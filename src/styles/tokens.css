@@ -54,7 +54,9 @@
     --main-font: Helvetica, Arial, sans-serif;
     --secondary-font: Calibri, Helvetica, Arial;
     
-    --font-weight-bold: 700;
+    --font-weight-bold: 800;
+    --font-weight-regular: 400;
+    --font-weight-light: 200;
 
     --fs-xxxxl: 5rem;
     --fs-xxxl: 4rem;
