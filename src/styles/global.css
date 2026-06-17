@@ -12,7 +12,7 @@
 
     /* ============= BACKGROUND ================== */
 
-    --color-backgroung: var(--semantic-background);
+    --color-background: var(--semantic-background);
     --color-surface: var(--semantic-surface);
     --color-surface-muted: var(--semantic-surface-muted);
     --color-background-inverse: var(--semantic-background-inverse);

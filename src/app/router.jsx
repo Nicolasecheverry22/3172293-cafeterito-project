@@ -1,5 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, DashboardLayout } from "@/shared";
+import CreateProveedorPage from "../features/providers/pages/CreateProveedorPage";
+import LoginPage from "../features/login/pages/LoginPage";
 
 const router = createBrowserRouter ([
     {
@@ -11,7 +13,8 @@ const router = createBrowserRouter ([
         element: <AuthLayout/>,
         children:[
             {
-                index:true,
+               index: true, 
+            element: <LoginPage />
             },
         ],
     },
@@ -19,9 +22,12 @@ const router = createBrowserRouter ([
         path: "/dashboard",
         element: <DashboardLayout/>,
         children: [
-            {index: true, },
-            // {path: "/dashboard/auth", element: <h1>Hello2</h1>},
-            // {path: "/dashboard/userList", element: <h1>Hello3</h1>},
+            {index: true, element: <h1>Hello1</h1>},
+            {
+                path: "proveedores/crear",
+                element: <CreateProveedorPage />
+            }
+           
         ],
     },
 ]);

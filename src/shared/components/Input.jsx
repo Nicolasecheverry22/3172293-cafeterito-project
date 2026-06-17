@@ -4,21 +4,25 @@ export default function Input({
     htmlFor,
     type = "text",
     variant = "primary",
-    size = "small",
+    size = "md",
     ...props
 }){
     const variants = {
         // Estos valores deben ser con variables
         primary: `
-            border-brand
-            bg-background
+            bg-background 
+            border-border 
+            text-text-primary
         `,
         secondary: `
-            border-red-950
-            bg-gray-300
+            bg-surface-muted
+            border-border-strong
+            text-text-primary
         `,
         tertiary: `
-            border-green-950        
+            bg-transparent
+            border-b-2 border-border
+            text-text-primary     
         `
     };
     const sizes = {
@@ -44,6 +48,7 @@ export default function Input({
                     block
                     text-caption
                     text-secondary
+                    font-label
                     ${
                         size === "sm"
                         ? "-mb-2"
@@ -62,13 +67,9 @@ export default function Input({
                 {/* Contenedor de input */}
             <div
                 className="
-                    relative
-                    h-12
-                    flex
-                    items-center
+                relative flex items-center w-full
                 "
             >
-                
                 {/* Área interactiva invisible (48px) */}
 
             <div
@@ -119,7 +120,7 @@ export default function Input({
 
             {/* Feedback */}
             {error && (
-                <p className="text-caption text-red-800 place-self-start">{error}</p>
+                <p className="text-caption text-error place-self-start">{error}</p>
             )}
 
 
