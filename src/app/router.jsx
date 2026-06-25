@@ -24,7 +24,7 @@ const router = createBrowserRouter ([
         children: [
             {index: true, element: <h1>Hello1</h1>},
             {
-                path: "proveedores/crear",
+                path: " proveedores/crear",
                 element: <CreateProveedorPage />
             }
            
