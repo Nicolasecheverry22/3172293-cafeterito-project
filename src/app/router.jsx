@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, DashboardLayout } from "@/shared";
 import CreateProveedorPage from "../features/providers/pages/CreateProveedorPage";
+import CreateInventary from "../features/providers/pages/CreateInventary";
 import LoginPage from "../features/login/pages/LoginPage";
 
 const router = createBrowserRouter ([
@@ -13,7 +14,7 @@ const router = createBrowserRouter ([
         element: <AuthLayout/>,
         children:[
             {
-               index: true, 
+            index: true, 
             element: <LoginPage />
             },
         ],
@@ -27,9 +28,17 @@ const router = createBrowserRouter ([
                 path: "proveedores/crear",
                 element: <CreateProveedorPage />
             }
-           
-        ],
+        ]
     },
+      {
+         path: "/inventary",
+         element: <CreateInventary/>,
+         children: [
+              {index: true, element: <h1>Hello1</h1>},
+              {path: "auth", element: <h1>Hello2</h1>},     
+              {path: "userList", element: <h1>Hello3</h1>},
+         ],
+     },
 ]);
 
 export default router;
