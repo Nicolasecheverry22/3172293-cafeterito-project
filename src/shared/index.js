@@ -10,6 +10,9 @@ export {default as EffectDemo } from "./components/EffectDemo";
 export {default as CounterEffect } from "./components/CounterEffect";
 export {default as Select } from "./components/Select";
 export {default as Checkbox } from "./components/Checkbox";
+<<<<<<< HEAD
+export{ default as FileInput }from "./components/FileInput";
+=======
 export {default as AuthLayout } from "./layouts/AuthLayout";
 export {default as DashboardLayout } from "./layouts/DashboardLayout";
 
@@ -35,3 +38,4 @@ export {
 
 // Layouts Components
 export { default as Navbar } from "./layouts/Navbar";
+>>>>>>> 6e6aec69610af954ff43200250ae23cbbf24c065
