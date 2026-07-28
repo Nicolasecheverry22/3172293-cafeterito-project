@@ -13,8 +13,8 @@ const router = createBrowserRouter ([
         element: <AuthLayout/>,
         children:[
             {
-               index: true, 
-            element: <LoginPage />
+                index: true, 
+                element: <LoginPage />
             },
         ],
     },
@@ -22,9 +22,9 @@ const router = createBrowserRouter ([
         path: "/dashboard",
         element: <DashboardLayout/>,
         children: [
-            {index: true, element: <h1>Hello1</h1>},
-            {
-                path: " proveedores/crear",
+            {   
+                index: true,
+                path: " /proveedores/crear",
                 element: <CreateProveedorPage />
             }
            
