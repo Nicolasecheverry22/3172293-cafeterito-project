@@ -1,0 +1,62 @@
+[
+    {
+        "id": "CAR",
+        "label": "Cárnicos"
+    },
+    {
+        "id": "LAC",
+        "label": "Lácteos"
+    },
+    {
+        "id": "FRU",
+        "label": "Frutas"
+    },
+    {
+        "id": "VER",
+        "label": "Verduras y Hortalizas"
+    },
+    {
+        "id": "GRA",
+        "label": "Granos y Cereales"
+    },
+    {
+        "id": "PAN",
+        "label": "Panadería"
+    },
+    {
+        "id": "CON",
+        "label": "Condimentos y Especias"
+    },
+    {
+        "id": "ACE",
+        "label": "Aceites y Grasas"
+    },
+    {
+        "id": "BEB",
+        "label": "Bebidas"
+    },
+    {
+        "id": "CONG",
+        "label": "Congelados"
+    },
+    {
+        "id": "ENL",
+        "label": "Enlatados y Conservas"
+    },
+    {
+        "id": "LIM",
+        "label": "Limpieza e Higiene"
+    },
+    {
+        "id": "EMP",
+        "label": "Empaques y Desechables"
+    },
+    {
+        "id": "MAR",
+        "label": "Mariscos y Pescados"
+    },
+    {
+        "id": "POS",
+        "label": "Postres e Insumos de Repostería"
+    }
+]
