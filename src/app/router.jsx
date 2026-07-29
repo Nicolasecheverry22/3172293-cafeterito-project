@@ -3,6 +3,8 @@ import { AuthLayout, DashboardLayout, } from "@/shared";
 import CreateInventary from "../shared/layouts/CreateInventary"
 import CreateProveedorPage from "../features/providers/pages/CreateProveedorPage";
 import LoginPage from "../features/login/pages/LoginPage";
+import { UserListPage, UserRegisterForm } from "@/features/users";
+import HomePage from "../features/home/pages/HomePage";
 
 const router = createBrowserRouter ([
     {
@@ -14,10 +16,22 @@ const router = createBrowserRouter ([
         element: <AuthLayout/>,
         children:[
             {
-            index: true, 
-            element: <LoginPage />
+                index: true, 
+                element: <LoginPage />
             },
         ],
+    },
+    {
+        path: "/userCreate", 
+        element: <UserRegisterForm/>
+    },
+    {
+        path: "/userList", 
+        element: <UserListPage/>
+    },
+    {
+        path: "/homePage", 
+        element: <HomePage/>
     },
     {
         path: "/dashboard",

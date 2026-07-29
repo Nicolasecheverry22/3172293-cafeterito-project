@@ -9,6 +9,12 @@ import {
   DropdownContent,
   DropdownItem,
 } from "@/shared";
+// import  logo  from "@/assets/images/1-logo.png";
+import { Link } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+
+export default function Navbar(){
+
 
 export default function Navbar() {
   const [search, setSearch] = useState("");
