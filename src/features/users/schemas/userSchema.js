@@ -2,7 +2,7 @@
 //  CORRECCION: agregar campos booleanos
 
 import {z} from "zod";
-// import {fileSchema} from "@/shared";
+import {fileSchema} from "../schemas/fileSchema";
 
 export const userSchema = z.object({
     userName: z
