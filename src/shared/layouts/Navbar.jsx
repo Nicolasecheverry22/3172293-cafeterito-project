@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Search, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   IconButton,
   SearchField,
@@ -8,21 +9,13 @@ import {
   DropdownContent,
   DropdownItem,
 } from "@/shared";
-import  logo  from "@/assets/images/1-logo.png";
-import { Link } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
 
-export default function Navbar(){
-
-
-  // Componente de búsqueda 😂😂😂
+export default function Navbar() {
   const [search, setSearch] = useState("");
-
 
   const handleSearch = (value) => {
     console.log("Buscar:", value);
   };
-
 
   const handleClear = () => {
     console.log("Campo limpiado");
@@ -32,15 +25,14 @@ export default function Navbar(){
     <nav className="w-full bg-transparent border-b-2">
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
-
-            {/* Logo de marca */}
-          <div className=" hidden sm:block items-center">
+          {/* Logo de marca */}
+          <div className="hidden sm:block items-center">
             <Link to={"/dashboard/home"} className="text-h1 font-heading">
               <img src={logo} alt="logo" className="h-12" />
             </Link>
           </div>
 
-            {/* Links de navegación */}
+          {/* Links de navegación */}
           <ul className="hidden md:flex items-center gap-6">
             <li>
               <Link to={"/auth"} className="hover:text-primary transition">
@@ -65,56 +57,47 @@ export default function Navbar(){
                 Contacto
               </Link>
             </li>
-            </ul>
+          </ul>
 
-                {/* SearchField + IconButton */}
-            <div>
-              <SearchField
-                value={search}
-                onChange={setSearch}
-                onSubmit={handleSearch}
-                onClear={handleClear}
-                placeholder="Buscar productos..."
-                size="md"
-                variant="outlined"
-                className="w-76"
-              />
-            </div>
+          {/* SearchField */}
+          <div>
+            <SearchField
+              value={search}
+              onChange={setSearch}
+              onSubmit={handleSearch}
+              onClear={handleClear}
+              placeholder="Buscar productos..."
+              size="md"
+              variant="outlined"
+              className="w-76"
+            />
+          </div>
 
-        {/* Dropdown */}
-        <div>
-      <Dropdown>
-          {/* Disparador */}
-          <DropdownTrigger>
-            <IconButton>
-              <Menu/>
-            </IconButton>
-          </DropdownTrigger>
+          {/* Dropdown */}
+          <div>
+            <Dropdown>
+              {/* Disparador */}
+              <DropdownTrigger>
+                <IconButton>
+                  <Menu />
+                </IconButton>
+              </DropdownTrigger>
 
-          {/* Contenido */}
-        <DropdownContent>
-          <DropdownItem>
-            Gestion de Usuarios
-          </DropdownItem>
-          <DropdownItem>
-            Gestion de Productos
-          </DropdownItem>
-          <DropdownItem>
-            <Link to="/dashboard/userList" className="block w-full">
-              Listar usuarios
-            </Link>
-          </DropdownItem>
-          <DropdownItem>
-            Cerrar Sesión
-          </DropdownItem>
-        </DropdownContent>
-
-      </Dropdown>
-        </div>
-
+              {/* Contenido */}
+              <DropdownContent>
+                <DropdownItem>Gestion de Usuarios</DropdownItem>
+                <DropdownItem>Gestion de Productos</DropdownItem>
+                <DropdownItem>
+                  <Link to="/dashboard/userList" className="block w-full">
+                    Listar usuarios
+                  </Link>
+                </DropdownItem>
+                <DropdownItem>Cerrar Sesión</DropdownItem>
+              </DropdownContent>
+            </Dropdown>
+          </div>
         </div>
       </div>
     </nav>
   );
-};
-    
+}
