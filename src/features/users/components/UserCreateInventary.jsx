@@ -47,7 +47,7 @@ export default function CreateInventary(){
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-10 w-full shadow-xl">
                     
                     <h1 className="text-center text-title font-bold mb-8">
-                        Crear Producto
+                        Crear Inventario
                     </h1>
 
                     

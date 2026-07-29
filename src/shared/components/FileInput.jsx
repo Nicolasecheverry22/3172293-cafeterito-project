@@ -34,13 +34,10 @@ export default function FileInput({
 
   const handleFiles = async (files) => {
     setIsLoading(true);
-
     const list = Array.from(files);
     await new Promise((r) => setTimeout(r, 500));
-
     const data = multiple ? [...value, ...list] : [list[0]];
     onChange(data.slice(0, 12));
-
     setIsLoading(false);
   };
 
