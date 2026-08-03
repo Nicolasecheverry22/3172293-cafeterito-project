@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthLayout, DashboardLayout } from "@/shared";
+import { AuthLayout, DashboardLayout, } from "@/shared";
+import CreateInventary from "../shared/layouts/CreateInventary"
 import CreateProveedorPage from "../features/providers/pages/CreateProveedorPage";
-import CreateInventary from "../features/providers/pages/CreateInventary";
 import LoginPage from "../features/login/pages/LoginPage";
 import { UserListPage, UserRegisterForm } from "@/features/users";
 import HomePage from "../features/home/pages/HomePage";
@@ -44,15 +44,16 @@ const router = createBrowserRouter ([
             }
         ]
     },
-      {
-         path: "/inventary",
-         element: <CreateInventary/>,
-         children: [
-              {index: true, element: <h1>Hello1</h1>},
-              {path: "auth", element: <h1>Hello2</h1>},     
-              {path: "userList", element: <h1>Hello3</h1>},
-         ],
-     },
+
+    {
+        path: "/inventary",
+        element: <CreateInventary/>,
+        children: [
+            {index: true, element: <h1>Hello1</h1>},
+            {path: "auth", element: <h1>Hello2</h1>},     
+            {path: "userList", element: <h1>Hello3</h1>},
+        ],
+    },
 ]);
 
 export default router;
