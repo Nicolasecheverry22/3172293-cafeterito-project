@@ -5,6 +5,8 @@ import CreateInventary from "../features/providers/pages/CreateInventary";
 import LoginPage from "../features/login/pages/LoginPage";
 import { UserListPage, UserRegisterForm } from "@/features/users";
 import HomePage from "../features/home/pages/HomePage";
+import Navbar from "../shared/layouts/Navbar";
+
 
 const router = createBrowserRouter ([
     {
@@ -22,16 +24,14 @@ const router = createBrowserRouter ([
         ],
     },
     {
-        path: "/userCreate", 
-        element: <UserRegisterForm/>
-    },
-    {
-        path: "/userList", 
-        element: <UserListPage/>
-    },
-    {
-        path: "/homePage", 
-        element: <HomePage/>
+        path: "/dashboard",
+        element: <DashboardLayout/>,
+        children: [
+            {index: true, },
+            {path: "/dashboard/userCreate", element: <UserRegisterForm/>},
+            {path: "/dashboard/userList", element: <UserListPage/>},
+            {path: "/dashboard/homePage", element: <HomePage/>},
+        ],
     },
     {
         path: "/dashboard",
