@@ -1,59 +1,71 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthLayout, DashboardLayout, } from "@/shared";
-import CreateInventary from "../shared/layouts/CreateInventary"
-import CreateProveedorPage from "../features/providers/pages/CreateProveedorPage";
-import LoginPage from "../features/login/pages/LoginPage";
-import { UserListPage, UserRegisterForm } from "@/features/users";
-import HomePage from "../features/home/pages/HomePage";
-import Navbar from "../shared/layouts/Navbar";
+import { AuthLayout, DashboardLayout } from "@/shared";
+import LoginPage from "@/features/login/pages/LoginPage";
+import HomePage from "@/features/home/pages/HomePage";
+import CreateInventary from "@/features/providers/pages/CreateInventary";
+import CreateProveedorPage from "@/features/providers/pages/CreateProveedorPage";
+import { UserListPage, UserRegisterForm} from "@/features/users";
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/dashboard" replace />,
+  },
+  {
+    path: "/auth",
+    element: <AuthLayout />,
+    children: [
+      {
+        index: true,
+        element: <LoginPage />,
+      },
+    ],
+  },
 
-const router = createBrowserRouter ([
-    {
-        path: "/",
-        element: <Navigate to="/dashboard" replace />,
-    },
-    {
-        path: "/auth",
-        element: <AuthLayout/>,
-        children:[
-            {
-                index: true, 
-                element: <LoginPage />
-            },
-        ],
-    },
-    {
-        path: "/dashboard",
-        element: <DashboardLayout/>,
+  // Rutas Dashboard 
+  {
+    path: "/dashboard",
+    element: <DashboardLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />, 
+      },
+      {
+        path: "homePage",
+        element: <HomePage />,
+      },
+      {
+        path: "users",
         children: [
-            {index: true, },
-            {path: "/dashboard/userCreate", element: <UserRegisterForm/>},
-            {path: "/dashboard/userList", element: <UserListPage/>},
-            {path: "/dashboard/homePage", element: <HomePage/>},
+          { index: true, element: <UserListPage /> }, 
+          { path: "create", element: <UserRegisterForm /> }, 
         ],
-    },
-    {
-        path: "/dashboard",
-        element: <DashboardLayout/>,
-        children: [
-            {   
-                index: true,
-                path: "proveedores/crear",
-                element: <CreateProveedorPage />
-            }
-        ]
-    },
+      },
+      {
+        path: "userCreate",
+        element: <UserRegisterForm />, 
+      },
+      {
+        path: "userList",
+        element: <UserListPage />, 
+      },
+      // Módulo Proveedores
+      {
+        path: "proveedores/crear",
+        element: <CreateProveedorPage />, 
+      },
+      {
+        path: "inventario/crear",
+        element: <CreateInventary />,
+      },
+    ],
+  },
 
-    {
-        path: "/inventary",
-        element: <CreateInventary/>,
-        children: [
-            {index: true, element: <h1>Hello1</h1>},
-            {path: "auth", element: <h1>Hello2</h1>},     
-            {path: "userList", element: <h1>Hello3</h1>},
-        ],
-    },
+  {
+    path: "*",
+    element: <Navigate to="/dashboard" replace />,
+  },
 ]);
 
 export default router;

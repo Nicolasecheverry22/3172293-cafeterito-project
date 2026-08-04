@@ -4,9 +4,10 @@ import {
   Select,
   Checkbox,
   Button,
-} from "@/shared"; 
+  FileInput,
+} from "@/shared";
 import { useNavigate } from "react-router-dom";
-import { providerSchema } from "../schemas/providerSchema"; 
+import { providerSchema } from "../schemas/providerSchema";
 import documentTypesData from "@/data/selects/documentTypes.json";
 
 export default function CreateProveedorPage() {
@@ -17,10 +18,10 @@ export default function CreateProveedorPage() {
     providerDocumentType: "",
     providerDocumentNumber: "",
     providerName: "",
-    isActive: true, 
+    isActive: true,
     providerEmail: "",
     providerEmailConfirm: "",
-    providerImage: "",
+    providerImage: [],
     providerAddress: "",
     providerPhone: "",
     productFood: false,
@@ -53,11 +54,10 @@ export default function CreateProveedorPage() {
       return;
     }
     setErrors({});
-    
 
     try {
-      // const response = await createProvider(formData);
-      
+      // AQUÍ IRÁ LA LLAMADA A TU BACKEND O SERVICIO
+      console.log("Proveedor a enviar:", formData);
       alert("Proveedor creado correctamente");
       navigate(-1);
     } catch (error) {
@@ -66,15 +66,16 @@ export default function CreateProveedorPage() {
     }
   };
 
-
   return (
-<div className="w-full">
-      <h2 className="text-main font-heading text-text-primary mb-8">
+    <div className="w-full max-w-6xl mx-auto p-4">
+      <h2 className="text-main font-heading font-bold text-text-primary mb-8">
         Registrar proveedor nuevo
       </h2>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-surface-muted border border-border p-8 rounded-lg">
-        
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-surface-muted border border-border p-8 rounded-2xl shadow-sm"
+      >
         <div className="flex flex-col gap-4">
           <Select
             label="Tipo de documento"
@@ -117,45 +118,72 @@ export default function CreateProveedorPage() {
             error={errors.providerEmailConfirm}
           />
 
-<div className="self-center mt-2">
-            <Button variant="secondary" type="button" size="sm">
-              Agregar correo 
+          <div className="self-start mt-2">
+            <Button
+              variant="secondary"
+              type="button"
+              size="sm"
+              onClick={() => console.log("Agregar correo extra")}
+            >
+              + Agregar correo
             </Button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <Input
-            label="Dirección"
-            name="providerAddress"
-            type="text"
-            value={formData.providerAddress}
-            onChange={handleChange}
-            error={errors.providerAddress}
+        <div className="flex flex-col gap-4 items-center">
+          <FileInput
+            value={formData.providerImage}
+            onChange={(files) =>
+              setFormData((prev) => ({
+                ...prev,
+                providerImage: files,
+              }))
+            }
+            multiple
           />
-          <Input
-            label="Número telefónico"
-            name="providerPhone"
-            type="tel"
-            value={formData.providerPhone}
-            onChange={handleChange}
-            error={errors.providerPhone}
-          />
+          {errors.providerImage && (
+            <span className="text-error text-caption block mt-1">
+              {errors.providerImage}
+            </span>
+          )}
 
-          <div className="self-center mt-2">
-            <Button variant="secondary" type="submit" size="sm">
-              Agregar Número Telefónico 
-            </Button>
+          <div className="w-full flex flex-col gap-4 mt-2">
+            <Input
+              label="Dirección"
+              name="providerAddress"
+              type="text"
+              value={formData.providerAddress}
+              onChange={handleChange}
+              error={errors.providerAddress}
+            />
+            <Input
+              label="Número telefónico"
+              name="providerPhone"
+              type="tel"
+              value={formData.providerPhone}
+              onChange={handleChange}
+              error={errors.providerPhone}
+            />
+
+            <div className="self-start mt-2">
+              <Button
+                variant="secondary"
+                type="button"
+                size="sm"
+                onClick={() => console.log("Agregar teléfono extra")}
+              >
+                + Agregar número telefónico
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">  
-      
-          <div className="flex flex-col gap-2 bg-white/50 p-4 rounded border border-gray-200">
+        <div className="flex flex-col gap-4 justify-between">
+          <div className="flex flex-col gap-3 bg-surface p-6 rounded-xl border border-border">
+            <h3 className="font-heading font-bold text-text-primary text-body mb-2">
+              Producto que suministra:
+            </h3>
 
-            <h3 className="flex flex-col">Producto que suministra:
-            </h3>  
-            
             <Checkbox
               name="productFood"
               label="Alimentos y/o Bebidas"
@@ -186,26 +214,33 @@ export default function CreateProveedorPage() {
               checked={formData.productOthers}
               onChange={handleChange}
             />
-            
-            <Input
-            placeholder="Producto/Servicio"
-            name="providerProductServiceDesc"
-            type="text"
-            value={formData.providerProductServiceDesc}
-            onChange={handleChange}
-            error={errors.providerProductServiceDesc}
-          />
+
+            <div className="mt-2 w-full">
+              <Input
+                placeholder="Descripción del Producto/Servicio"
+                name="providerProductServiceDesc"
+                type="text"
+                value={formData.providerProductServiceDesc}
+                onChange={handleChange}
+                error={errors.providerProductServiceDesc}
+              />
+            </div>
           </div>
 
-
-
-          <div className="mt-auto flex justify-end">
+          <div className="mt-auto flex justify-end gap-4">
+            <Button
+              variant="secondary"
+              type="button"
+              size="md"
+              onClick={() => navigate(-1)}
+            >
+              Cancelar
+            </Button>
             <Button variant="primary" type="submit" size="md">
-              Crear Usuario
+              Crear Proveedor
             </Button>
           </div>
         </div>
-
       </form>
     </div>
   );

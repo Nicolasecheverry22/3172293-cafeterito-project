@@ -1,204 +1,266 @@
 import { useState, useEffect } from "react";
-import { Input, Select, Checkbox, Button, FileInput } from "@/shared";
-import { getDocumentTypes } from "@/services/selectService";
 import { useNavigate } from "react-router-dom";
+import { UserPlus, Plus } from "lucide-react";
+
+import { Input, Select, Checkbox, Button, FileInput, StatusSwitch } from "@/shared";
+
+import { getDocumentTypes } from "@/services/selectService";
+import { users as usersData } from "../data/users";
 import { userSchema } from "../schemas/userSchema";
-import { User, Pencil } from "lucide-react";
 
 export default function UserRegisterForm() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [errors, setErrors] = useState({});
-    const [documentTypes, setDocumentTypes] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [documentTypes, setDocumentTypes] = useState([]);
 
-    const [formData, setFormData] = useState({
-        userName: "",
-        userEmail: "",
-        userPhone: "",
-        userDocumentTypes: "",
-        userDocumentNumber: "",
-        userPassword: "",
-        userImage: [],
-        isStaff: false,
-        isActive: true,
-        isSuperUser: false,
-    });
+  const [formData, setFormData] = useState({
+    userName: "",
+    userEmail: "",
+    confirmEmail: "",
+    userPhone: "",
+    address: "",
+    userDocumentTypes: "",
+    userDocumentNumber: "",
+    userPassword: "",
+    userImage: [],
+    isActive: false,
+    isSuperUser: false,
+    isCook: false,
+    isWaiter: false,
+    isCashier: false,
+    isGuest: false,
+  });
 
-    useEffect(() => {
-        getDocumentTypes().then(setDocumentTypes);
-    }, []);
+  useEffect(() => {
+    getDocumentTypes().then(setDocumentTypes);
+  }, []);
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: type === "checkbox" ? checked : value,
-        }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (formData.userEmail !== formData.confirmEmail) {
+      setErrors((prev) => ({
+        ...prev,
+        confirmEmail: "Los correos electrónicos no coinciden",
+      }));
+      return;
+    }
+
+    const result = userSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
+
+    const newUser = {
+      id: usersData.length + 1,
+      ...result.data,
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    usersData.push(newUser);
+    console.log("Usuario guardado:", usersData);
 
-        const result = userSchema.safeParse(formData);
+    navigate(-1);
+  };
 
-        // ✅ VALIDACIÓN CORRECTA
-        if (!result.success) {
-            const fieldErrors = {};
+  return (
+    <div className="w-full max-w-6xl mx-auto p-4">
+      {/* Título con Icono */}
+      <div className="flex items-center gap-3 mb-6">
+        <UserPlus className="w-8 h-8 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary">
+          Registrar usuario
+        </h1>
+      </div>
 
-            result.error.issues.forEach((issue) => {
-                fieldErrors[issue.path[0]] = issue.message;
-            });
+      <div className="bg-[#B3B3B3] rounded-3xl p-8 shadow-sm">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <div className="space-y-4">
+            <Select
+              label="Tipo de documento"
+              name="userDocumentTypes"
+              value={formData.userDocumentTypes}
+              options={documentTypes}
+              onChange={handleChange}
+              error={errors.userDocumentTypes}
+            />
 
-            setErrors(fieldErrors);
-            return;
-        }
+            <Input
+              label="Número de documento"
+              name="userDocumentNumber"
+              type="text"
+              value={formData.userDocumentNumber}
+              placeholder="Ingrese su documento"
+              onChange={handleChange}
+              error={errors.userDocumentNumber}
+            />
 
-        setErrors({});
+            <Input
+              label="Nombre completo"
+              name="userName"
+              type="text"
+              value={formData.userName}
+              placeholder="Ingrese su nombre"
+              onChange={handleChange}
+              error={errors.userName}
+            />
 
-        try {
-            await createUser(result.data);
-            console.log("Usuario creado correctamente");
-            navigate(-1);
-        } catch (error) {
-            console.error("Error:", error.message);
-            alert(error.message);
-        }
-    };
+            <div className="flex items-center gap-4 py-2">
+              <span className="font-label text-text-primary text-small">Estado</span>
+              <StatusSwitch
+                checked={formData.isActive}
+                onChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, isActive: checked }))
+                }
+              />
+            </div>
 
-    return (
-        <div className="grid items-center justify-center">
-            <h1 className="mx-auto my-12 text-title font-bold">
-                Registro de usuarios
-            </h1>
+            <Input
+              label="Correo electrónico"
+              name="userEmail"
+              type="email"
+              value={formData.userEmail}
+              placeholder="Ingrese correo"
+              onChange={handleChange}
+              error={errors.userEmail}
+            />
 
-            <form className="grid gap-2" onSubmit={handleSubmit}>
-                <Input
-                    label="Nombre"
-                    name="userName"
-                    type="text"
-                    value={formData.userName}
-                    placeholder="Ingrese su nombre"
-                    onChange={handleChange}
-                    error={errors.userName}
-                />
+            <Input
+              label="Confirmar correo electrónico"
+              name="confirmEmail"
+              type="email"
+              value={formData.confirmEmail}
+              placeholder="Confirme correo"
+              onChange={handleChange}
+              error={errors.confirmEmail}
+            />
 
-                <Input
-                    label="Correo"
-                    name="userEmail"
-                    type="email"
-                    value={formData.userEmail}
-                    placeholder="Ingrese su correo"
-                    onChange={handleChange}
-                    error={errors.userEmail}
-                />
+            <div className="pt-2">
+              <Button variant="primary" size="md">
+                <span className="flex items-center gap-2">
+                  Agregar correo <Plus className="w-4 h-4" />
+                </span>
+              </Button>
+            </div>
+          </div>
 
-                <Input
-                    label="Teléfono"
-                    name="userPhone"
-                    type="tel"
-                    value={formData.userPhone}
-                    placeholder="Ingrese su número"
-                    onChange={handleChange}
-                    error={errors.userPhone}
-                />
+          <div className="flex flex-col justify-between space-y-4">
+            <div>
+              <FileInput
+                value={formData.userImage}
+                onChange={(files) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    userImage: files,
+                  }))
+                }
+                multiple
+              />
+              {errors.userImage && (
+                <span className="text-error text-caption block mt-1">
+                  {errors.userImage}
+                </span>
+              )}
+            </div>
 
-                <Select
-                    label="Tipos de documento"
-                    name="userDocumentTypes"
-                    value={formData.userDocumentTypes}
-                    options={documentTypes}
-                    onChange={handleChange}
-                    error={errors.userDocumentTypes}
-                />
+            <div className="space-y-4">
+              <Input
+                label="Dirección"
+                name="address"
+                type="text"
+                value={formData.address}
+                placeholder="Ingrese dirección"
+                onChange={handleChange}
+                error={errors.address}
+              />
 
-                <Input
-                    label="Documento"
-                    name="userDocumentNumber"
-                    type="text"
-                    value={formData.userDocumentNumber}
-                    placeholder="Ingrese su documento"
-                    onChange={handleChange}
-                    error={errors.userDocumentNumber}
-                />
+              <Input
+                label="Número telefónico"
+                name="userPhone"
+                type="tel"
+                value={formData.userPhone}
+                placeholder="Ingrese número"
+                onChange={handleChange}
+                error={errors.userPhone}
+              />
 
-                <Input
-                    label="Contraseña"
-                    name="userPassword"
-                    type="password"
-                    value={formData.userPassword}
-                    placeholder="Ingrese su contraseña"
-                    onChange={handleChange}
-                    error={errors.userPassword}
-                />
+              <div className="pt-2">
+                <Button variant="primary" size="md">
+                  <span className="flex items-center gap-2">
+                    Agregar Número Telefónico <Plus className="w-4 h-4" />
+                  </span>
+                </Button>
+              </div>
+            </div>
+          </div>
 
-                {/* CHECKBOX */}
-                <div className="grid gap-4 my-4">
-                    <Checkbox
-                        name="isSuperUser"
-                        label="Es super usuario"
-                        checked={formData.isSuperUser}
-                        onChange={handleChange}
-                    />
+          <div className="flex flex-col justify-between h-full">
+            <div className="bg-[#8E8E8E] p-6 rounded-2xl text-text-inverse space-y-3 shadow-inner">
+              <h3 className="font-heading text-subtitle mb-2">Tipo de Usuario:</h3>
 
-                    <Checkbox
-                        name="isStaff"
-                        label="Es staff"
-                        checked={formData.isStaff}
-                        onChange={handleChange}
-                    />
+              <Checkbox
+                name="isSuperUser"
+                label="Administrador"
+                checked={formData.isSuperUser}
+                onChange={handleChange}
+              />
 
-                    <Checkbox
-                        name="isActive"
-                        label="Está activo"
-                        checked={formData.isActive}
-                        onChange={handleChange}
-                    />
-                </div>
+              <Checkbox
+                name="isCook"
+                label="Cocinero"
+                checked={formData.isCook}
+                onChange={handleChange}
+              />
 
-                <h2>Cantidad Máxima: 12 archivos</h2>
-                <h2>Peso Máximo: 10MB</h2>
+              <Checkbox
+                name="isWaiter"
+                label="Mesero"
+                checked={formData.isWaiter}
+                onChange={handleChange}
+              />
 
-                <FileInput
-                    value={formData.userImage}
-                    onChange={(files) =>
-                        setFormData((prev) => ({
-                            ...prev,
-                            userImage: files,
-                        }))
-                    }
-                    multiple
-                />
+              <Checkbox
+                name="isCashier"
+                label="Caja"
+                checked={formData.isCashier}
+                onChange={handleChange}
+              />
 
-                {errors.userImage && (
-                    <span className="text-red-500 text-sm">
-                        {errors.userImage}
-                    </span>
-                )}
+              <Checkbox
+                name="isGuest"
+                label="Invitado"
+                checked={formData.isGuest}
+                onChange={handleChange}
+              />
+            </div>
 
-                {/* BOTONES */}
-                <div className="flex gap-6 items-center">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        type="button"
-                        onClick={() => navigate(-1)}
-                    >
-                        Cancelar
-                    </Button>
+            <div className="flex justify-end mt-8">
+              <Button type="submit" variant="primary" size="md">
+                Crear Usuario
+              </Button>
+            </div>
+          </div>
 
-                    <Button
-                        variant="primary"
-                        size="md"
-                        type="submit"
-                    >
-                        Guardar
-                    </Button>
-                </div>
-
-                <User />
-                <Pencil />
-            </form>
-        </div>
-    );
+        </form>
+      </div>
+    </div>
+  );
 }

@@ -1,143 +1,181 @@
 import { useEffect, useState } from "react";
-import authBg from "@/assets/images/bg-1.png";
+import { useNavigate } from "react-router-dom";
 import { getCategoryTypes } from "@/services/selectService";
-import { Input, Button, Select } from "@/shared";
-import {
-    FileInput
-} from "@/shared";
+import { Input, Button, Select, FileInput } from "@/shared";
 
-export default function CreateInventary(){
+export default function CreateInventary() {
+  const navigate = useNavigate();
+  const [categoryTypes, setCategoryTypes] = useState([]);
+  const [errors, setErrors] = useState({});
 
-    const [categoryTypes, setCategoryTypes] = useState([])
 
-    useEffect(() => {
-        getCategoryTypes().then(setCategoryTypes);
-    },[])
-    
-    
-    // Estado del error
-    const [ errors, setErrors] = useState({})
+  useEffect(() => {
+    getCategoryTypes().then(setCategoryTypes);
+  }, []);
 
-    const [formData, setFormData] = useState({
-        userName: "",
-        userEmail: "",
-        userPhone: "",
-        userDocumentTypes: "",
-        userDocumentNumber: "",
-        userPassword: "",
-        userImage: [],
 
-        //Flags booleanos
-        isStaff: false,
-        isActive: true,
-        isSuperUser: false,
-    });
 
-    return(
-        <>
-        <div
-          className="min-h-screen w-full mx-auto justify-center"
-          style={{
-            backgroundImage: `url(${authBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}  
-        >
-            <main className="min-h-screen flex items-center justify-start px-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-10 w-full shadow-xl">
-                    
-                    <h1 className="text-center text-title font-bold mb-8">
-                        Crear Producto
-                    </h1>
+  const [formData, setFormData] = useState({
+    productImage: [],
+    productName: "",
+    productDescription: "",
+    productCategory: "",
+    productCode: "",
+    foodPrice: "",
+    foodBrand: "",
+    foodQuantity: "",
+  });
 
-                    
-                    <div className="grid gap-4">
 
-                        <div className="grid grid-cols-3 gap-6 items-start">
 
-                            <div>
-                                 <FileInput
-                                    value={formData.userImage}
-                                    onChange={(files) =>
-                                        setFormData((prev)  => ({...prev, userImage: files}))
-                                    }
-                                    multiple={true}
-                                    />
-                                    {errors.userImage && (
-                                        <span className= "text-red-500 text-sm">{errors.userImage}</span>
-                                    )}
-                            </div>
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-                            <div className="flex flex-col gap-4">
-                                <Input
-                                    label="Nombre del Producto"
-                                    type="text"
-                                    placeholder="Escribe el nombre del producto"
-                                    htmlFor="name-product"
-                                />
-                                <Input
-                                    label="Descripcion"
-                                    type="text"
-                                    placeholder="Escribe la descripcion del producto"
-                                    htmlFor="product-description"
-                                />
-                                <Select
-                                    label="Categoria de alimentos"
-                                    name="userAlimentTypes"
-                                    placeholder="Seleccione una Categoria"
-                                    htmlFor="userAlimentTypes"
-                                    options={categoryTypes}
-                                />
-                            </div>
 
-                            {/* Columna derecha */}
-                            <div className="flex flex-col gap-4">
-                                <Input
-                                    label="Codigo del Producto"
-                                    type="number"
-                                    placeholder="Escribe el codigo del producto"
-                                    htmlFor="product-number"
-                                />
-                                <Input
-                                    label="Precio"
-                                    name="foodPrice"
-                                    placeholder="Ingrese precio del producto"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                />
-                                <Input
-                                    label="Marca"
-                                    name="foodBrand"
-                                    type="text"
-                                    placeholder="Ej: Alpina"
-                                />
-                                <Input
-                                    label="Cantidad"
-                                    name="foodQuantity"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    placeholder="Ej: 10"
-                                />
-                            </div>
 
-                        </div>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Inventario guardado:", formData);
+    alert("Producto de inventario creado correctamente");
+    navigate(-1);
+  };
 
-                        {/* Botones */}
-                        <div className="flex gap-6 items-center mt-4 justify-center">
-                            <Button variant="secondary" size="sm" type="button">
-                                Cancelar
-                            </Button>
-                            <Button variant="primary" size="md" type="submit">
-                                Guardar
-                            </Button>
-                        </div>
 
-                    </div>
-                </div>
-            </main>
-        </div>
-        </>
-    );
-}
+
+  return (
+    <div className="w-full max-w-6xl mx-auto p-4">
+      <h1 className="text-main font-heading text-text-primary mb-8 font-bold">
+        Crear Producto
+      </h1>
+
+      <div className="bg-surface-muted border border-border p-8 rounded-2xl shadow-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+
+            <div className="flex flex-col items-center">
+              <FileInput
+                value={formData.productImage}
+                onChange={(files) =>
+                  setFormData((prev) => ({ ...prev, productImage: files }))
+                }
+                multiple={true}
+              />
+              {errors.productImage && (
+                <span className="text-error text-caption mt-1">
+                 {errors.productImage}
+                </span>
+              )}
+           </div>
+
+
+            <div className="flex flex-col gap-4">
+              <Input
+                label="Nombre del Producto"
+                name="productName"
+                type="text"
+                value={formData.productName}
+                onChange={handleChange}
+                placeholder="Escribe el nombre del producto"
+                error={errors.productName}
+              />
+
+              <Input
+               label="Descripción"
+                name="productDescription"
+                type="text"
+                value={formData.productDescription}
+                onChange={handleChange}
+                placeholder="Escribe la descripción del producto"
+                error={errors.productDescription}
+
+              />
+
+              <Select
+                label="Categoría de alimentos"
+                name="productCategory"
+                value={formData.productCategory}
+                onChange={handleChange}
+                placeholder="Seleccione una Categoría"
+                options={categoryTypes}
+                error={errors.productCategory}
+              />
+
+            </div>
+
+
+            <div className="flex flex-col gap-4">
+              <Input
+                label="Código del Producto"
+                name="productCode"
+                type="text"
+                value={formData.productCode}
+                onChange={handleChange}
+                placeholder="Escribe el código del producto"
+                error={errors.productCode}
+              />
+
+              <Input
+                label="Precio"
+                name="foodPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.foodPrice}
+                onChange={handleChange}
+                placeholder="Ingrese precio del producto"
+                error={errors.foodPrice}
+              />
+
+              <Input
+                label="Marca"
+                name="foodBrand"
+                type="text"
+                value={formData.foodBrand}
+                onChange={handleChange}
+                placeholder="Ej: Alpina"
+                error={errors.foodBrand}
+              />
+
+              <Input
+                label="Cantidad"
+                name="foodQuantity"
+                type="number"
+                min="0"
+                step="1"
+                value={formData.foodQuantity}
+                onChange={handleChange}
+                placeholder="Ej: 10"
+                error={errors.foodQuantity}
+              />
+
+            </div>
+
+          </div>
+
+
+          <div className="flex gap-4 items-center justify-end mt-4">
+            <Button
+              variant="secondary"
+              size="sm"
+              type="button"
+              onClick={() => navigate(-1)}
+            >
+              Cancelar
+            </Button>
+
+            <Button variant="primary" size="md" type="submit">
+              Guardar
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+} 
+
