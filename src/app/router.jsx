@@ -2,70 +2,82 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, DashboardLayout } from "@/shared";
 import LoginPage from "@/features/login/pages/LoginPage";
 import HomePage from "@/features/home/pages/HomePage";
-import CreateInventary from "@/features/providers/pages/CreateInventary";
+import CreateInventary from "../features/inventory/pages/CreateInventary";
 import CreateProveedorPage from "@/features/providers/pages/CreateProveedorPage";
 import { UserListPage, UserRegisterForm} from "@/features/users";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/auth" replace />,
   },
   {
     path: "/auth",
-    element: <AuthLayout />,
+    element: <AuthLayout/>,
     children: [
       {
         index: true,
-        element: <LoginPage />,
+        element: <LoginPage/>,
       },
     ],
   },
-
-  // Rutas Dashboard 
+  {
+    path: "/home",
+    element: <HomePage/>,
+    children: [
+      {
+        index: true,
+      },
+    ],
+  },
+  {
+    path: "/userCreate",
+    element: <UserRegisterForm/>,
+    children: [
+      {
+        index: true,
+      },
+    ],
+  },
+  {
+    path: "/userList",
+    element: <UserListPage/>,
+    children: [
+      {
+        index: true,
+      },
+    ],
+  },
+  {
+    path: "/providerCreate",
+    element: <CreateProveedorPage/>,
+    children: [
+      {
+        index: true,
+      },
+    ],
+  },
+  {
+    path: "/inventoryCreate",
+    element: <CreateInventary/>,
+    children: [
+      {
+        index: true,
+      },
+    ],
+  },
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: <DashboardLayout/>,
     children: [
       {
         index: true,
-        element: <HomePage />, 
-      },
-      {
-        path: "homePage",
-        element: <HomePage />,
-      },
-      {
-        path: "users",
-        children: [
-          { index: true, element: <UserListPage /> }, 
-          { path: "create", element: <UserRegisterForm /> }, 
-        ],
-      },
-      {
-        path: "userCreate",
-        element: <UserRegisterForm />, 
-      },
-      {
-        path: "userList",
-        element: <UserListPage />, 
-      },
-      // Módulo Proveedores
-      {
-        path: "proveedores/crear",
-        element: <CreateProveedorPage />, 
-      },
-      {
-        path: "inventario/crear",
-        element: <CreateInventary />,
       },
     ],
   },
 
-  {
-    path: "*",
-    element: <Navigate to="/dashboard" replace />,
-  },
+  
+  
 ]);
 
 export default router;

@@ -17,11 +17,11 @@ export default function Navbar() {
 
  
   const menuItems = [
-    { label: "Usuarios", to: "/dashboard/userList", icon: User },
-    { label: "Inventario", to: "/dashboard/inventario/crear", icon: ClipboardCheck },
-    { label: "Proveedores", to: "/dashboard/proveedores/crear", icon: Truck },
-    { label: "Menú", to: "/dashboard/menu", icon: UtensilsCrossed },
-    { label: "Ordenes", to: "/dashboard/ordenes", icon: ClipboardList },
+    { label: "Usuarios", to: "/userList", icon: User },
+    { label: "Inventario", to: "/", icon: ClipboardCheck },
+    { label: "Proveedores", to: "/", icon: Truck },
+    { label: "Menú", to: "/menuList", icon: UtensilsCrossed },
+    { label: "Ordenes", to: "/ordensList", icon: ClipboardList },
   ];
 
   useEffect(() => {

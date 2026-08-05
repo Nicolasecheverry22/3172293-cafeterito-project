@@ -41,7 +41,7 @@ export default function LoginPage() {
     try {
       console.log("Datos de login validados:", result.data);
       
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
     }
