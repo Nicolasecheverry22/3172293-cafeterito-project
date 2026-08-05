@@ -8,7 +8,7 @@ import { getDocumentTypes } from "@/services/selectService";
 import { users as usersData } from "../data/users";
 import { userSchema } from "../schemas/userSchema";
 
-export default function UserRegisterForm() {
+export default function CreateUserPage() {
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});

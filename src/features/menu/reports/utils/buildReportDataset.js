@@ -13,7 +13,7 @@ export function buildReportDataset({
   // Filtro por alcance: si es por documento, se aplica filtro específico
   if (scope === "document" && documentNumber) {
     filteredUsers = filteredUsers.filter(
-      (user) => user.id === Number(documentNumber) // 🔧 CORRECCIÓN AQUÍ
+      (user) => user.document_number === documentNumber
     );
   }
 

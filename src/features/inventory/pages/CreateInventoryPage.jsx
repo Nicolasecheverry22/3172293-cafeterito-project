@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCategoryTypes } from "@/services/selectService";
 import { Input, Button, Select, FileInput } from "@/shared";
 
-export default function CreateInventary() {
+export default function CreateInventoryPage() {
   const navigate = useNavigate();
   const [categoryTypes, setCategoryTypes] = useState([]);
   const [errors, setErrors] = useState({});

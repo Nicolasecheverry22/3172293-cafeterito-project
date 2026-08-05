@@ -18,8 +18,8 @@ export default function Navbar() {
  
   const menuItems = [
     { label: "Usuarios", to: "/userList", icon: User },
-    { label: "Inventario", to: "/", icon: ClipboardCheck },
-    { label: "Proveedores", to: "/", icon: Truck },
+    { label: "Inventario", to: "/inventoryList", icon: ClipboardCheck },
+    { label: "Proveedores", to: "/providerList", icon: Truck },
     { label: "Menú", to: "/menuList", icon: UtensilsCrossed },
     { label: "Ordenes", to: "/ordensList", icon: ClipboardList },
   ];

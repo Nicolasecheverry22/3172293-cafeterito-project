@@ -2,9 +2,9 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, DashboardLayout } from "@/shared";
 import LoginPage from "@/features/login/pages/LoginPage";
 import HomePage from "@/features/home/pages/HomePage";
-import CreateInventary from "../features/inventory/pages/CreateInventary";
-import CreateProveedorPage from "@/features/providers/pages/CreateProveedorPage";
-import { UserListPage, UserRegisterForm} from "@/features/users";
+import { UserListPage, CreateUserPage } from "@/features/users";
+import { ProviderListPage, CreateProviderPage } from "@/features/providers";
+import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
 
 const router = createBrowserRouter([
   {
@@ -24,58 +24,31 @@ const router = createBrowserRouter([
   {
     path: "/home",
     element: <HomePage/>,
-    children: [
-      {
-        index: true,
-      },
-    ],
   },
   {
     path: "/userCreate",
-    element: <UserRegisterForm/>,
-    children: [
-      {
-        index: true,
-      },
-    ],
+    element: <CreateUserPage/>,
   },
   {
     path: "/userList",
     element: <UserListPage/>,
-    children: [
-      {
-        index: true,
-      },
-    ],
   },
   {
     path: "/providerCreate",
-    element: <CreateProveedorPage/>,
-    children: [
-      {
-        index: true,
-      },
-    ],
+    element: <CreateProviderPage/>,
+  },
+  {
+    path: "/providerList",
+    element: <ProviderListPage/>,
   },
   {
     path: "/inventoryCreate",
-    element: <CreateInventary/>,
-    children: [
-      {
-        index: true,
-      },
-    ],
+    element: <CreateInventoryPage/>,
   },
   {
-    path: "/dashboard",
-    element: <DashboardLayout/>,
-    children: [
-      {
-        index: true,
-      },
-    ],
+    path: "/inventoryList",
+    element: <InventoryListPage/>,
   },
-
   
   
 ]);

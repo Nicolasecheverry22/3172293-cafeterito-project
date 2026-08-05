@@ -1,24 +1,22 @@
 import { useState } from "react";
-import { DataTable, Button } from "@/shared";
+import { DataTable } from "@/shared";
+import { ProviderColumns } from "../table/ProviderColumns";
+import { providers } from "../data/providers";
+import { Button } from "../../../shared";
 import { Link } from "react-router-dom";
 import Navbar from "../../../shared/layouts/Navbar";
-
-import { InventoryColumns } from "../table/InventoryColumns";
-import { inventory } from "../data/inventory";
-
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
-export default function InventoryListPage() {
+export default function ProviderListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div>
       <Navbar />
-
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">
-            Listado de Inventario
+            Listado de Proveedores
           </h1>
 
           <div className="flex gap-12">
@@ -27,23 +25,18 @@ export default function InventoryListPage() {
               variant="secondary"
               onClick={() => setIsModalOpen(true)}
             >
-              Reportar inventario
+              Reportar proveedor
             </Button>
 
-            <Link to="/inventoryCreate">
+            <Link to="/providerCreate">
               <Button size="sm" variant="secondary">
-                Crear producto
+                Crear proveedor
               </Button>
             </Link>
           </div>
         </div>
 
-
-        <DataTable
-          data={inventory}
-          columns={InventoryColumns}
-        />
-
+        <DataTable data={providers} columns={ProviderColumns} />
 
         <ReportConfigModal
           isOpen={isModalOpen}
