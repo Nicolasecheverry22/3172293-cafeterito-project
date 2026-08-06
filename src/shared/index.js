@@ -11,6 +11,7 @@ export {default as IconButton } from "./components/IconButton";
 export {default as StatusSwitch } from "./components/StatusSwitch";
 export {default as DataTable } from "./components/DataTable";
 export {default as FileInput } from "./components/FileInput";
+export {default as FormNavbar } from "./components/FormNavbar";
 export {default as Card } from "./components/Card";
 export {
     Dropdown,

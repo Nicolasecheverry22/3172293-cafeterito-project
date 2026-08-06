@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCategoryTypes } from "@/services/selectService";
-import { Input, Button, Select, FileInput } from "@/shared";
+import { Input, Button, Select, FileInput, FormNavbar} from "@/shared";
 
 export default function CreateInventoryPage() {
   const navigate = useNavigate();
@@ -48,6 +48,8 @@ export default function CreateInventoryPage() {
 
 
   return (
+        <div className="w-full min-h-screen bg-background-main pb-10">
+      <FormNavbar />
     <div className="w-full max-w-6xl mx-auto p-4">
       <h1 className="text-main font-heading text-text-primary mb-8 font-bold">
         Crear Producto
@@ -174,6 +176,7 @@ export default function CreateInventoryPage() {
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 
