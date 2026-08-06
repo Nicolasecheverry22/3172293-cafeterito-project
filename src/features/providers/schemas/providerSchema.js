@@ -38,6 +38,5 @@ export const providerSchema = z.object({
   productFood: z.boolean(),
   productSupplies: z.boolean(),
   productFruits: z.boolean(),
-  productService: z.boolean(),
   productOthers: z.boolean(),
-})
+});

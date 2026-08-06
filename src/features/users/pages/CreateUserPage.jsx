@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus, Plus } from "lucide-react";
 
-import { Input, Select, Checkbox, Button, FileInput, StatusSwitch } from "@/shared";
+import { Input, Select, Checkbox, Button, FileInput, StatusSwitch, FormNavbar} from "@/shared";
 
 import { getDocumentTypes } from "@/services/selectService";
 import { users as usersData } from "../data/users";
@@ -81,6 +81,8 @@ export default function CreateUserPage() {
   };
 
   return (
+      <div className="w-full min-h-screen bg-background-main pb-10">
+      <FormNavbar />
     <div className="w-full max-w-6xl mx-auto p-4">
       {/* Título con Icono */}
       <div className="flex items-center gap-3 mb-6">
@@ -252,7 +254,16 @@ export default function CreateUserPage() {
               />
             </div>
 
-            <div className="flex justify-end mt-8">
+              <div className="flex gap-4 items-center justify-end mt-4">
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={() => navigate(-1)}
+              >
+                Cancelar
+              </Button>
+
               <Button type="submit" variant="primary" size="md">
                 Crear Usuario
               </Button>
@@ -261,6 +272,7 @@ export default function CreateUserPage() {
 
         </form>
       </div>
+    </div>
     </div>
   );
 }

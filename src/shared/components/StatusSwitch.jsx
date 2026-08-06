@@ -59,6 +59,7 @@ export default function StatusSwitch({
 
     // Botón que funciona como switch
     <button
+        type="button"
         onClick={handleToggle}  // Evento que cambia el estado
         disabled={disabled}     // Permite deshabilitar el botón
         className={`
