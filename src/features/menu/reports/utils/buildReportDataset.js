@@ -1,41 +1,26 @@
-// Función utilitaria para construir el dataset de un reporte (tabla)
-// exporta { transformación de datos (input -> output listo para exportar) }
-export function buildReportDataset({
-  users,           // Array de usuarios origen
-  selectedFields,  // Campos seleccionados para el reporte [{ key, label }]
-  scope,           // Alcance del reporte: "all" | "document"
-  documentNumber   // Número de documento para filtrar (si aplica)
-}) {
+export const buildReportDataset = (data, fields) => {
+  return data.map((item) => {
+    const row = {};
 
-  // Copia inmutable del array original (evita mutaciones)
-  let filteredUsers = [...users];
+    fields.forEach((field) => {
+      let value = item[field.key];
 
-  // Filtro por alcance: si es por documento, se aplica filtro específico
-  if (scope === "document" && documentNumber) {
-    filteredUsers = filteredUsers.filter(
-      (user) => user.document_number === documentNumber
-    );
-  }
+      // Transformaciones específicas
+      if (field.key === "isAvailable") {
+        value = value ? "Disponible" : "No disponible";
+      }
 
-  // Construcción de encabezados del reporte
-  // Se toma el label de cada campo seleccionado
-  const headers = selectedFields.map((field) => field.label);
+      if (field.key === "price") {
+        value = new Intl.NumberFormat("es-CO", {
+          style: "currency",
+          currency: "COP",
+          minimumFractionDigits: 0,
+        }).format(value);
+      }
 
-  // Construcción de filas del reporte
-  // Cada usuario se transforma en un array de valores según los campos seleccionados
-  const rows = filteredUsers.map((user) =>
-    selectedFields.map((field) => {
-      const value = user[field.key]; // Acceso dinámico a la propiedad
+      row[field.label] = value;
+    });
 
-      // Normalización: evita undefined o null en el reporte
-      return value ?? "";
-    })
-  );
-
-  // Estructura final desacoplada de la UI
-  // Lista para exportar a Excel, PDF o renderizar en tabla
-  return {
-    headers, // Array de strings (columnas)
-    rows     // Array de arrays (filas)
-  };
-}
+    return row;
+  });
+};

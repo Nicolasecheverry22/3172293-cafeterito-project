@@ -1,64 +1,61 @@
-import { useState } from "react"
+import { useState } from "react";
+import { menuReportFields } from "../config/menuReportFields";
+import { generateMenuReport } from "../services/generateMenuReport";
 
-// Configuración de campos disponibles para el reporte
-import { userReportFields } from "../config/userReportFields";
-
-// Caso de uso que orquesta la generación del reporte
-import { generateUserReport } from "../services/generateUserReport";
-
-// Componentes UI reutilizables (design system)
-import { Button, Input, Select } from "@/shared";
+import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
-// Componente modal para configuración de reportes
 export default function ReportConfigModal({ isOpen, onClose }) {
-
-  // Estado del formato de salida
   const [format, setFormat] = useState("pdf");
 
-  // Estado del alcance del reporte
-  const [scope, setScope] = useState("all");
+  // ✅ mantener objetos completos
+  const [selectedFields, setSelectedFields] = useState(menuReportFields);
 
-  // Estado para filtro por documento
-  const [documentNumber, setDocumentNumber] = useState("");
-
-  // Estado de campos seleccionados
-  const [selectedFields, setSelectedFields] = useState(() =>
-    userReportFields.filter((f) => f.default)
-  );
-
-  // Evita render si el modal está cerrado
   if (!isOpen) return null;
 
-  // Toggle de campos
   const handleFieldToggle = (field) => {
-    const exists = selectedFields.find((f) => f.key === field.key);
+    setSelectedFields((prev) => {
+      const exists = prev.find((f) => f.key === field.key);
 
-    if (exists) {
-      setSelectedFields(selectedFields.filter((f) => f.key !== field.key));
-    } else {
-      setSelectedFields([...selectedFields, field]);
+      if (exists) {
+        return prev.filter((f) => f.key !== field.key);
+      } else {
+        return [...prev, field];
+      }
+    });
+  };
+
+  const handleGenerateReport = () => {
+    if (selectedFields.length === 0) {
+      alert("Debes seleccionar al menos un campo");
+      return;
+    }
+
+    try {
+      // ✅ CORRECTO: enviar objetos completos
+      generateMenuReport(selectedFields, format);
+
+      onClose();
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
     }
   };
 
-  // Generar reporte
-  const handleGenerateReport = () => {
-    generateUserReport({
-      format,
-      selectedFields,
-      scope,
-      documentNumber
-    });
-
-    onClose();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
 
+      {/* Modal */}
+      <div className="relative bg-white rounded-lg shadow-lg w-full max-w-lg p-6 z-10">
+        
         <h2 className="mb-6 text-xl font-semibold">
-          Generar reporte de usuarios
+          Generar reporte de menú
         </h2>
 
         {/* Formato */}
@@ -79,7 +76,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           <p className="mb-2 font-medium">Campos del reporte</p>
 
           <div className="grid grid-cols-2 gap-2">
-            {userReportFields.map((field) => {
+            {menuReportFields.map((field) => {
               const checked = selectedFields.some(
                 (f) => f.key === field.key
               );
@@ -97,31 +94,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             })}
           </div>
         </div>
-
-        {/* Alcance */}
-        <div className="mb-4">
-          <Select
-            label="Alcance del reporte"
-            value={scope}
-            onChange={(e) => setScope(e.target.value)}
-            options={[
-              { label: "Todos los usuarios", value: "all" },
-              { label: "Filtrar por documento", value: "document" }
-            ]}
-          />
-        </div>
-
-        {/* Filtro por documento */}
-        {scope === "document" && (
-          <div className="mb-4">
-            <Input
-              label="Número de documento"
-              value={documentNumber}
-              onChange={(e) => setDocumentNumber(e.target.value)}
-              placeholder="Ingrese número de documento"
-            />
-          </div>
-        )}
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">

@@ -1,6 +1,7 @@
 import { generateExcelReport } from "./generateExcelReport";
 import { generatePdfReport } from "./generatePdfReport";
 import { providers } from "../../data/providers";
+import { buildReportDataset } from "../utils/buildReportDataset";
 
 export function generateProviderReport({
   format,
@@ -8,38 +9,33 @@ export function generateProviderReport({
   scope,
   documentNumber,
 }) {
-  let filteredProviders = [...providers];
+  const dataset = buildReportDataset({
+    providers,
+    selectedFields,
+    scope,
+    documentNumber,
+  });
 
-  // ✅ filtro por documento
-  if (scope === "document") {
-    filteredProviders = filteredProviders.filter(
-      (p) => p.documentNumber === documentNumber
-    );
-  }
-
-  // ✅ validación
-  if (!filteredProviders.length) {
+  if (!dataset.rows.length) {
     alert("No hay datos para generar el reporte.");
     return;
   }
 
-  // ✅ Excel
   if (format === "excel") {
     generateExcelReport({
-      data: filteredProviders,
-      selectedFields,
+      headers: dataset.headers,
+      rows: dataset.rows,
       fileName: "reporte_proveedores.xlsx",
-      sheetName: "Proveedores"
+      sheetName: "Proveedores",
     });
   }
 
-  // ✅ PDF
   if (format === "pdf") {
     generatePdfReport({
-      data: filteredProviders,
-      selectedFields,
+      headers: dataset.headers,
+      rows: dataset.rows,
       fileName: "reporte_proveedores.pdf",
-      title: "Reporte de Proveedores"
+      title: "Reporte de Proveedores",
     });
   }
 }
