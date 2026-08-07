@@ -1,10 +1,13 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthLayout, DashboardLayout } from "@/shared";
+import { AuthLayout} from "@/shared";
 import LoginPage from "@/features/login/pages/LoginPage";
 import HomePage from "@/features/home/pages/HomePage";
 import { UserListPage, CreateUserPage } from "@/features/users";
 import { ProviderListPage, CreateProviderPage } from "@/features/providers";
 import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
+import ForgotPasswordPage from "@/features/login/pages/ForgotPasswordPage";
+import VerifyTokenPage from "@/features/login/pages/VerifyTokenPage";
+import ResetPasswordPage from "@/features/login/pages/ResetPasswordPage";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +21,18 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <LoginPage/>,
+      },
+      {
+        path: "recuperar-password",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "verificar-token",
+        element: <VerifyTokenPage />,
+      },
+      {
+        path: "nueva-password",
+        element: <ResetPasswordPage />,
       },
     ],
   },
