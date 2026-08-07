@@ -6,7 +6,7 @@
     --semantic-brand: var(--color-primary-500);
     --semantic-brand-hover: var(--color-primary-950);/*Generalmente es de un tono mas alto que el brand*/
     --semantic-brand-soft: var(--color-tertiary-200);
-    --semantic-brand-hover: var(--color-primary-350);
+    /* --semantic-brand-hover: var(--color-primary-350); */
 
     /* ============= BACKGROUND================== */
 
