@@ -1,11 +1,14 @@
-export const buildReportDataset = (data, fields) => {
-  return data.map((item) => {
-    const row = {};
+export const buildReportDataset = ({ data, selectedFields }) => {
+  if (!Array.isArray(selectedFields) || selectedFields.length === 0) {
+    throw new Error("Debes seleccionar al menos un campo");
+  }
 
-    fields.forEach((field) => {
+  const headers = selectedFields.map((f) => f.label);
+
+  const rows = data.map((item) => {
+    return selectedFields.map((field) => {
       let value = item[field.key];
 
-      // Transformaciones específicas
       if (field.key === "isAvailable") {
         value = value ? "Disponible" : "No disponible";
       }
@@ -18,9 +21,9 @@ export const buildReportDataset = (data, fields) => {
         }).format(value);
       }
 
-      row[field.label] = value;
+      return value;
     });
-
-    return row;
   });
+
+  return { headers, rows };
 };

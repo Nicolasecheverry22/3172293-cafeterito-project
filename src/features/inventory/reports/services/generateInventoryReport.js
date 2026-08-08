@@ -6,20 +6,28 @@ import { inventory } from "../../data/inventory";
 export function generateInventoryReport({
   format,
   selectedFields,
+  scope,
+  selectedCategory,
 }) {
-  // ✅ usamos el builder (requerido por el instructor)
+  let filteredData = inventory;
+
+  // 🔴 FILTRO REAL
+  if (scope === "category") {
+    filteredData = inventory.filter(
+      (item) => item.category === selectedCategory
+    );
+  }
+
   const { headers, rows } = buildReportDataset({
-    data: inventory,
+    data: filteredData,
     selectedFields,
   });
 
-  // ✅ validación
   if (!rows.length) {
     alert("No hay datos para generar el reporte.");
     return;
   }
 
-  // ✅ Excel
   if (format === "excel") {
     generateExcelReport({
       headers,
@@ -28,7 +36,6 @@ export function generateInventoryReport({
     });
   }
 
-  // ✅ PDF
   if (format === "pdf") {
     generatePdfReport({
       headers,

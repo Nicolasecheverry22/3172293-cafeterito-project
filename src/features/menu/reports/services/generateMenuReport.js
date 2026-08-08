@@ -1,25 +1,46 @@
-import { menu } from "../../data/menu.js";
-import { buildReportDataset } from "../utils/buildReportDataset";
 import { generateExcelReport } from "./generateExcelReport";
 import { generatePdfReport } from "./generatePdfReport";
+import { buildReportDataset } from "../utils/buildReportDataset";
+import { menu } from "../../data/menu";
 
-export const generateMenuReport = (fields, format) => {
-  if (!Array.isArray(fields) || fields.length === 0) {
-    throw new Error("Debes seleccionar al menos un campo");
+export function generateMenuReport({
+  format,
+  selectedFields,
+  scope,
+  selectedCategory,
+}) {
+  let filteredData = menu;
+
+  // 🔴 FILTRO REAL (esto no lo tenías)
+  if (scope === "category") {
+    filteredData = menu.filter(
+      (item) => item.category === selectedCategory
+    );
   }
 
-  // 🔴 fields ahora son objetos { key, label }
-  const dataset = buildReportDataset(menu, fields);
+  const { headers, rows } = buildReportDataset({
+    data: filteredData,
+    selectedFields,
+  });
 
-  if (!dataset || dataset.length === 0) {
-    throw new Error("No hay datos para generar el reporte");
+  if (!rows.length) {
+    alert("No hay datos para generar el reporte.");
+    return;
   }
 
   if (format === "excel") {
-    generateExcelReport(dataset, "menu_report");
+    generateExcelReport({
+      headers,
+      rows,
+      fileName: "reporte_menu.xlsx",
+    });
   }
 
   if (format === "pdf") {
-    generatePdfReport(dataset, "menu_report");
+    generatePdfReport({
+      headers,
+      rows,
+      fileName: "reporte_menu.pdf",
+    });
   }
-};
+}
