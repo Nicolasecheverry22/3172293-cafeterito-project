@@ -4,10 +4,10 @@ export default function Button ({
     variant = "primary",
     size = "md",
     type = "button",
+    className = "", 
     children,
     ...props
 }){
-
     const variants = {
         primary: "bg-brand text-text-primary hover:bg-brand-hover",
         secondary: "bg-brand-soft text-primary hover:bg-brand-soft-hover"
@@ -19,11 +19,13 @@ export default function Button ({
             px-4 
             before:absolute before:content-['']
             before:-inset-y-[8px] before:-inset-x-[0px]
-            
-            `,
-        md: `h-10 px-4 before:absolute before:content-['']
-            before:-inset-y-[4px] before:-inset-x-[0px]`
+        `,
+        md: `
+            h-10 px-4 before:absolute before:content-['']
+            before:-inset-y-[4px] before:-inset-x-[0px]
+        `
     };
+
     return(
         <button
             type={type}
@@ -34,11 +36,11 @@ export default function Button ({
                 transition-colors
                 ${variants[variant]}
                 ${sizes[size]}
-                `}
-                {...props}
+                ${className} // 2. Concatenamos las clases extra aquí
+            `}
+            {...props} 
         >
             {children}
-
         </button>
     )
 }

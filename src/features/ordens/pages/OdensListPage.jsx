@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DataTable, Button } from "@/shared";
 import Navbar from "../../../shared/layouts/Navbar";
-
+import { Link } from "react-router-dom";
 import { OrdensColumns } from "../table/OrdensColumns";
 import { ordens } from "../data/ordens";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
@@ -25,11 +25,11 @@ export default function OrdenListPage() {
             Reportar órdenes
           </Button>
 
-          {/* <Link to="/orders/create"> */}
+          <Link to="/createorders">
           <Button size="sm" variant="secondary">
             Crear orden
           </Button>
-          {/* </Link> */}
+          </Link>
         </div>
       </div>
 

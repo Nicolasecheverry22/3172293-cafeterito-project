@@ -31,15 +31,23 @@ export default function Select({
                 value={value}
                 id={htmlFor}
                 className="
-                    w-80
-                    h12
+                    w-full
+                    h-12
                     rounded-md
                     border
+                    bg-background
                     px-4
-
-                    hover:border
-                    hover:border-2
-                    hover:border-focus-border
+                    text-body
+                    font-body
+                    text-text-primary
+                    outline-none
+                    transition-all
+                    cursor-pointer
+                    border-border
+                    hover:border-border-strong
+                    focus:border-focus-ring
+                    focus:ring-1
+                    focus:ring-focus-ring
                 "
             >
                 <option value="">Seleccione una opción</option>

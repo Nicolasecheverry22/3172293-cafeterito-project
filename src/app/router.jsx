@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout} from "@/shared";
 import LoginPage from "@/features/login/pages/LoginPage";
 import HomePage from "@/features/home/pages/HomePage";
-import { UserListPage, CreateUserPage } from "@/features/users";
+import { UserListPage, CreateUserPage,PermissionsManagementPage } from "@/features/users";
 import { ProviderListPage, CreateProviderPage } from "@/features/providers";
 import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
 import { MenuListPage } from "@/features/menu";
@@ -10,6 +10,8 @@ import { OrdensListPage } from "@/features/ordens";
 import ForgotPasswordPage from "@/features/login/pages/ForgotPasswordPage";
 import VerifyTokenPage from "@/features/login/pages/VerifyTokenPage";
 import ResetPasswordPage from "@/features/login/pages/ResetPasswordPage";
+import CreateOrderPage from "@/features/ordens/pages/CreateOrderPage"
+import CreateMenuPage from "@/features/menu/pages/CreateMenuPage"
 
 const router = createBrowserRouter([
   {
@@ -74,8 +76,18 @@ const router = createBrowserRouter([
     path: "/ordensList",
     element: <OrdensListPage/>,
   },
-  
-  
+  {
+    path: "/permits",
+    element: <PermissionsManagementPage/>,
+  },
+  {
+    path: "/createorders",
+    element: <CreateOrderPage/>,
+  },
+  {
+    path: "/createMenu",
+    element: <CreateMenuPage/>,
+  },
 ]);
 
 export default router;
