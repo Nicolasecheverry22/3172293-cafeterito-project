@@ -13,7 +13,6 @@ export default function CreateOrderPage() {
     status: "Activo",
   });
 
-  // Lista de productos sencilla
   const [orderItems, setOrderItems] = useState([
     { id: crypto.randomUUID(), dishId: "", quantity: 1 }
   ]);

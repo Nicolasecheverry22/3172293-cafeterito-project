@@ -1,22 +1,50 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Input, Button } from "@/shared";
+import { verifyTokenSchema } from "../schemas/verifyTokenSchema"; 
 
 export default function VerifyTokenPage() {
     const navigate = useNavigate();
 
+    const [formData, setFormData] = useState({ token: "" });
+    const [errors, setErrors] = useState({});
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Validando token...");
+
+        const result = verifyTokenSchema.safeParse(formData);
+
+        if (!result.success) {
+            const fieldErrors = {};
+            
+            result.error.issues.forEach((issue) => {
+                fieldErrors[issue.path[0]] = issue.message;
+            });
+            
+            setErrors(fieldErrors);
+            return;
+        }
+
+        setErrors({});
         navigate("/auth/newPassword");
     };
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-surface-muted/30">
             
-            <div className="w-full max-w-3xl bg-background rounded-2xl shadow-xl overflow-hidden relative p-8 md:p-16 flex flex-col items-center justify-center min-h-[500px]">
+            <div className="w-full max-w-3xl bg-background rounded-2xl shadow-xl overflow-hidden relative p-8 md:p-16 flex flex-col items-center justify-center ">
                 
                 <button 
+                    type="button"
                     onClick={() => navigate(-1)}
                     className="absolute top-6 left-6 p-2 text-text-primary hover:text-brand transition-colors z-10 cursor-pointer"
                     aria-label="Volver"
@@ -35,12 +63,21 @@ export default function VerifyTokenPage() {
                     </p>
 
                     <form onSubmit={handleSubmit} className="w-full flex flex-col gap-8">
-                        <Input 
-                            type="text" 
-                            placeholder="Ingrese su token" 
-                            required 
-                            className="text-center tracking-widest" 
-                        />
+                        <div className="flex flex-col gap-1 text-left">
+                            <Input 
+                                type="text" 
+                                name="token"
+                                value={formData.token}
+                                onChange={handleChange}
+                                placeholder="Ingrese su token" 
+                                className="text-center tracking-widest" 
+                            />
+                            {errors.token && (
+                                <span className="text-xs text-red-500 font-medium ml-1 text-center">
+                                    {errors.token}
+                                </span>
+                            )}
+                        </div>
 
                         <div className="flex justify-center mt-2 w-full">
                             <Button variant="primary" type="submit" size="md">
@@ -57,7 +94,7 @@ export default function VerifyTokenPage() {
                         <button 
                             type="button"
                             className="text-small text-text-primary font-bold cursor-pointer hover:underline focus:outline-none"
-                            onClick={() => console.log("Solicitando nuevo código...")}
+                            onClick={() => {}} 
                         >
                             Solicitar un nuevo código
                         </button>

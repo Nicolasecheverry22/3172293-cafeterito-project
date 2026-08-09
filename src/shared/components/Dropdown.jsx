@@ -61,7 +61,6 @@ export function Dropdown({
   )
 }
 
-// Trigger (asChild pattern)
 export function DropdownTrigger({ children }) {
   const { open, setOpen } = useContext(DropdownContext)
 
@@ -77,7 +76,6 @@ export function DropdownTrigger({ children }) {
   })
 }
 
-// Content
 export function DropdownContent({ children, className = "" }) {
   const { open } = useContext(DropdownContext)
 
@@ -88,18 +86,16 @@ export function DropdownContent({ children, className = "" }) {
       role="menu"
       className={`
         absolute
-        mt-1
+        mt-2
         min-w-48
-        border
-        text-text-inverse
+        bg-white
+        border border-gray-200
+        text-gray-800
         p-1
-        dark:bg-neutral-950/80
-        backdrop-blur-[1px]
         shadow-lg
-        rounded-2xl
+        rounded-xl
         overflow-hidden
-        hover:shadow-black
-        transition-shadow duration-700
+        z-50
         ${className}
       `}
     >
@@ -108,7 +104,6 @@ export function DropdownContent({ children, className = "" }) {
   )
 }
 
-// Item
 export function DropdownItem({
   children,
   onClick,
@@ -126,8 +121,8 @@ export function DropdownItem({
       role="menuitem"
       onClick={handleClick}
       className={`
-        w-full text-left px-3 py-2 rounded-lg
-        hover:bg-gray-500 focus:bg-gray-100
+        w-full text-left px-3 py-2 rounded-md
+        hover:bg-gray-100 focus:bg-gray-100
         transition-colors
         ${className}
       `}

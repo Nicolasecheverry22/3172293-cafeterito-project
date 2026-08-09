@@ -70,7 +70,7 @@ export default function FileInput({
               <span className="font-heading font-medium text-body">
                 Subir imagen
               </span>
-              <Upload className="w-7 h-7 stroke-[2]" />
+              <Upload className="w-7 h-7" />
             </div>
           )}
         </div>

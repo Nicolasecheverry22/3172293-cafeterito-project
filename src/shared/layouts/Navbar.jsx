@@ -21,10 +21,9 @@ import {
 export default function Navbar() {
   const navigate = useNavigate();
 
-  // const handleLogout = () => {
-  //   setIsOpen(false);
-  //   navigate("/auth");
-  // };
+  const handleLogout = () => {
+    navigate("/auth");
+  };
 
   return (
     <nav className="w-full bg-brand shadow-md relative z-50">
@@ -121,36 +120,34 @@ export default function Navbar() {
             </li>
           </ul>
 
-          <div className="flex items-center">
+  <div className="flex items-center">
             <Dropdown>
               <DropdownTrigger>
                 <button
-                  className="p-2 rounded-md text-text-primary hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none"
+                  className="p-2 rounded-md text-text-primary hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none cursor-pointer"
                   aria-label="Abrir Menú"
                 >
-                  <Menu className="w-7 h-7 " />
+                  <Menu className="w-7 h-7" />
                 </button>
               </DropdownTrigger>
 
-              <DropdownContent className="right-0 mt-2 w-60 bg-white text-black border-gray-200 shadow-xl">
+              <DropdownContent className="right-0 w-52">
 
-                <DropdownItem 
-                  onClick={() => navigate("/permits")} 
-                  className="hover:bg-gray-100 text-black focus:bg-gray-100"
-                >
+                <DropdownItem onClick={() => navigate("/permits")}>
                   <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5 text-gray-600" />
-                    <span>Permisos</span>
+                    <ShieldCheck className="w-5 h-5" />
+                    <span className="font-medium font-body text-base">Permisos</span>
                   </div>
                 </DropdownItem>
 
                 <DropdownItem 
-                  onClick={() => navigate("/auth")} 
-                  className="hover:bg-red-50 text-red-600 focus:bg-red-50 font-serif"
+
+                  onClick={handleLogout} 
+                  className="mt-1 text-red-600 hover:bg-red-50 focus:bg-red-50"
                 >
                   <div className="flex items-center gap-3">
                     <LogOut className="w-5 h-5" />
-                    <span>Cerrar Sesión</span>
+                    <span className="font-medium font-body text-base">Cerrar Sesión</span>
                   </div>
                 </DropdownItem>
                 
