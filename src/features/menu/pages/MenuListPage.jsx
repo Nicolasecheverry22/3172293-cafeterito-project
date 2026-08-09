@@ -27,11 +27,11 @@ export default function MenuListPage() {
               Reportar menú
             </Button>
 
-            {/* <Link to="/menu/create"> */}
+            <Link to="/createMenu">
               <Button size="sm" variant="secondary">
                 Crear platillo
               </Button>
-            {/* </Link> */}
+            </Link>
           </div>
         </div>
 
