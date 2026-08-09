@@ -12,7 +12,6 @@ export default function HomePage() {
             
             <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col gap-10 p-6">
                 
-                {/* Acciones Rápidas */}
                 <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border">
 
                     <h2 className="text-title font-heading font-bold mb-4 text-text-primary">
@@ -24,7 +23,7 @@ export default function HomePage() {
                         <Button
                             variant="primary"
                             size="md"
-                            onClick={() => navigate("/ordensList")}
+                            onClick={() => navigate("/createorders")}
                             className="w-full justify-start p-2 h-auto rounded-2xl shadow-sm border border-border hover:border-brand transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-xl w-full">
