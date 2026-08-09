@@ -8,6 +8,10 @@
         "label":"Tarjeta de Identidad"
     },
     {
+        "id":"NIT",
+        "label":"NIT"
+    },
+    {
         "id":"PPT",
         "label":"Permiso por Protección Temporal"
     },

@@ -21,4 +21,5 @@ export {
 
 // Layouts Components
 export { default as Navbar } from "./layouts/Navbar";
+export { default as NavbarAdmin } from "./layouts/NavbarAdmin";
 
