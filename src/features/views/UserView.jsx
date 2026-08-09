@@ -6,6 +6,7 @@ import {SquarePen,UserRoundSearch} from "lucide-react"
 
 
 export default function UserView() {
+    
     const navigate = useNavigate();
 
     return (
