@@ -16,14 +16,12 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     providerReportFields.filter((f) => f.default)
   );
 
-  // ✅ Hook SIEMPRE arriba (corrige el error de React)
   useEffect(() => {
     if (scope !== "document") {
       setDocumentNumber("");
     }
   }, [scope]);
 
-  // ✅ Ahora sí puedes cortar render
   if (!isOpen) return null;
 
   const handleFieldToggle = (field) => {
@@ -49,7 +47,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       return;
     }
 
-    // ✅ CORREGIDO: ahora usa provider (no user)
     generateProviderReport({
       format,
       selectedFields,

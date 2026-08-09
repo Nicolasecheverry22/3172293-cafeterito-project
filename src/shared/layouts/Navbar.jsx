@@ -21,10 +21,10 @@ import {
 export default function Navbar() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    setIsOpen(false);
-    navigate("/auth/login");
-  };
+  // const handleLogout = () => {
+  //   setIsOpen(false);
+  //   navigate("/auth");
+  // };
 
   return (
     <nav className="w-full bg-brand shadow-md relative z-50">
@@ -145,7 +145,7 @@ export default function Navbar() {
                 </DropdownItem>
 
                 <DropdownItem 
-                  onClick={handleLogout} 
+                  onClick={() => navigate("/auth")} 
                   className="hover:bg-red-50 text-red-600 focus:bg-red-50 font-serif"
                 >
                   <div className="flex items-center gap-3">

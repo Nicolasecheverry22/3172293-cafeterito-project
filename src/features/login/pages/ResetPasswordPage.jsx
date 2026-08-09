@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { Input, Button } from "@/shared";
 
 export default function ResetPasswordPage() {
@@ -31,8 +32,15 @@ export default function ResetPasswordPage() {
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-surface-muted/30">
-            
-            <div className="w-full max-w-3xl bg-background rounded-2xl shadow-xl overflow-hidden p-8 md:p-16 flex flex-col items-center justify-center min-h-[500px]">
+                        <div className="w-full max-w-3xl bg-background rounded-2xl shadow-xl overflow-hidden relative p-8 md:p-16 flex flex-col items-center justify-center min-h-[500px]">
+
+            <button 
+                    onClick={() => navigate(-1)}
+                    className="absolute top-6 left-6 p-2 text-text-primary hover:text-brand transition-colors z-10 cursor-pointer"
+                    aria-label="Volver"
+                >
+                    <ArrowLeft className="w-8 h-8 stroke-[2.5]" />
+                </button>
                 
                 <div className="w-full max-w-md flex flex-col items-center text-center">
                     

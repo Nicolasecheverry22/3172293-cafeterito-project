@@ -9,13 +9,15 @@ export default function ForgotPasswordPage() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Enviando enlace de recuperación...");
-        navigate("/auth/verificar-token");
+        navigate("/auth/verifyToken");
     };
 
     return (
        
             <div className="flex flex-col md:flex-row w-full max-w-5xl bg-background rounded-2xl shadow-xl overflow-hidden ">
                 
+
+                <div className="hidden md:flex md:w-1/2 relative items-center justify-center p-8 bg-surface-muted/10">
                 <button 
                     onClick={() => navigate(-1)}
                     className="absolute top-6 left-6 p-2 text-text-primary hover:text-brand transition-colors z-10 cursor-pointer"
@@ -23,8 +25,6 @@ export default function ForgotPasswordPage() {
                 >
                     <ArrowLeft className="w-8 h-8 stroke-[2.5]" />
                 </button>
-
-                <div className="hidden md:flex md:w-1/2 items-center justify-center p-8 bg-surface-muted/10">
                     <div className="w-full max-w-sm flex justify-center">
                         <img 
                             src={imageLogin} 

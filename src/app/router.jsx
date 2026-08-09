@@ -2,16 +2,14 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout} from "@/shared";
 import LoginPage from "@/features/login/pages/LoginPage";
 import HomePage from "@/features/home/pages/HomePage";
-import { UserListPage, CreateUserPage,PermissionsManagementPage } from "@/features/users";
-import { ProviderListPage, CreateProviderPage } from "@/features/providers";
-import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
-import { MenuListPage } from "@/features/menu";
-import { OrdensListPage } from "@/features/ordens";
 import ForgotPasswordPage from "@/features/login/pages/ForgotPasswordPage";
 import VerifyTokenPage from "@/features/login/pages/VerifyTokenPage";
 import ResetPasswordPage from "@/features/login/pages/ResetPasswordPage";
-import CreateOrderPage from "@/features/ordens/pages/CreateOrderPage"
-import CreateMenuPage from "@/features/menu/pages/CreateMenuPage"
+import { UserListPage, CreateUserPage,PermissionsManagementPage } from "@/features/users";
+import { ProviderListPage, CreateProviderPage } from "@/features/providers";
+import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
+import { MenuListPage, CreateMenuPage } from "@/features/menu";
+import { OrdensListPage, CreateOrderPage } from "@/features/ordens";
 
 const router = createBrowserRouter([
   {
@@ -27,15 +25,15 @@ const router = createBrowserRouter([
         element: <LoginPage/>,
       },
       {
-        path: "recuperar-password",
+        path: "recoverPassword",
         element: <ForgotPasswordPage />,
       },
       {
-        path: "verificar-token",
+        path: "verifyToken",
         element: <VerifyTokenPage />,
       },
       {
-        path: "nueva-password",
+        path: "newPassword",
         element: <ResetPasswordPage />,
       },
     ],
@@ -69,8 +67,16 @@ const router = createBrowserRouter([
     element: <InventoryListPage/>,
   },
   {
+    path: "/menuCreate",
+    element: <CreateMenuPage/>,
+  },
+  {
     path: "/menuList",
     element: <MenuListPage/>,
+  },
+  {
+    path: "/ordensCreate",
+    element: <CreateOrderPage/>,
   },
   {
     path: "/ordensList",
@@ -79,14 +85,6 @@ const router = createBrowserRouter([
   {
     path: "/permits",
     element: <PermissionsManagementPage/>,
-  },
-  {
-    path: "/createorders",
-    element: <CreateOrderPage/>,
-  },
-  {
-    path: "/createMenu",
-    element: <CreateMenuPage/>,
   },
 ]);
 

@@ -111,7 +111,7 @@ export default function LoginPage() {
 
             <div className="text-center mt-6">
               <Link 
-                to="/auth/recuperar-password" 
+                to="/auth/recoverPassword" 
                 className="text-small text-text-muted hover:text-text-primary hover:underline transition-colors"
               >
                 Olvidé mi contraseña

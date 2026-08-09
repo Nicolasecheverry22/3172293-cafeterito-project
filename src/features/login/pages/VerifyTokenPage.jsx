@@ -8,7 +8,7 @@ export default function VerifyTokenPage() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Validando token...");
-        navigate("/auth/nueva-password");
+        navigate("/auth/newPassword");
     };
 
     return (
