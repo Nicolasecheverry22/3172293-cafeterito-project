@@ -16,4 +16,9 @@ export const userReportFields = [
     label: "Teléfono",
     default: true
   },
+  {
+    key: "is_active",
+    label: "Estado",
+    default: true
+  }
 ];

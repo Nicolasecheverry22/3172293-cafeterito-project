@@ -1,36 +1,28 @@
-import { useState } from "react"
-
-// Configuración de campos disponibles para el reporte
-import { userReportFields } from "../config/userReportFields";
-
-// Caso de uso que orquesta la generación del reporte
-import { generateUserReport } from "../services/generateUserReport";
-
-// Componentes UI reutilizables (design system)
-import { Button, Input, Select } from "@/shared";
+import { useState } from "react";
+import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
-// Componente modal para configuración de reportes
+import { generateOrdersReport } from "../services/generateOrdensReport";
+
 export default function ReportConfigModal({ isOpen, onClose }) {
-
-  // Estado del formato de salida
   const [format, setFormat] = useState("pdf");
-
-  // Estado del alcance del reporte
   const [scope, setScope] = useState("all");
+  const [tableNumber, setTableNumber] = useState("");
 
-  // Estado para filtro por documento
-  const [documentNumber, setDocumentNumber] = useState("");
+  const orderFields = [
+    { key: "id", label: "Orden", default: true },
+    { key: "tableNumber", label: "Mesa", default: true },
+    { key: "waiter", label: "Encargado", default: true },
+    { key: "total", label: "Total", default: true },
+    { key: "status", label: "Estado", default: true },
+  ];
 
-  // Estado de campos seleccionados
-  const [selectedFields, setSelectedFields] = useState(() =>
-    userReportFields.filter((f) => f.default)
+  const [selectedFields, setSelectedFields] = useState(
+    orderFields.filter((f) => f.default)
   );
 
-  // Evita render si el modal está cerrado
   if (!isOpen) return null;
 
-  // Toggle de campos
   const handleFieldToggle = (field) => {
     const exists = selectedFields.find((f) => f.key === field.key);
 
@@ -41,24 +33,35 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
   };
 
-  // Generar reporte
-  const handleGenerateReport = () => {
-    generateUserReport({
+  const handleGenerate = () => {
+    if (selectedFields.length === 0) {
+      alert("Selecciona al menos un campo");
+      return;
+    }
+
+    if (scope === "table" && !tableNumber) {
+      alert("Debes ingresar un número de mesa");
+      return;
+    }
+
+    // 🔴 AQUÍ ESTÁ LA CONEXIÓN REAL
+    generateOrdersReport({
       format,
       selectedFields,
       scope,
-      documentNumber
+      tableNumber,
     });
 
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
 
-        <h2 className="mb-6 text-xl font-semibold">
-          Generar reporte de usuarios
+      <div className="relative bg-white rounded-lg shadow-lg w-full max-w-lg p-6 z-10">
+        <h2 className="text-xl font-semibold mb-4">
+          Generar reporte de órdenes
         </h2>
 
         {/* Formato */}
@@ -69,7 +72,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             onChange={(e) => setFormat(e.target.value)}
             options={[
               { label: "PDF", value: "pdf" },
-              { label: "Excel", value: "excel" }
+              { label: "Excel", value: "excel" },
             ]}
           />
         </div>
@@ -79,22 +82,14 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           <p className="mb-2 font-medium">Campos del reporte</p>
 
           <div className="grid grid-cols-2 gap-2">
-            {userReportFields.map((field) => {
-              const checked = selectedFields.some(
-                (f) => f.key === field.key
-              );
-
-              return (
-                <Checkbox
-                  key={field.key}
-                  id={field.key}
-                  name={field.key}
-                  label={field.label}
-                  checked={checked}
-                  onChange={() => handleFieldToggle(field)}
-                />
-              );
-            })}
+            {orderFields.map((field) => (
+              <Checkbox
+                key={field.key}
+                label={field.label}
+                checked={selectedFields.some((f) => f.key === field.key)}
+                onChange={() => handleFieldToggle(field)}
+              />
+            ))}
           </div>
         </div>
 
@@ -105,20 +100,21 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             value={scope}
             onChange={(e) => setScope(e.target.value)}
             options={[
-              { label: "Todos los usuarios", value: "all" },
-              { label: "Filtrar por documento", value: "document" }
+              { label: "Todas las órdenes", value: "all" },
+              { label: "Filtrar por mesa", value: "table" },
             ]}
           />
         </div>
 
-        {/* Filtro por documento */}
-        {scope === "document" && (
+        {/* Filtro mesa */}
+        {scope === "table" && (
           <div className="mb-4">
-            <Input
-              label="Número de documento"
-              value={documentNumber}
-              onChange={(e) => setDocumentNumber(e.target.value)}
-              placeholder="Ingrese número de documento"
+            <input
+              type="number"
+              placeholder="Número de mesa"
+              className="w-full border rounded px-3 py-2"
+              value={tableNumber}
+              onChange={(e) => setTableNumber(e.target.value)}
             />
           </div>
         )}
@@ -129,7 +125,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport}>
+          <Button variant="primary" onClick={handleGenerate}>
             Generar reporte
           </Button>
         </div>

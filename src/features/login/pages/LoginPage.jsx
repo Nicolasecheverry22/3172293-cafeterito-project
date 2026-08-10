@@ -58,14 +58,12 @@ export default function LoginPage() {
         >
         </button>
 
-        {/*columna izquierda*/}
         <div className="hidden md:flex md:w-1/2 items-center justify-center p-8">
           <div className="w-full max-w-sm flex justify-center">
             <img src={imageLogin} alt="Ilustración de login" className="w-full h-auto object-contain" />
           </div>
         </div>
 
-        {/*columna derecha*/}
         <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-16">
           
           <h2 className="text-display font-heading text-text-primary mb-1">
@@ -109,21 +107,11 @@ export default function LoginPage() {
               <Button variant="primary" type="submit" size="md">
                 Iniciar Sesión
               </Button>
-              
-              <Button 
-                variant="secondary" 
-                type="button" 
-                size="md"
-                // Hay que ajustar esta ruta cuadno julian cree el regiztro
-                onClick={() => navigate("/auth/registro")} 
-              >
-                Crear una Cuenta
-              </Button>
             </div>
 
             <div className="text-center mt-6">
               <Link 
-                to="/auth/recuperar-password" 
+                to="/auth/recoverPassword" 
                 className="text-small text-text-muted hover:text-text-primary hover:underline transition-colors"
               >
                 Olvidé mi contraseña

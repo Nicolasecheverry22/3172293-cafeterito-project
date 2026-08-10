@@ -1,8 +1,11 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthLayout, DashboardLayout } from "@/shared";
+import { AuthLayout} from "@/shared";
 import LoginPage from "@/features/login/pages/LoginPage";
 import HomePage from "@/features/home/pages/HomePage";
-import { UserListPage, CreateUserPage } from "@/features/users";
+import ForgotPasswordPage from "@/features/login/pages/ForgotPasswordPage";
+import VerifyTokenPage from "@/features/login/pages/VerifyTokenPage";
+import ResetPasswordPage from "@/features/login/pages/ResetPasswordPage";
+import { UserListPage, CreateUserPage,PermissionsManagementPage } from "@/features/users";
 import { ProviderListPage, CreateProviderPage } from "@/features/providers";
 import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
 import  ProviderView  from "../features/views/ProviderView";
@@ -10,6 +13,8 @@ import  UserView  from "../features/views/UserView";
 import  ProductView  from "../features/views/ProductView";
 import  EditUser  from "../features/views/edit/EditUser";
 import  EditProvider  from "../features/views/edit/EditProvider";
+import { MenuListPage, CreateMenuPage } from "@/features/menu";
+import { OrdensListPage, CreateOrderPage } from "@/features/ordens";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +28,18 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <LoginPage/>,
+      },
+      {
+        path: "recoverPassword",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "verifyToken",
+        element: <VerifyTokenPage />,
+      },
+      {
+        path: "newPassword",
+        element: <ResetPasswordPage />,
       },
     ],
   },
@@ -76,7 +93,27 @@ const router = createBrowserRouter([
     element: <EditProvider/>,
   },
   
-  
+  {
+    path: "/menuCreate",
+    element: <CreateMenuPage/>,
+  },
+  {
+    path: "/menuList",
+    element: <MenuListPage/>,
+  },
+  {
+    path: "/ordensCreate",
+    element: <CreateOrderPage/>,
+  },
+  {
+    path: "/ordensList",
+    element: <OrdensListPage/>,
+  },
+  {
+    path: "/permits",
+    element: <PermissionsManagementPage/>,
+  },
+
 ]);
 
 export default router;

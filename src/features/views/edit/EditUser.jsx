@@ -1,4 +1,4 @@
-import { NavbarAdmin } from "../../../shared";
+import { Navbar } from "../../../shared";
 import authBg from "@/assets/images/calvitor.png";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +40,7 @@ export default function EditUser() {
     return (
         <div className="min-h-screen w-full flex flex-col">
 
-            <NavbarAdmin />
+            <Navbar />
 
                 <div className="flex items-center gap-3 mt-10 ml-12">
                 <PencilSparkles className="w-10 h-10 text-text-primary" />

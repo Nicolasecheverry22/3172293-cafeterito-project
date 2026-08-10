@@ -1,41 +1,29 @@
-// Función utilitaria para construir el dataset de un reporte (tabla)
-// exporta { transformación de datos (input -> output listo para exportar) }
-export function buildReportDataset({
-  users,           // Array de usuarios origen
-  selectedFields,  // Campos seleccionados para el reporte [{ key, label }]
-  scope,           // Alcance del reporte: "all" | "document"
-  documentNumber   // Número de documento para filtrar (si aplica)
-}) {
-
-  // Copia inmutable del array original (evita mutaciones)
-  let filteredUsers = [...users];
-
-  // Filtro por alcance: si es por documento, se aplica filtro específico
-  if (scope === "document" && documentNumber) {
-    filteredUsers = filteredUsers.filter(
-      (user) => user.document_number === documentNumber
-    );
+export const buildReportDataset = ({ data, selectedFields }) => {
+  if (!Array.isArray(selectedFields) || selectedFields.length === 0) {
+    throw new Error("Debes seleccionar al menos un campo");
   }
 
-  // Construcción de encabezados del reporte
-  // Se toma el label de cada campo seleccionado
-  const headers = selectedFields.map((field) => field.label);
+  const headers = selectedFields.map((f) => f.label);
 
-  // Construcción de filas del reporte
-  // Cada usuario se transforma en un array de valores según los campos seleccionados
-  const rows = filteredUsers.map((user) =>
-    selectedFields.map((field) => {
-      const value = user[field.key]; // Acceso dinámico a la propiedad
+  const rows = data.map((item) => {
+    return selectedFields.map((field) => {
+      let value = item[field.key];
 
-      // Normalización: evita undefined o null en el reporte
-      return value ?? "";
-    })
-  );
+      if (field.key === "isAvailable") {
+        value = value ? "Disponible" : "No disponible";
+      }
 
-  // Estructura final desacoplada de la UI
-  // Lista para exportar a Excel, PDF o renderizar en tabla
-  return {
-    headers, // Array de strings (columnas)
-    rows     // Array de arrays (filas)
-  };
-}
+      if (field.key === "price") {
+        value = new Intl.NumberFormat("es-CO", {
+          style: "currency",
+          currency: "COP",
+          minimumFractionDigits: 0,
+        }).format(value);
+      }
+
+      return value;
+    });
+  });
+
+  return { headers, rows };
+};

@@ -1,41 +1,37 @@
-// Función utilitaria para construir el dataset de un reporte (tabla)
-// exporta { transformación de datos (input -> output listo para exportar) }
-export function buildReportDataset({
-  users,           // Array de usuarios origen
-  selectedFields,  // Campos seleccionados para el reporte [{ key, label }]
-  scope,           // Alcance del reporte: "all" | "document"
-  documentNumber   // Número de documento para filtrar (si aplica)
-}) {
+export const buildOrdersReportDataset = ({ data, selectedFields }) => {
+  const headers = selectedFields.map((f) => f.label);
 
-  // Copia inmutable del array original (evita mutaciones)
-  let filteredUsers = [...users];
+  const rows = data.map((order) => {
+    return selectedFields.map((field) => {
+      let value;
 
-  // Filtro por alcance: si es por documento, se aplica filtro específico
-  if (scope === "document" && documentNumber) {
-    filteredUsers = filteredUsers.filter(
-      (user) => user.document_number === documentNumber
-    );
-  }
+      switch (field.key) {
+        case "total":
+          value = order.items.reduce(
+            (acc, item) => acc + item.price * item.quantity,
+            0
+          );
 
-  // Construcción de encabezados del reporte
-  // Se toma el label de cada campo seleccionado
-  const headers = selectedFields.map((field) => field.label);
+          value = new Intl.NumberFormat("es-CO", {
+            style: "currency",
+            currency: "COP",
+            minimumFractionDigits: 0,
+          }).format(value);
+          break;
 
-  // Construcción de filas del reporte
-  // Cada usuario se transforma en un array de valores según los campos seleccionados
-  const rows = filteredUsers.map((user) =>
-    selectedFields.map((field) => {
-      const value = user[field.key]; // Acceso dinámico a la propiedad
+        case "status":
+          if (order.status === "pending") value = "Pendiente";
+          else if (order.status === "completed") value = "Completado";
+          else value = order.status;
+          break;
 
-      // Normalización: evita undefined o null en el reporte
-      return value ?? "";
-    })
-  );
+        default:
+          value = order[field.key];
+      }
 
-  // Estructura final desacoplada de la UI
-  // Lista para exportar a Excel, PDF o renderizar en tabla
-  return {
-    headers, // Array de strings (columnas)
-    rows     // Array de arrays (filas)
-  };
-}
+      return value;
+    });
+  });
+
+  return { headers, rows };
+};

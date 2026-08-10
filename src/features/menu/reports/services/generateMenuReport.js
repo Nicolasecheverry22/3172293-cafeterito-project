@@ -1,19 +1,19 @@
 import { generateExcelReport } from "./generateExcelReport";
 import { generatePdfReport } from "./generatePdfReport";
 import { buildReportDataset } from "../utils/buildReportDataset";
-import { inventory } from "../../data/inventory";
+import { menu } from "../../data/menu";
 
-export function generateInventoryReport({
+export function generateMenuReport({
   format,
   selectedFields,
   scope,
   selectedCategory,
 }) {
-  let filteredData = inventory;
+  let filteredData = menu;
 
-  // 🔴 FILTRO REAL
+  // 🔴 FILTRO REAL (esto no lo tenías)
   if (scope === "category") {
-    filteredData = inventory.filter(
+    filteredData = menu.filter(
       (item) => item.category === selectedCategory
     );
   }
@@ -32,7 +32,7 @@ export function generateInventoryReport({
     generateExcelReport({
       headers,
       rows,
-      fileName: "reporte_inventario.xlsx",
+      fileName: "reporte_menu.xlsx",
     });
   }
 
@@ -40,7 +40,7 @@ export function generateInventoryReport({
     generatePdfReport({
       headers,
       rows,
-      fileName: "reporte_inventario.pdf",
+      fileName: "reporte_menu.pdf",
     });
   }
 }

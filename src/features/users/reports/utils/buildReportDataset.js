@@ -29,6 +29,13 @@ export function buildReportDataset({
 
       // Normalización: evita undefined o null en el reporte
       return value ?? "";
+
+      if (field.key === "is_active") {
+        return value ? "Activo" : "Inactivo";
+      }
+
+
+      return value;
     })
   );
 

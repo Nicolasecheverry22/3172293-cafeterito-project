@@ -1,64 +1,77 @@
-import { useState } from "react"
+import { useState, useEffect } from "react";
 
-// Configuración de campos disponibles para el reporte
-import { userReportFields } from "../config/userReportFields";
-
-// Caso de uso que orquesta la generación del reporte
-import { generateUserReport } from "../services/generateUserReport";
-
-// Componentes UI reutilizables (design system)
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
-// Componente modal para configuración de reportes
+import { generateMenuReport } from "../services/generateMenuReport";
+import { menu } from "../../data/menu";
+
 export default function ReportConfigModal({ isOpen, onClose }) {
-
-  // Estado del formato de salida
   const [format, setFormat] = useState("pdf");
-
-  // Estado del alcance del reporte
   const [scope, setScope] = useState("all");
+  const [category, setCategory] = useState("");
 
-  // Estado para filtro por documento
-  const [documentNumber, setDocumentNumber] = useState("");
+  const menuReportFields = [
+    { key: "productName", label: "Producto", default: true },
+    { key: "category", label: "Categoría", default: true },
+    { key: "price", label: "Precio", default: true },
+    { key: "isAvailable", label: "Disponible", default: true },
+  ];
 
-  // Estado de campos seleccionados
   const [selectedFields, setSelectedFields] = useState(() =>
-    userReportFields.filter((f) => f.default)
+    menuReportFields.filter((f) => f.default)
   );
 
-  // Evita render si el modal está cerrado
+  // 🔴 MISMO PATRÓN QUE PROVIDERS
+  useEffect(() => {
+    if (scope !== "category") {
+      setCategory("");
+    }
+  }, [scope]);
+
   if (!isOpen) return null;
 
-  // Toggle de campos
-  const handleFieldToggle = (field) => {
-    const exists = selectedFields.find((f) => f.key === field.key);
+  // ✅ categorías dinámicas
+  const categories = [...new Set(menu.map((item) => item.category))];
 
-    if (exists) {
-      setSelectedFields(selectedFields.filter((f) => f.key !== field.key));
-    } else {
-      setSelectedFields([...selectedFields, field]);
-    }
+  const handleFieldToggle = (field) => {
+    setSelectedFields((prev) => {
+      const exists = prev.find((f) => f.key === field.key);
+
+      if (exists) {
+        return prev.filter((f) => f.key !== field.key);
+      } else {
+        return [...prev, field];
+      }
+    });
   };
 
-  // Generar reporte
   const handleGenerateReport = () => {
-    generateUserReport({
+    if (selectedFields.length === 0) {
+      alert("Debes seleccionar al menos un campo");
+      return;
+    }
+
+    if (scope === "category" && !category) {
+      alert("Debes seleccionar una categoría");
+      return;
+    }
+
+    generateMenuReport({
       format,
       selectedFields,
       scope,
-      documentNumber
+      selectedCategory: category,
     });
 
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white p-6 rounded-lg w-[500px]">
         <h2 className="mb-6 text-xl font-semibold">
-          Generar reporte de usuarios
+          Generar reporte de menú
         </h2>
 
         {/* Formato */}
@@ -69,7 +82,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             onChange={(e) => setFormat(e.target.value)}
             options={[
               { label: "PDF", value: "pdf" },
-              { label: "Excel", value: "excel" }
+              { label: "Excel", value: "excel" },
             ]}
           />
         </div>
@@ -79,7 +92,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           <p className="mb-2 font-medium">Campos del reporte</p>
 
           <div className="grid grid-cols-2 gap-2">
-            {userReportFields.map((field) => {
+            {menuReportFields.map((field) => {
               const checked = selectedFields.some(
                 (f) => f.key === field.key
               );
@@ -105,20 +118,26 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             value={scope}
             onChange={(e) => setScope(e.target.value)}
             options={[
-              { label: "Todos los usuarios", value: "all" },
-              { label: "Filtrar por documento", value: "document" }
+              { label: "Todo el menú", value: "all" },
+              { label: "Filtrar por categoría", value: "category" },
             ]}
           />
         </div>
 
-        {/* Filtro por documento */}
-        {scope === "document" && (
+        {/* Filtro */}
+        {scope === "category" && (
           <div className="mb-4">
-            <Input
-              label="Número de documento"
-              value={documentNumber}
-              onChange={(e) => setDocumentNumber(e.target.value)}
-              placeholder="Ingrese número de documento"
+            <Select
+              label="Categoría"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              options={[
+                { label: "Seleccione una categoría", value: "" },
+                ...categories.map((cat) => ({
+                  label: cat,
+                  value: cat,
+                })),
+              ]}
             />
           </div>
         )}
