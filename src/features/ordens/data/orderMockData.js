@@ -5,15 +5,13 @@ export const waitersData = [
 ];
 
 export const menuDishesData = [
-  { value: "p1", label: "Hamburguesa Sencilla" },
-  { value: "p2", label: "Papas Fritas Grandes" },
-  { value: "p3", label: "Gaseosa 400ml" },
-  { value: "p4", label: "Perro Caliente Especial" },
+  { value: "p1", label: "Hamburguesa Sencilla", price: 18000 },
+  { value: "p2", label: "Papas Fritas Grandes", price: 9000 },
+  { value: "p3", label: "Gaseosa 400ml", price: 6000 },
+  { value: "p4", label: "Perro Caliente Especial", price: 12000 },
 ];
 
 export const orderStatusOptions = [
-  { value: "Activo", label: "Activo" },
-  { value: "Lista para entrega", label: "Lista para entrega" },
-  { value: "Pagada", label: "Pagada" },
-  { value: "Cancelada", label: "Cancelada" },
+  { value: "pending", label: "Pendiente" },
+  { value: "completed", label: "Completada" },
 ];

@@ -25,7 +25,7 @@ export default function OrdenListPage() {
             Reportar órdenes
           </Button>
 
-          <Link to="/createorders">
+          <Link to="/ordensCreate">
           <Button size="sm" variant="secondary">
             Crear orden
           </Button>

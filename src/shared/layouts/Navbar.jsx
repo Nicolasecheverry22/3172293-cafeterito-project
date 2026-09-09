@@ -5,7 +5,6 @@ import {
   Truck, 
   UtensilsCrossed, 
   ClipboardList, 
-  LogOut,
   Coffee,
   Menu,
   ShieldCheck 
@@ -18,12 +17,12 @@ import {
   DropdownItem 
 } from "@/shared"; 
 
+import LogoutButton from "@/features/login/components/LogoutButton";
+
 export default function Navbar() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    navigate("/auth");
-  };
+
 
   return (
     <nav className="w-full bg-brand shadow-md relative z-50">
@@ -140,15 +139,8 @@ export default function Navbar() {
                   </div>
                 </DropdownItem>
 
-                <DropdownItem 
-
-                  onClick={handleLogout} 
-                  className="mt-1 text-red-600 hover:bg-red-50 focus:bg-red-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium font-body text-base">Cerrar Sesión</span>
-                  </div>
+                <DropdownItem className="mt-1 p-0">
+                  <LogoutButton className="w-full px-3 py-2" />
                 </DropdownItem>
                 
               </DropdownContent>

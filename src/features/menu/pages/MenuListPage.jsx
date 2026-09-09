@@ -27,7 +27,7 @@ export default function MenuListPage() {
               Reportar menú
             </Button>
 
-            <Link to="/createMenu">
+            <Link to="/menuCreate">
               <Button size="sm" variant="secondary">
                 Crear platillo
               </Button>

@@ -1,42 +1,70 @@
-// src/user/schemas/userSchemas.js
-//  CORRECCION: agregar campos booleanos
+import { z } from "zod";
+import { fileSchema } from "../schemas/fileSchema";
+import { users as existingUsers } from "../data/users";
 
-import {z} from "zod";
-import {fileSchema} from "../schemas/fileSchema";
+const NAME_NO_DIGITS_REGEX = /^[^\d]*$/;
 
-    export const userSchema = z.object({
-        userName: z
+export function createUserSchema({ currentUserId = null } = {}) {
+  return z
+    .object({
+      userName: z
         .string()
-        .min(3, "El nombre debe tener minimo 3 caracteres")
-        .max(60,"El nombre es demasiado largo"),
-    userEmail: z
-        .email()
-        .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Debe ingresar un email valido"),
-    userPhone: z
+        .min(3, "El nombre debe tener mínimo 3 caracteres")
+        .max(60, "El nombre es demasiado largo")
+        .regex(NAME_NO_DIGITS_REGEX, "El nombre no puede contener números"),
+
+      userEmail: z.string().min(1, "El correo es requerido").email("Debe ingresar un correo válido"),
+
+      userPhone: z.string().regex(/^[0-9]{10}$/, "El teléfono debe tener 10 dígitos"),
+
+      userImage: fileSchema.shape.files.optional(),
+
+      userDocumentTypes: z.string().min(1, "Debe seleccionar un tipo de documento"),
+
+      userDocumentNumber: z
         .string()
-        .regex(/^[0-9]{10}$/, "EL telefono debe de tener 10 digitos"),
-    
-    userImage: fileSchema.shape.files.optional(),
+        .min(5, "Número de documento inválido")
+        .max(20, "Número de documento demasiado largo"),
 
-
-    userDocumentTypes: z.string().min(1, "Debe seleccionar un tipo de documento"),
-
-
-    userDocumentNumber: z
+      userPassword: z
         .string()
-        .min(5,"numero de documento invalido")
-        .max(20,"numero de documento demasiado largo"),
+        .min(8, "La contraseña debe tener mínimo 8 caracteres")
+        .regex(/[A-Z]/, "Debe contener al menos una mayúscula")
+        .regex(/[a-z]/, "Debe contener al menos una minúscula")
+        .regex(/[0-9]/, "Debe contener al menos un número")
+        .regex(/[^A-Za-z0-9]/, "Debe contener al menos un carácter especial"),
 
-    userPassword: z
-        .string()
-        .min(8, "contraseña debe tener minimo 8 caracteres")
-        .regex(/[A-Z]/,"debe contener almenos una mayuscula")
-        .regex(/[a-z]/,"debe contener almenos una minuscula")
-        .regex(/[0-9]/,"debe contener almenos un numero ")
-        .regex(/[^A-Za-z0-9]/, "debe contener almenos un caracter especial"),
+      isActive: z.boolean(),
+      isSuperUser: z.boolean(),
+      isCook: z.boolean(),
+      isWaiter: z.boolean(),
+      isCashier: z.boolean(),
+      isGuest: z.boolean(),
 
-    isStaff : z.boolean(),
-    isActive : z.boolean(),
-    isSuperUser: z.boolean(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    })
+    .refine(
+      (data) =>
+        !existingUsers.some(
+          (user) =>
+            user.userEmail?.toLowerCase() === data.userEmail.toLowerCase() &&
+            user.id !== currentUserId
+        ),
+      { message: "Este correo ya está registrado", path: ["userEmail"] }
+    )
+    .refine(
+      (data) => data.isSuperUser || data.isCook || data.isWaiter || data.isCashier || data.isGuest,
+      { message: "Debe seleccionar al menos un rol", path: ["isSuperUser"] }
+    )
+    .refine((data) => data.isSuperUser || Boolean(data.startDate), {
+      message: "Debe ingresar la fecha de inicio para roles distintos de administrador",
+      path: ["startDate"],
+    })
+    .refine((data) => data.isSuperUser || Boolean(data.endDate), {
+      message: "Debe ingresar la fecha de finalización para roles distintos de administrador",
+      path: ["endDate"],
+    });
+}
 
-});
+export const userSchema = createUserSchema();

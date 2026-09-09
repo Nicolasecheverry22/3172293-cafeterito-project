@@ -18,7 +18,7 @@
     /* ============ TEXT ================== */
 
     --semantic-text-primary: var(--color-gray-900); /* Color principal de lectura, titulos, texto  base del documento*/
-    --semantic-text-secundary: var(--color-gray-700); /*Textos menos dominantes*/
+    --semantic-text-secondary: var(--color-gray-700); /*Textos menos dominantes*/
     --semantic-text-muted: var(--color-gray-500); /*Texto deshabilitado por ejemplo*/
     --semantic-text-inverse: var(--color-white); /*Texto invertido*/
 
@@ -34,7 +34,7 @@
     
     /* ============ STATE ================== */
 
-    --semantic-succes: var(--color-primary-950);
+    --semantic-success: var(--color-primary-950);
     --semantic-warning: var(--color-tertiary-950);
     --semantic-error: var(--color-secondary-950);
     
