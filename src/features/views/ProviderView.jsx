@@ -1,11 +1,41 @@
 import { Navbar } from "../../shared";
 import authBg from "@/assets/images/provider.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useParams } from "react-router-dom";
 import { Input,Button,StatusSwitch} from "../../shared";
-import {SquarePen,Ambulance} from "lucide-react"
+import {SquarePen,Ambulance,UserRoundSearch} from "lucide-react"
+import { providers } from "../providers/data/providers";
 
 export default function ProviderView() {
     const navigate = useNavigate();
+    const { id } = useParams();
+
+    const provider = providers.find((p) => p.id === Number(id));
+
+    if (!provider) {
+        return (
+            <div className="min-h-screen w-full flex flex-col">
+                <Navbar />
+                <div className="flex items-center gap-3 mt-10 ml-12">
+                    <UserRoundSearch className="w-10 h-10 text-text-primary" />
+                    <h1 className="text-main font-heading font-bold text-text-primary">
+                        Visualizar Usuario
+                    </h1>
+                </div>
+                <p className="ml-12 mt-8 text-red-500">Usuario no encontrado.</p>
+            </div>
+        );
+    }
+
+    const initial = provider.providerName.charAt(0).toUpperCase();
+
+    // Damos una lista de posibles colores y se le asigna segun el id del usuario
+    const colors = [
+        "#E57373", "#F06292", "#BA68C8", "#9575CD",
+        "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
+        "#FFD54F", "#FF8A65",
+    ];
+    const bgColor = colors[provider.id % colors.length];
+
     return (
         <div className="min-h-screen w-full flex flex-col">
 
@@ -19,27 +49,35 @@ export default function ProviderView() {
             </div>
             <div className="flex flex-row ">
 
-                <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-50 mx-auto w-fit h-fit mb-40 mt-[110px]"
-                
-                    style={{
-                        backgroundImage: `url(${authBg})`,
-                        backgroundPosition: "center center",
-                        backgroundSize: "300px 300px",
-                        backgroundRepeat: "no-repeat",
-                        width: "350px",
-                        
-                        // height: "400px",
-                    }}
-                
+                <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-[-100px] mx-auto w-fit h-fit mb-40 mt-[110px]"
                 >
+                    {/* Avatar con inicial */}
+                        <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-[-100px] mx-auto w-fit h-fit mb-40 mt-[110px]"
+                            style={{
+                                backgroundColor: bgColor,
+                                marginTop:"50px",
+                                width: "150px",
+                                height: "150px",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "64px",
+                                fontWeight: "bold",
+                                color: "#fff",
+                                userSelect: "none",
+                            }}
+                        >
+                            {initial}
+                        </div>
     
 
-                    <div className="flex justify-center mt-100 mb-2">
+                    <div className="flex justify-center mt-[-100px] mb-2">
                         <Button
                             variant="secondary"
                             type="button"
                             size="md"
-                            onClick={() => navigate("/EditProvider")}
+                            onClick={() => navigate(`/EditProvider/${provider.id}`)}
                 
                         >
                             <SquarePen className="w-5 h-5 gap-1"/>
@@ -80,35 +118,35 @@ export default function ProviderView() {
                             label=""
                             name="documentNumberInfo"
                             type="text"
-                            value="902447851-4"
+                            value={provider.nit}
                             disabled
                         />
                         <Input
                             label=""
                             name="nameInfo"
                             type="text"
-                            value="Meat Point"
+                            value={provider.providerName}
                             disabled
                         />
                         <Input
                             label=""
                             name="addressInfo"
                             type="text"
-                            value="Cr15 #18b Bogotá"
+                            value={provider.providerAddress}
                             disabled
                         />
                         <Input
                             label=""
                             name="phoneInfo"
                             type="text"
-                            value="+57 311 123 5678"
+                            value={provider.providerPhone}
                             disabled
                         />
                         <Input
                             label=""
                             name="emailInfo"
                             type="email"
-                            value="meat.point@email.com"
+                            value={provider.providerEmail}
                             disabled
                         />
                     </div>
@@ -119,9 +157,9 @@ export default function ProviderView() {
                 
 
             </div>
-            <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-70 mx-auto w-fit mt-[-340px] mr-70">
+            <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-70 mx-auto w-fit mt-[-200px] mr-70">
 
-                    <div className="w-fit flex items-center flex-col gap-4">
+                    <div className="w-90 flex items-center flex-col gap-4 mr-1 ">
 
                         <h1
                             className="text-[var(--color-black)] font-[var(--font-weight-bold)] text-[var(--fs-lg)]"
@@ -133,10 +171,10 @@ export default function ProviderView() {
                             <br />
                         </h1>
 
-                        <Input
+                        <Input className="w-20"
                             label=""
                             type="text"
-                            value="Productos Carnicos"
+                            value={provider.productService}
                             disabled
                         />
                     

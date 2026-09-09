@@ -1,13 +1,18 @@
 import { Navbar } from "../../../shared";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getDocumentTypes } from "@/services/selectService";
 import { getCategoryTypes } from "@/services/selectService";
 import { Input, Button, StatusSwitch,FileInput,Select} from "../../../shared";
 import { PencilSparkles } from "lucide-react";
+import { providers } from "../../providers/data/providers";
 
 export default function EditProvider() {
     const navigate = useNavigate();
+    const { id } = useParams();
+
+    const provider = providers.find((p) => p.id === Number(id));
+
     const [documentTypes, setDocumentTypes] = useState([]);
     const [categoryTypes, setCategoryTypes] = useState([]);
     const [errors, setErrors] = useState({});
@@ -108,7 +113,7 @@ export default function EditProvider() {
                             type="text"
                             value={formData.providerName}
                             onChange={handleChange}
-                            placeholder="Meat Point"
+                            placeholder={provider.providerName}
                             error={errors.providerName}
                         />
                         
@@ -119,7 +124,7 @@ export default function EditProvider() {
                             type="text"
                             value={formData.providerDirection}
                             onChange={handleChange}
-                            placeholder="Cr15 #18b Bogotá"
+                            placeholder={provider.providerAddress}
                             error={errors.providerDirection}
                         />
                          <Input
@@ -128,7 +133,7 @@ export default function EditProvider() {
                             type="text"
                             value={formData.providerPhone}
                             onChange={handleChange}
-                            placeholder="+57 311 123 5678"
+                            placeholder={provider.providerPhone}
                             error={errors.providerPhone}
                         />
 
@@ -138,7 +143,7 @@ export default function EditProvider() {
                             type="text"
                             value={formData.providerEmail}
                             onChange={handleChange}
-                            placeholder="meat.point@email.com"
+                            placeholder={provider.providerEmail}
                             error={errors.providerEmail}
                         />
                     </div>
