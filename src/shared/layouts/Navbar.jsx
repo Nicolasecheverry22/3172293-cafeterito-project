@@ -115,7 +115,7 @@ export default function Navbar() {
                 }
               >
                 <ClipboardList className="w-5 h-5" />
-                <span>Ordenes</span>
+                <span>Órdenes</span>
               </NavLink>
             </li>
           </ul>

@@ -21,7 +21,7 @@ export default function NavbarAdmin() {
     { label: "Inventario", to: "/inventoryList", icon: ClipboardCheck },
     { label: "Proveedores", to: "/providerList", icon: Truck },
     { label: "Menú", to: "/menuList", icon: UtensilsCrossed },
-    { label: "Ordenes", to: "/ordensList", icon: ClipboardList },
+    { label: "Órdenes", to: "/ordensList", icon: ClipboardList },
   ];
 
   useEffect(() => {

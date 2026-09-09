@@ -12,11 +12,11 @@ export default function OrdenListPage() {
   return (
     <div>
       <Navbar/>
-      <div className="p-4">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-bold">Listado de Órdenes</h2>
+      <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Listado de Órdenes</h2>
 
-        <div className="flex gap-2">
+        <div className="flex gap-12">
           <Button
             size="sm"
             variant="secondary"
@@ -25,7 +25,7 @@ export default function OrdenListPage() {
             Reportar órdenes
           </Button>
 
-          <Link to="/createorders">
+          <Link to="/ordensCreate">
           <Button size="sm" variant="secondary">
             Crear orden
           </Button>

@@ -14,11 +14,11 @@ export default function MenuListPage() {
     <div>
       <Navbar />
 
-      <div className="p-4">
-        <div className="flex justify-between mb-4">
-          <h2 className="text-xl font-bold">Listado de Menú</h2>
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Listado de Menú</h2>
 
-          <div className="flex gap-2">
+          <div className="flex gap-12">
             <Button
               size="sm"
               variant="secondary"
@@ -27,7 +27,7 @@ export default function MenuListPage() {
               Reportar menú
             </Button>
 
-            <Link to="/createMenu">
+            <Link to="/menuCreate">
               <Button size="sm" variant="secondary">
                 Crear platillo
               </Button>

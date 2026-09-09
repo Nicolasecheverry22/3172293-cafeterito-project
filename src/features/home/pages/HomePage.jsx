@@ -23,7 +23,7 @@ export default function HomePage() {
                         <Button
                             variant="primary"
                             size="md"
-                            onClick={() => navigate("/createorders")}
+                            onClick={() => navigate("/ordensCreate")}
                             className="w-full justify-start p-2 h-auto rounded-2xl shadow-sm border border-border hover:border-brand transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-xl w-full">
