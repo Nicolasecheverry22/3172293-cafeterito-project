@@ -1,5 +1,5 @@
 // Iconos usados en los botones de acciones
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Eye } from "lucide-react";
 
 // Hook de React Router para navegar programáticamente entre rutas
 import { useNavigate } from "react-router-dom";
@@ -24,9 +24,17 @@ export default function ProviderRowActions({ provider }) {
   return (
     <div className="flex gap-2">
 
+       {/* Botón visualizar */}
+      <button
+        onClick={() => navigate(`/ProviderView/${provider.id}`)}// Ejecuta la navegación a la página de visualizar usuario
+        className="p-1 rounded hover:bg-gray-100"
+      >
+        <Eye size={16} /> {/* Icono de editar */}
+      </button>
+
       {/* Botón editar */}
       <button
-        onClick={handleEdit}
+        onClick={() => navigate(`/EditProvider/${provider.id}`)}
         className="p-1 rounded hover:bg-gray-100"
       >
         <Pencil size={16} />

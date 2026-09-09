@@ -73,23 +73,23 @@ const router = createBrowserRouter([
   },
   
   {
-    path: "/ProviderView",
+    path: "/ProviderView/:id",
     element: <ProviderView/>,
-  },
-  {
-    path: "/UserView",
-    element: <UserView/>,
   },
   {
     path: "/ProductView",
     element: <ProductView/>,
   },
   {
-    path: "/EditUser",
+  path: "/UserView/:id",  //Con esto pretendemos que crear una ruta dinamica que se base en los id de usuario para mostrar la informacion del usuario con dicho id
+  element: <UserView/>,
+  },
+  {
+    path: "/EditUser/:id",
     element: <EditUser/>,
   },
   {
-    path: "/EditProvider",
+    path: "/EditProvider/:id",
     element: <EditProvider/>,
   },
   
