@@ -8,6 +8,11 @@ import ResetPasswordPage from "@/features/login/pages/ResetPasswordPage";
 import { UserListPage, CreateUserPage,PermissionsManagementPage } from "@/features/users";
 import { ProviderListPage, CreateProviderPage } from "@/features/providers";
 import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
+import  ProviderView  from "../features/views/ProviderView";
+import  UserView  from "../features/views/UserView";
+import  ProductView  from "../features/views/ProductView";
+import  EditUser  from "../features/views/edit/EditUser";
+import  EditProvider  from "../features/views/edit/EditProvider";
 import { MenuListPage, CreateMenuPage } from "@/features/menu";
 import { OrdensListPage, CreateOrderPage } from "@/features/ordens";
 
@@ -66,6 +71,28 @@ const router = createBrowserRouter([
     path: "/inventoryList",
     element: <InventoryListPage/>,
   },
+  
+  {
+    path: "/ProviderView",
+    element: <ProviderView/>,
+  },
+  {
+    path: "/UserView",
+    element: <UserView/>,
+  },
+  {
+    path: "/ProductView",
+    element: <ProductView/>,
+  },
+  {
+    path: "/EditUser",
+    element: <EditUser/>,
+  },
+  {
+    path: "/EditProvider",
+    element: <EditProvider/>,
+  },
+  
   {
     path: "/menuCreate",
     element: <CreateMenuPage/>,
@@ -86,6 +113,7 @@ const router = createBrowserRouter([
     path: "/permits",
     element: <PermissionsManagementPage/>,
   },
+
 ]);
 
 export default router;
