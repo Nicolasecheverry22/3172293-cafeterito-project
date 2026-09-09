@@ -18,25 +18,24 @@ export default function VerifyTokenPage() {
         });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+const handleSubmit = (e) => {
+  e.preventDefault();
 
-        const result = verifyTokenSchema.safeParse(formData);
+  const result = verifyTokenSchema.safeParse(formData);
 
-        if (!result.success) {
-            const fieldErrors = {};
-            
-            result.error.issues.forEach((issue) => {
-                fieldErrors[issue.path[0]] = issue.message;
-            });
-            
-            setErrors(fieldErrors);
-            return;
-        }
+  if (!result.success) {
+    const fieldErrors = {};
+    result.error.issues.forEach((issue) => {
+      fieldErrors[issue.path[0]] = issue.message;
+    });
+    setErrors(fieldErrors);
+    return;
+  }
 
-        setErrors({});
-        navigate("/auth/newPassword");
-    };
+  setErrors({});
+
+  navigate(`/auth/newPassword?token=${result.data.token}`);
+};
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 bg-surface-muted/30">
