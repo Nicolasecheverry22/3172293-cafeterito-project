@@ -1,16 +1,20 @@
 import { Navbar } from "../../../shared";
-import authBg from "@/assets/images/calvitor.png";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useParams } from "react-router-dom";
 import { getDocumentTypes } from "@/services/selectService";
 import { Input,Button,StatusSwitch,Select,FileInput} from "../../../shared";
 import {PencilSparkles} from "lucide-react"
+import {users} from "../../users/data/users"
+
 
 
 export default function EditUser() {
-        const navigate = useNavigate();
-        const [documentTypes, setDocumentTypes] = useState([]);
-        const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
+    const [documentTypes, setDocumentTypes] = useState([]);
+    const { id } = useParams();
+    
+    const user = users.find((u) => u.id === Number(id));
+    const [errors, setErrors] = useState({});
     
           useEffect(() => {
         getDocumentTypes().then(setDocumentTypes);
@@ -108,7 +112,7 @@ export default function EditUser() {
                             type="text"
                             value={formData.providerName}
                             onChange={handleChange}
-                            placeholder="Calvitor Cortez Castrillon "
+                            placeholder={user.userName}
                             error={errors.providerName}
                         />
                         
@@ -119,7 +123,7 @@ export default function EditUser() {
                             type="text"
                             value={formData.addressInfo}
                             onChange={handleChange}
-                            placeholder="Mz6 CS8 La Graciela-Dosquebradas"
+                            placeholder={user.userAddress}
                             error={errors.addressInfo}
                         />
                          <Input
@@ -128,7 +132,7 @@ export default function EditUser() {
                             type="text"
                             value={formData.userPhone}
                             onChange={handleChange}
-                            placeholder="+57 311 123 5678"
+                            placeholder={user.userPhone}
                             error={errors.userPhone}
                         />
 
@@ -138,7 +142,7 @@ export default function EditUser() {
                             type="text"
                             value={formData.userEmail}
                             onChange={handleChange}
-                            placeholder="calvo.victor@email.com"
+                            placeholder={user.userEmail}
                             error={errors.userEmail}
                         />
                     </div>

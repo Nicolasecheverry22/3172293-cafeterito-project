@@ -46,7 +46,7 @@
     --text-main: var(--semantic-font-size-h1);
     --text-title: var(--semantic-font-size-h2);
     --text-subtitle: var(--semantic-font-size-h3);
-    --text-body: var(--semantic-font-size-body);
+    --text-body: var(--semantic-font-size-body);    
     --text-medium: var(--semantic-font-size-medium);
     --text-small: var(--semantic-font-size-small);
     --text-caption: var(--semantic-font-size-caption);
