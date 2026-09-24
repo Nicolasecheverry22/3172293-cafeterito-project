@@ -105,7 +105,7 @@ export default function LoginForm({ onSubmit }) {
 
       <div className="text-center mt-6">
         <Link
-          to="/auth/recoverPassword"
+          to="/auth/resetPassword"
           className="text-small text-text-muted hover:text-text-primary hover:underline transition-colors"
         >
           Olvidé mi contraseña
