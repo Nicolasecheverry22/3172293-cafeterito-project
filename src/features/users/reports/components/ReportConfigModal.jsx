@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState } from "react";
 
 // Configuración de campos disponibles para el reporte
 import { userReportFields } from "../config/userReportFields";
@@ -6,14 +6,18 @@ import { userReportFields } from "../config/userReportFields";
 // Caso de uso que orquesta la generación del reporte
 import { generateUserReport } from "../services/generateUserReport";
 
-// Componentes UI reutilizables (design system)
+// Componentes UI reutilizables
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
-import { showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
 
-// Componente modal para configuración de reportes
+// Alertas
+import {
+  showSuccessAlert,
+  showErrorAlert,
+  showConfirmDeleteAlert,
+} from "@/shared/services/alertService";
+
 export default function ReportConfigModal({ isOpen, onClose }) {
-
   // Estado del formato de salida
   const [format, setFormat] = useState("pdf");
 
@@ -28,7 +32,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     userReportFields.filter((f) => f.default)
   );
 
-  // Estado de generación en curso (evita doble clic)
+  // Estado de generación en curso
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Evita render si el modal está cerrado
@@ -39,7 +43,9 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     const exists = selectedFields.find((f) => f.key === field.key);
 
     if (exists) {
-      setSelectedFields(selectedFields.filter((f) => f.key !== field.key));
+      setSelectedFields(
+        selectedFields.filter((f) => f.key !== field.key)
+      );
     } else {
       setSelectedFields([...selectedFields, field]);
     }
@@ -64,6 +70,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
 
     setIsGenerating(true);
+
     try {
       await generateUserReport({
         format,
@@ -81,6 +88,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte:", error);
+
       await showErrorAlert({
         title: "Error al generar el reporte",
         text: "No fue posible generar el reporte. Intenta nuevamente.",
@@ -90,10 +98,25 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
   };
 
+  // Cancelar configuración del reporte
+  const handleCancel = async () => {
+    if (isGenerating) return;
+
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cancelar configuración?",
+      text: "La configuración del reporte no se guardará.",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "Continuar configurando",
+    });
+
+    if (result.isConfirmed) {
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
-
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de usuarios
         </h2>
@@ -106,7 +129,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             onChange={(e) => setFormat(e.target.value)}
             options={[
               { label: "PDF", value: "pdf" },
-              { label: "Excel", value: "excel" }
+              { label: "Excel", value: "excel" },
             ]}
           />
         </div>
@@ -143,7 +166,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             onChange={(e) => setScope(e.target.value)}
             options={[
               { label: "Todos los usuarios", value: "all" },
-              { label: "Filtrar por documento", value: "document" }
+              { label: "Filtrar por documento", value: "document" },
             ]}
           />
         </div>
@@ -162,11 +185,19 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="secondary" onClick={onClose} disabled={isGenerating}>
+          <Button
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isGenerating}
+          >
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating}>
+          <Button
+            variant="primary"
+            onClick={handleGenerateReport}
+            disabled={isGenerating}
+          >
             {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>

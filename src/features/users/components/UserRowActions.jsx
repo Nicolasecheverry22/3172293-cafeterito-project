@@ -1,12 +1,7 @@
 // Iconos usados en los botones de acciones
 import { Pencil, Trash2, Eye } from "lucide-react";
-
-// Hook de React Router para navegar programáticamente entre rutas
 import { useNavigate } from "react-router-dom";
-
-// Alertas del design system (SweetAlert2)
 import { showConfirmDeleteAlert, showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
-
 // Fuente de datos mock de usuarios
 import { users as usersData } from "../data/users";
 

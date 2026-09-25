@@ -1,15 +1,22 @@
 import { useState, useEffect } from "react";
 
-import { Button, Input, Select } from "@/shared";
+import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
 import { generateMenuReport } from "../services/generateMenuReport";
 import { menu } from "../../data/menu";
 
+import {
+  showSuccessAlert,
+  showErrorAlert,
+  showConfirmDeleteAlert,
+} from "@/shared/services/alertService";
+
 export default function ReportConfigModal({ isOpen, onClose }) {
   const [format, setFormat] = useState("pdf");
   const [scope, setScope] = useState("all");
   const [category, setCategory] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const menuReportFields = [
     { key: "productName", label: "Producto", default: true },
@@ -22,7 +29,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     menuReportFields.filter((f) => f.default)
   );
 
-  // 🔴 MISMO PATRÓN QUE PROVIDERS
+  // Limpia la categoría cuando el reporte no está filtrado por categoría
   useEffect(() => {
     if (scope !== "category") {
       setCategory("");
@@ -31,7 +38,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // ✅ categorías dinámicas
+  // Categorías dinámicas a partir de los datos del menú
   const categories = [...new Set(menu.map((item) => item.category))];
 
   const handleFieldToggle = (field) => {
@@ -40,31 +47,73 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
       if (exists) {
         return prev.filter((f) => f.key !== field.key);
-      } else {
-        return [...prev, field];
       }
+
+      return [...prev, field];
     });
   };
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     if (selectedFields.length === 0) {
-      alert("Debes seleccionar al menos un campo");
+      await showErrorAlert({
+        title: "Selecciona al menos un campo",
+        text: "Debes elegir al menos un campo para generar el reporte.",
+      });
+
       return;
     }
 
     if (scope === "category" && !category) {
-      alert("Debes seleccionar una categoría");
+      await showErrorAlert({
+        title: "Categoría requerida",
+        text: "Debes seleccionar una categoría para filtrar el reporte.",
+      });
+
       return;
     }
 
-    generateMenuReport({
-      format,
-      selectedFields,
-      scope,
-      selectedCategory: category,
+    setIsGenerating(true);
+
+    try {
+      await generateMenuReport({
+        format,
+        selectedFields,
+        scope,
+        selectedCategory: category,
+      });
+
+      await showSuccessAlert({
+        title: "Reporte generado",
+        text: "El reporte del menú fue generado correctamente.",
+        timer: 2000,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Error al generar el reporte del menú:", error);
+
+      await showErrorAlert({
+        title: "Error al generar el reporte",
+        text: "No fue posible generar el reporte del menú. Intenta nuevamente.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (isGenerating) return;
+
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cancelar configuración?",
+      text: "La configuración del reporte no se guardará.",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "Continuar configurando",
     });
 
-    onClose();
+    if (result.isConfirmed) {
+      onClose();
+    }
   };
 
   return (
@@ -124,7 +173,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           />
         </div>
 
-        {/* Filtro */}
+        {/* Filtro por categoría */}
         {scope === "category" && (
           <div className="mb-4">
             <Select
@@ -132,7 +181,10 @@ export default function ReportConfigModal({ isOpen, onClose }) {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               options={[
-                { label: "Seleccione una categoría", value: "" },
+                {
+                  label: "Seleccione una categoría",
+                  value: "",
+                },
                 ...categories.map((cat) => ({
                   label: cat,
                   value: cat,
@@ -144,12 +196,20 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="secondary" onClick={onClose}>
+          <Button
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isGenerating}
+          >
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport}>
-            Generar reporte
+          <Button
+            variant="primary"
+            onClick={handleGenerateReport}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>
       </div>
