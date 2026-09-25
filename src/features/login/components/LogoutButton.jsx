@@ -1,10 +1,20 @@
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { showConfirmDeleteAlert } from "@/shared/services/alertService";
 
 export default function LogoutButton({ className = "", showLabel = true }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cerrar sesión?",
+      text: "Tendrás que iniciar sesión nuevamente para acceder al sistema.",
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
     navigate("/auth", { replace: true });
   };
 

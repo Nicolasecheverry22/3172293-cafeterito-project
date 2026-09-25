@@ -6,6 +6,12 @@ import ProviderForm from "../components/ProviderForm";
 import { getDocumentTypes } from "@/services/selectService";
 import { providers as providersData } from "../data/providers";
 
+import {
+  showSuccessAlert,
+  showErrorAlert,
+  showConfirmDeleteAlert,
+} from "../../../shared/services/alertService";
+
 export default function CreateProviderPage() {
   const navigate = useNavigate();
   const [documentTypes, setDocumentTypes] = useState([]);
@@ -15,11 +21,39 @@ export default function CreateProviderPage() {
   }, []);
 
   const handleCreateProvider = async (validatedData) => {
+    try{
     const newProvider = { id: providersData.length + 1, ...validatedData };
     providersData.push(newProvider);
     console.log("Proveedor guardado:", newProvider);
+   
+    await showSuccessAlert({
+    title: "Proveedor creado",
+    text: "El Proveedor fue creado correctamente.",
+    timer: 2000,
+      });
+
     navigate(-1);
+  } catch (error) {
+      console.error("Error al crear el Proveedor:", error);
+      await showErrorAlert({
+        title: "Error al crear el Proveedor",
+        text: "El Proveedor no pudo ser creado correctamente.",
+      });
+    }
+    };
+
+    const handleCancel = async () => {
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cancelar registro?",
+      text: "Los datos ingresados no se guardarán.",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "Continuar editando",
+    });
+
+    if (result.isConfirmed) navigate(-1);
   };
+
+
 
   return (
     <div className="w-full min-h-screen bg-background pb-10">
@@ -35,7 +69,7 @@ export default function CreateProviderPage() {
             mode="create"
             documentTypes={documentTypes}
             onSubmit={handleCreateProvider}
-            onCancel={() => navigate(-1)}
+            onCancel={handleCancel}
           />
         </div>
       </div>

@@ -1,5 +1,4 @@
-import { Navbar } from "../../shared";
-import authBg from "@/assets/images/provider.png";
+import { FormNavbar } from "@/shared";
 import { useNavigate,useParams } from "react-router-dom";
 import { Input,Button,StatusSwitch} from "../../shared";
 import {SquarePen,Ambulance,UserRoundSearch} from "lucide-react"
@@ -14,7 +13,7 @@ export default function ProviderView() {
     if (!provider) {
         return (
             <div className="min-h-screen w-full flex flex-col">
-                <Navbar />
+                <FormNavbar />
                 <div className="flex items-center gap-3 mt-10 ml-12">
                     <UserRoundSearch className="w-10 h-10 text-text-primary" />
                     <h1 className="text-main font-heading font-bold text-text-primary">
@@ -39,7 +38,7 @@ export default function ProviderView() {
     return (
         <div className="min-h-screen w-full flex flex-col">
 
-            <Navbar/>
+            <FormNavbar />
             {/* Con esto logro que todo lo que esta contenido por la caja principal donde se encuentra la imagen y la infromacion del usuario queden columnas "una aal fente de la otra" con flex felx row */}
             <div className="flex items-center gap-3 mt-10 ml-30">
                 <Ambulance className="w-10 h-10 text-text-primary" />

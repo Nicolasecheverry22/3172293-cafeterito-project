@@ -5,6 +5,11 @@ import { FormNavbar } from "@/shared";
 import UserForm from "../components/UserForm";
 import { getDocumentTypes } from "@/services/selectService";
 import { users as usersData } from "../data/users";
+import {
+  showSuccessAlert,
+  showErrorAlert,
+  showConfirmDeleteAlert,
+} from "../../../shared/services/alertService";
 
 export default function CreateUserPage() {
   const navigate = useNavigate();
@@ -15,10 +20,36 @@ export default function CreateUserPage() {
   }, []);
 
   const handleCreateUser = async (validatedData) => {
-    const newUser = { id: usersData.length + 1, ...validatedData };
-    usersData.push(newUser);
-    console.log("Usuario guardado:", usersData);
-    navigate(-1);
+    try {
+      const newUser = { id: usersData.length + 1, ...validatedData };
+      usersData.push(newUser);
+      console.log("Usuario creado:", newUser);
+
+      await showSuccessAlert({
+        title: "Usuario creado",
+        text: "El usuario fue creado correctamente.",
+        timer: 2000,
+      });
+
+      navigate(-1);
+    } catch (error) {
+      console.error("Error al crear el usuario:", error);
+      await showErrorAlert({
+        title: "Error al crear el usuario",
+        text: "El usuario no pudo ser creado correctamente.",
+      });
+    }
+  };
+
+  const handleCancel = async () => {
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cancelar registro?",
+      text: "Los datos ingresados no se guardarán.",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "Continuar editando",
+    });
+
+    if (result.isConfirmed) navigate(-1);
   };
 
   return (
@@ -35,7 +66,7 @@ export default function CreateUserPage() {
             mode="create"
             documentTypes={documentTypes}
             onSubmit={handleCreateUser}
-            onCancel={() => navigate(-1)}
+            onCancel={handleCancel}
           />
         </div>
       </div>
