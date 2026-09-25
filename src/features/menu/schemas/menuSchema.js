@@ -30,14 +30,17 @@ export function createMenuSchema({ currentMenuItemId = null } = {}) {
 
       estado: z.boolean(),
 
-      imagen: z.array(z.instanceof(File)).min(1, "Debe cargar una imagen del platillo"),
+      imagen: z
+        .array(z.instanceof(File))
+        .min(1, "Debe cargar una imagen del platillo"),
     })
     .refine(
       (data) =>
         !existingMenu.some(
           (item) =>
-            item.nombre.trim().toLowerCase() === data.nombre.trim().toLowerCase() &&
-            item.categoria === data.categoria &&
+            item.productName.trim().toLowerCase() ===
+              data.nombre.trim().toLowerCase() &&
+            item.category === data.categoria &&
             item.id !== currentMenuItemId
         ),
       {

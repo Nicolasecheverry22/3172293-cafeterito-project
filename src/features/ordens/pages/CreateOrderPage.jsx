@@ -8,35 +8,35 @@ import {
   showSuccessAlert,
   showErrorAlert,
   showConfirmDeleteAlert,
-} from "../../../shared/services/alertService";
+} from "@/shared/services/alertService";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
 
   const handleCreateOrder = async (validatedData) => {
-    const waiterName =
-      waitersData.find((w) => w.value === validatedData.waiterId)?.label ?? "";
-
-    const newOrder = {
-      id: ordersData.length + 1,
-      tableNumber: validatedData.tableNumber,
-      waiter: waiterName,
-      status: "pending",
-      createdAt: new Date().toISOString().slice(0, 10),
-      observations: validatedData.observations ?? "",
-      items: validatedData.items.map((item) => {
-        const dish = menuDishesData.find((d) => d.value === item.dishId);
-
-        return {
-          dish: dish?.label ?? "",
-          quantity: item.quantity,
-          price: dish?.price ?? 0,
-          dispatched: false,
-        };
-      }),
-    };
-
     try {
+      const waiterName =
+        waitersData.find((w) => w.value === validatedData.waiterId)?.label ?? "";
+
+      const newOrder = {
+        id: ordersData.length + 1,
+        tableNumber: validatedData.tableNumber,
+        waiter: waiterName,
+        status: "pending",
+        createdAt: new Date().toISOString().slice(0, 10),
+        observations: validatedData.observations ?? "",
+        items: validatedData.items.map((item) => {
+          const dish = menuDishesData.find((d) => d.value === item.dishId);
+
+          return {
+            dish: dish?.label ?? "",
+            quantity: item.quantity,
+            price: dish?.price ?? 0,
+            dispatched: false,
+          };
+        }),
+      };
+
       ordersData.push(newOrder);
 
       console.log("Orden creada:", newOrder);

@@ -2,8 +2,14 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OrderDetailModal from "./OrderDetailModal";
+import {
+  showConfirmDeleteAlert,
+  showSuccessAlert,
+  showErrorAlert,
+} from "@/shared/services/alertService";
+import { ordens as ordersData } from "../data/ordens";
 
-export default function OrdensRowActions({ order }) {
+export default function OrdensRowActions({ order, onDeleted }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -11,8 +17,36 @@ export default function OrdensRowActions({ order }) {
     navigate(`/orders/${order.id}/edit`);
   };
 
-  const handleDelete = () => {
-    console.log("Eliminar orden:", order.id);
+  const handleDelete = async () => {
+    const result = await showConfirmDeleteAlert({
+      title: "¿Eliminar orden?",
+      text: `Esta acción eliminará la orden #${order.id} y no se puede revertir.`,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const index = ordersData.findIndex((o) => o.id === order.id);
+
+      if (index !== -1) {
+        ordersData.splice(index, 1);
+      }
+
+      await showSuccessAlert({
+        title: "Orden eliminada",
+        text: "La orden fue eliminada correctamente.",
+        timer: 2000,
+      });
+
+      onDeleted?.(order.id);
+    } catch (error) {
+      console.error("Error al eliminar la orden:", error);
+
+      await showErrorAlert({
+        title: "Error al eliminar la orden",
+        text: "La orden no pudo ser eliminada. Intenta nuevamente.",
+      });
+    }
   };
 
   return (

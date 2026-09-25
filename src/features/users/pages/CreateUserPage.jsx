@@ -9,7 +9,7 @@ import {
   showSuccessAlert,
   showErrorAlert,
   showConfirmDeleteAlert,
-} from "../../../shared/services/alertService";
+} from "@/shared/services/alertService";
 
 export default function CreateUserPage() {
   const navigate = useNavigate();
