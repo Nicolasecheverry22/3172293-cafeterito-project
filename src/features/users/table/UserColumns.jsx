@@ -82,7 +82,6 @@ export const UserColumns = [
   {
     id: "actions", // No usa accessorKey porque no corresponde a un campo del usuario
 
-
     // Renderiza el componente de acciones pasando el usuario completo
     cell: ({ row }) => <UserRowActions user={row.original} />,
   },

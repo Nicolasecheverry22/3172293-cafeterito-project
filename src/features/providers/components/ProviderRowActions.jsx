@@ -4,43 +4,64 @@ import { Pencil, Trash2, Eye } from "lucide-react";
 // Hook de React Router para navegar programáticamente entre rutas
 import { useNavigate } from "react-router-dom";
 
-// Componente que renderiza las acciones de cada fila de proveedor
-export default function ProviderRowActions({ provider }) {
+import { showConfirmDeleteAlert, showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
+
+import { providers as providersData } from "../data/providers";
+
+export default function ProviderRowActions({ provider, onDeleted }) {
 
   const navigate = useNavigate();
 
-  // Acción para editar el proveedor
   const handleEdit = () => {
-    navigate(`/providers/${provider.nit}/edit`);
+    navigate(`/EditProvider/${provider.id}`);
   };
 
-  // Acción para eliminar el proveedor
-  const handleDelete = () => {
-    console.log("Eliminar proveedor", provider.nit);
+  const handleDelete = async () => {
+    const result = await showConfirmDeleteAlert({
+      title: "¿Eliminar proveedor?",
+      text: `Esta acción eliminará a "${provider.providerName}" y no se puede revertir.`,
+    });
 
-    // deleteProvider(provider.nit)
+    if (!result.isConfirmed) return;
+
+    try {
+      const index = providersData.findIndex((p) => p.id === provider.id);
+      if (index !== -1) providersData.splice(index, 1);
+      // TODO: reemplazar por llamada real (ej. providerService.delete(provider.id))
+
+      await showSuccessAlert({
+        title: "Proveedor eliminado",
+        text: "El proveedor fue eliminado correctamente.",
+        timer: 2000,
+      });
+
+      onDeleted?.(provider.id);
+    } catch (error) {
+      console.error("Error al eliminar el proveedor:", error);
+      await showErrorAlert({
+        title: "Error al eliminar el proveedor",
+        text: "El proveedor no pudo ser eliminado. Intenta nuevamente.",
+      });
+    }
   };
 
   return (
     <div className="flex gap-2">
 
-       {/* Botón visualizar */}
       <button
-        onClick={() => navigate(`/ProviderView/${provider.id}`)}// Ejecuta la navegación a la página de visualizar usuario
+        onClick={() => navigate(`/ProviderView/${provider.id}`)}
         className="p-1 rounded hover:bg-gray-100"
       >
-        <Eye size={16} /> {/* Icono de editar */}
+        <Eye size={16} />
       </button>
 
-      {/* Botón editar */}
       <button
-        onClick={() => navigate(`/EditProvider/${provider.id}`)}
+        onClick={handleEdit}
         className="p-1 rounded hover:bg-gray-100"
       >
         <Pencil size={16} />
       </button>
 
-      {/* Botón eliminar */}
       <button
         onClick={handleDelete}
         className="p-1 rounded hover:bg-gray-100"

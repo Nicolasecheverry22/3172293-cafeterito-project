@@ -11,6 +11,6 @@ export const fileSchema = z.object({
           .refine((f) => ACCEPTED_TYPES.includes(f.type), "Tipo invalido")
           .refine((f) => f.size <= MAX_SIZE, "Max 10MB"),
       )
-      .min(1, "requerido")
+      .min(0, "requerido")
       .max(12, "Max 12 archivos")
 });

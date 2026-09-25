@@ -9,6 +9,7 @@ import { generateUserReport } from "../services/generateUserReport";
 // Componentes UI reutilizables (design system)
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
+import { showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
 
 // Componente modal para configuración de reportes
 export default function ReportConfigModal({ isOpen, onClose }) {
@@ -27,6 +28,9 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     userReportFields.filter((f) => f.default)
   );
 
+  // Estado de generación en curso (evita doble clic)
+  const [isGenerating, setIsGenerating] = useState(false);
+
   // Evita render si el modal está cerrado
   if (!isOpen) return null;
 
@@ -42,15 +46,48 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   };
 
   // Generar reporte
-  const handleGenerateReport = () => {
-    generateUserReport({
-      format,
-      selectedFields,
-      scope,
-      documentNumber
-    });
+  const handleGenerateReport = async () => {
+    if (selectedFields.length === 0) {
+      await showErrorAlert({
+        title: "Selecciona al menos un campo",
+        text: "Debes elegir al menos un campo para generar el reporte.",
+      });
+      return;
+    }
 
-    onClose();
+    if (scope === "document" && !documentNumber.trim()) {
+      await showErrorAlert({
+        title: "Número de documento requerido",
+        text: "Ingresa el número de documento para filtrar el reporte.",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      await generateUserReport({
+        format,
+        selectedFields,
+        scope,
+        documentNumber,
+      });
+
+      await showSuccessAlert({
+        title: "Reporte generado",
+        text: "El reporte fue generado correctamente.",
+        timer: 2000,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Error al generar el reporte:", error);
+      await showErrorAlert({
+        title: "Error al generar el reporte",
+        text: "No fue posible generar el reporte. Intenta nuevamente.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -125,12 +162,12 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} disabled={isGenerating}>
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport}>
-            Generar reporte
+          <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating}>
+            {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>
       </div>

@@ -5,12 +5,14 @@ import { generateProviderReport } from "../services/generateProviderReport";
 
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
+import { showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
 
   const [format, setFormat] = useState("pdf");
   const [scope, setScope] = useState("all");
   const [documentNumber, setDocumentNumber] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [selectedFields, setSelectedFields] = useState(() =>
     providerReportFields.filter((f) => f.default)
@@ -36,25 +38,48 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     });
   };
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     if (selectedFields.length === 0) {
-      alert("Debes seleccionar al menos un campo");
+      await showErrorAlert({
+        title: "Selecciona al menos un campo",
+        text: "Debes seleccionar al menos un campo para generar el reporte.",
+      });
       return;
     }
 
     if (scope === "document" && !documentNumber.trim()) {
-      alert("Debes ingresar un número de documento");
+      await showErrorAlert({
+        title: "Número de documento requerido",
+        text: "Debes ingresar un número de documento para filtrar el reporte.",
+      });
       return;
     }
 
-    generateProviderReport({
-      format,
-      selectedFields,
-      scope,
-      documentNumber
-    });
+    setIsGenerating(true);
+    try {
+      await generateProviderReport({
+        format,
+        selectedFields,
+        scope,
+        documentNumber,
+      });
 
-    onClose();
+      await showSuccessAlert({
+        title: "Reporte generado",
+        text: "El reporte de proveedores fue generado correctamente.",
+        timer: 2000,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Error al generar el reporte:", error);
+      await showErrorAlert({
+        title: "Error al generar el reporte",
+        text: "No fue posible generar el reporte de proveedores. Intenta nuevamente.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -129,12 +154,12 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} disabled={isGenerating}>
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport}>
-            Generar reporte
+          <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating}>
+            {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>
       </div>

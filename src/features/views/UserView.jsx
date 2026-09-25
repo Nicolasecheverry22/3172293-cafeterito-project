@@ -1,4 +1,4 @@
-import { Navbar } from "../../shared";
+import { FormNavbar } from "@/shared";
 import { useNavigate, useParams } from "react-router-dom";
 import { Input, Button, StatusSwitch } from "../../shared";
 import { SquarePen, UserRoundSearch } from "lucide-react";
@@ -14,7 +14,7 @@ export default function UserView() {
     if (!user) {
         return (
             <div className="min-h-screen w-full flex flex-col">
-                <Navbar />
+                <FormNavbar />
                 <div className="flex items-center gap-3 mt-10 ml-12">
                     <UserRoundSearch className="w-10 h-10 text-text-primary" />
                     <h1 className="text-main font-heading font-bold text-text-primary">
@@ -40,7 +40,7 @@ export default function UserView() {
     return (
         <div className="min-h-screen w-full flex flex-col">
 
-            <Navbar />
+            <FormNavbar />
 
             <div className="flex items-center gap-3 mt-10 ml-12">
                 <UserRoundSearch className="w-10 h-10 text-text-primary" />

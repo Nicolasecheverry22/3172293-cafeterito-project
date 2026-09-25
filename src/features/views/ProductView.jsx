@@ -1,4 +1,4 @@
-import { Navbar } from "../../shared";
+import { FormNavbar } from "@/shared";
 import authBg from "@/assets/images/burguer.jpg";
 import { Input,StatusSwitch} from "../../shared";
 import {UtensilsCrossed} from "lucide-react"
@@ -7,7 +7,7 @@ export default function ProductView() {
     return (
         <div className="min-h-screen w-full flex flex-col">
 
-            <Navbar/>
+            <FormNavbar />
             {/* Con esto logro que todo lo que esta contenido por la caja principal donde se encuentra la imagen y la infromacion del usuario queden columnas "una aal fente de la otra" con flex felx row */}
             <div className="flex items-center gap-3 mt-10 ml-30">
                 <UtensilsCrossed className="w-16 h-16 text-text-primary" />
