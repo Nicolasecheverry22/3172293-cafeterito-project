@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { Utensils } from "lucide-react";
+import { UtensilsCrossed } from "lucide-react";
+import Swal from "sweetalert2";
+
 import { FormNavbar } from "@/shared";
 import MenuForm from "../components/MenuForm";
 import { menu as menuData } from "../data/menu";
 import {
   showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
 } from "@/shared/services/alertService";
 
 export default function CreateMenuPage() {
@@ -23,53 +25,63 @@ export default function CreateMenuPage() {
       };
 
       menuData.push(newItem);
-
       console.log("Platillo guardado:", newItem);
 
       await showSuccessAlert({
-        title: "Platillo creado",
-        text: "El platillo fue creado correctamente.",
-        timer: 2000,
+        title: "¡Platillo creado!",
+        text: "El platillo fue registrado correctamente.",
       });
 
       navigate(-1);
     } catch (error) {
       console.error("Error al crear el platillo:", error);
-
-      await showErrorAlert({
-        title: "Error al crear el platillo",
-        text: "El platillo no pudo ser creado correctamente.",
+      await showSystemErrorAlert({
+        text: "El platillo no pudo ser registrado correctamente.",
       });
     }
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Cancelar registro?",
       text: "Los datos ingresados no se guardarán.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "Continuar editando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Registro cancelado",
+        text: "No se guardó el nuevo platillo.",
+      });
       navigate(-1);
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-background pb-12">
+    <div className="w-full min-h-screen bg-background pb-10">
       <FormNavbar />
+      <div className="w-full max-w-6xl mx-auto p-4">
+        <div className="flex items-center gap-3 mb-6">
+          <UtensilsCrossed className="w-8 h-8 text-text-primary" />
+          <h1 className="text-main font-heading font-bold text-text-primary">
+            Registrar platillo nuevo
+          </h1>
+        </div>
 
-      <div className="w-full px-6 md:px-12 pt-10">
-        <div className="mx-auto">
-          <div className="flex items-center gap-4 mb-12">
-            <Utensils className="w-10 h-10 text-text-primary" />
-
-            <h1 className="text-display font-heading font-bold text-text-primary">
-              Registrar nuevo platillo
-            </h1>
-          </div>
-
+        <div className="bg-surface rounded-3xl p-8 shadow-sm">
           <MenuForm
             mode="create"
             onSubmit={handleCreateMenuItem}

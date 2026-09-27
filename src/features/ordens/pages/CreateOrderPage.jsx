@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { Utensils } from "lucide-react";
+import Swal from "sweetalert2";
+
 import { FormNavbar } from "@/shared";
 import OrderForm from "../components/OrderForm";
 import { waitersData, menuDishesData } from "../data/orderMockData";
 import { ordens as ordersData } from "../data/ordens";
+
 import {
   showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
 } from "@/shared/services/alertService";
 
 export default function CreateOrderPage() {
@@ -15,58 +18,70 @@ export default function CreateOrderPage() {
 
   const handleCreateOrder = async (validatedData) => {
     try {
-      const waiterName =
-        waitersData.find((w) => w.value === validatedData.waiterId)?.label ?? "";
+    const waiterName =
+    waitersData.find((w) => w.value === validatedData.waiterId)?.label ?? "";
 
-      const newOrder = {
-        id: ordersData.length + 1,
-        tableNumber: validatedData.tableNumber,
-        waiter: waiterName,
-        status: "pending",
-        createdAt: new Date().toISOString().slice(0, 10),
-        observations: validatedData.observations ?? "",
-        items: validatedData.items.map((item) => {
-          const dish = menuDishesData.find((d) => d.value === item.dishId);
+    const newOrder = {
+    id: ordersData.length + 1,
+    tableNumber: validatedData.tableNumber,
+    waiter: waiterName,
+    status: "pending",
+    createdAt: new Date().toISOString().slice(0, 10),
+    observations: validatedData.observations ?? "",
+    items: validatedData.items.map((item) => {
+      const dish = menuDishesData.find((d) => d.value === item.dishId);
 
-          return {
-            dish: dish?.label ?? "",
-            quantity: item.quantity,
-            price: dish?.price ?? 0,
-            dispatched: false,
-          };
-        }),
+      return {
+        dish: dish?.label ?? "",
+        quantity: item.quantity,
+        price: dish?.price ?? 0,
+        dispatched: false,
       };
+    }),
+  };
 
-      ordersData.push(newOrder);
+  ordersData.push(newOrder);
 
-      console.log("Orden creada:", newOrder);
+  await showSuccessAlert({
+    title: "¡Orden creada!",
+    text: "La orden fue registrada correctamente.",
+  });
 
-      await showSuccessAlert({
-        title: "Orden creada",
-        text: "La orden fue creada correctamente.",
-        timer: 2000,
-      });
-
-      navigate(-1);
-    } catch (error) {
+  navigate(-1);
+} catch (error) {
       console.error("Error al crear la orden:", error);
 
-      await showErrorAlert({
-        title: "Error al crear la orden",
-        text: "La orden no pudo ser creada correctamente.",
+      await showSystemErrorAlert({
+        text: "La orden no pudo ser registrada correctamente.",
       });
     }
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Cancelar registro?",
       text: "Los datos ingresados no se guardarán.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "Continuar editando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Registro cancelado",
+        text: "No se guardó la nueva orden.",
+      });
       navigate(-1);
     }
   };

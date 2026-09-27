@@ -1,15 +1,27 @@
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
-import { Button, Input, Select } from "@/shared";
+// Componentes UI reutilizables
+import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
+// Caso de uso
 import { generateInventoryReport } from "../services/generateInventoryReport";
 import { inventory } from "../../data/inventory";
+
+// Alertas del servicio
+import {
+  showSuccessAlert,
+  showSystemErrorAlert,
+  showCreateErrorAlert,
+  showDeleteCancelAlert,
+} from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
   const [format, setFormat] = useState("pdf");
   const [scope, setScope] = useState("all");
   const [category, setCategory] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const inventoryReportFields = [
     { key: "productName", label: "Producto", default: true },
@@ -45,30 +57,84 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     });
   };
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     if (selectedFields.length === 0) {
-      alert("Debes seleccionar al menos un campo");
+      showCreateErrorAlert({
+        entity: "reporte",
+        text: "Debes elegir al menos un campo para generar el reporte.",
+      });
       return;
     }
 
     if (scope === "category" && !category) {
-      alert("Debes seleccionar una categoría");
+      showCreateErrorAlert({
+        entity: "categoría",
+        text: "Debes seleccionar una categoría para filtrar el reporte.",
+      });
       return;
     }
 
-    generateInventoryReport({
-      format,
-      selectedFields,
-      scope,
-      selectedCategory: category,
+    setIsGenerating(true);
+
+    try {
+      await generateInventoryReport({
+        format,
+        selectedFields,
+        scope,
+        selectedCategory: category,
+      });
+
+      await showSuccessAlert({
+        title: "¡Reporte generado!",
+        text: "El reporte de inventario fue generado correctamente.",
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Error al generar el reporte de inventario:", error);
+
+      await showSystemErrorAlert({
+        text: "No fue posible generar el reporte de inventario. Intenta nuevamente.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (isGenerating) return;
+
+    const result = await Swal.fire({
+      title: "¿Cancelar configuración?",
+      text: "La configuración del reporte no se guardará.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "Continuar configurando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
-    onClose();
+    if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Configuración cancelada",
+        text: "No se generó el reporte.",
+      });
+      onClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white p-6 rounded-lg w-[500px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de inventario
         </h2>
@@ -143,12 +209,20 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="secondary" onClick={onClose}>
+          <Button
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isGenerating}
+          >
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport}>
-            Generar reporte
+          <Button
+            variant="primary"
+            onClick={handleGenerateReport}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>
       </div>

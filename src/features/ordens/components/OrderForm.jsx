@@ -3,6 +3,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Input, Select, Button } from "@/shared";
 import { createOrderSchema } from "../schemas/orderSchema";
 import { waitersData, menuDishesData } from "../data/orderMockData";
+import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const DEFAULT_FORM_DATA = { tableNumber: "", waiterId: "", observations: "" };
 
@@ -61,12 +62,15 @@ export default function OrderForm({
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach((issue) => {
-        // Errores dentro del array "items" llegan con path ["items", index, "campo"];
-        // los mapeamos a un solo mensaje visible bajo "items" para no complicar el UI.
         const key = issue.path[0] === "items" ? "items" : issue.path[0];
         fieldErrors[key] = issue.message;
       });
       setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        entity: "orden",
+        text: "Por favor completa todos los campos requeridos antes de guardar la orden.",
+      });
       return;
     }
 

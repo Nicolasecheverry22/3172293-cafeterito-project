@@ -2,83 +2,70 @@
 
 import Swal from "sweetalert2";
 
-/**
- * Alerta para operaciones exitosas.
- */
-export function showSuccessAlert({
-  title = "Éxito",
-  text = "",
+export const showSuccessAlert = async ({
+  title = "¡Guardado con éxito!",
+  text = "La operación se completó correctamente.",
+  timer = 2000,
   confirmButtonText = "Aceptar",
-  timer = 3000,
-}) {
-  return Swal.fire({
+} = {}) => {
+  return await Swal.fire({
+    title,
+    text,
     icon: "success",
-    title,
-    text,
-    confirmButtonText,
     timer,
     timerProgressBar: true,
-
+    confirmButtonText,
     customClass: {
-      popup: "rounded-2xl",
-      title: "!text-green-600",
-      confirmButton:
-        "!bg-green-600 hover:!bg-green-700 text-white cursor-pointer px-4 py-2 rounded-lg",
-      timerProgressBar: "!bg-green-600",
-    },
+            popup: "rounded-2x1",
+            title: "text-green-600",  
+            confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
+            timerProgressBar: "!bg-green-600",
+        },
 
     buttonsStyling: false,
   });
-}
+};
 
 /**
- * Alerta para indicar que una operación fue cancelada.
+ * 1. Error al crear (usuario, proveedor, producto, etc.)
+ * Se dispara al presionar crear si falta un campo o falla la validación del schema.
  */
-export function showCancelAlert({
-  title = "Cancelado",
-  text = "",
-  confirmButtonText = "Aceptar",
-  timer = 3000,
-}) {
-  return Swal.fire({
-    icon: "error",
+export const showCreateErrorAlert = async ({
+  entity = "registro",
+  title = "Campos incompletos",
+  text,
+} = {}) => {
+  return await Swal.fire({
     title,
-    text,
-    confirmButtonText,
-    timer,
-    timerProgressBar: true,
-    showConfirmButton: true,
-
+    text: text || `Por favor completa los campos requeridos para el ${entity}.`,
+    icon: "warning",
+    confirmButtonText: "Entendido",
     customClass: {
       popup: "rounded-2xl",
-      title: "!text-red-600",
       confirmButton:
-        "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg",
-      timerProgressBar: "!bg-red-600",
+        "!bg-amber-500 hover:!bg-amber-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer",
     },
-
     buttonsStyling: false,
   });
-}
+};
 
 /**
- * Alerta para confirmar la eliminación de un registro.
+ * 2. Confirmación antes de eliminar
  */
 export function showConfirmDeleteAlert({
-  title = "¿Estás seguro?",
+  entity = "registro",
   text = "¡No podrás revertir esta acción!",
   confirmButtonText = "Sí, eliminar",
   cancelButtonText = "No, cancelar",
-}) {
+} = {}) {
   return Swal.fire({
-    title,
+    title: `¿Estás seguro de eliminar este ${entity}?`,
     text,
     icon: "warning",
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText,
     reverseButtons: true,
-
     customClass: {
       popup: "rounded-2xl",
       title: "!text-amber-600 font-bold",
@@ -87,27 +74,76 @@ export function showConfirmDeleteAlert({
       cancelButton:
         "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
     },
-
     buttonsStyling: false,
   });
 }
 
 /**
- * Alerta para errores.
+ * 3. Eliminación exitosa
  */
-export function showErrorAlert({
-  title = "Ops, hubo un error",
+export function showDeleteSuccessAlert({
+  entity = "registro",
+  text = "El elemento ha sido eliminado correctamente.",
+  timer = 3000,
+} = {}) {
+  return Swal.fire({
+    icon: "success",
+    title: `${entity.charAt(0).toUpperCase() + entity.slice(1)} eliminado`,
+    text,
+    confirmButtonText: "Aceptar",
+    timer,
+    timerProgressBar: true,
+    customClass: {
+      popup: "rounded-2xl",
+      title: "!text-green-600 font-bold",
+      confirmButton:
+        "!bg-green-600 hover:!bg-green-700 text-white cursor-pointer px-4 py-2 rounded-lg",
+      timerProgressBar: "!bg-green-600",
+    },
+    buttonsStyling: false,
+  });
+}
+
+/**
+ * 4. Cancelación de eliminación
+ */
+export function showDeleteCancelAlert({
+  title = "Eliminación cancelada",
+  text = "No se ha realizado ninguna modificación.",
+  timer = 2500,
+} = {}) {
+  return Swal.fire({
+    icon: "info",
+    title,
+    text,
+    confirmButtonText: "Aceptar",
+    timer,
+    timerProgressBar: true,
+    customClass: {
+      popup: "rounded-2xl",
+      title: "!text-blue-600 font-bold",
+      confirmButton:
+        "!bg-blue-600 hover:!bg-blue-700 text-white cursor-pointer px-4 py-2 rounded-lg",
+      timerProgressBar: "!bg-blue-600",
+    },
+    buttonsStyling: false,
+  });
+}
+
+/**
+ * 5. Error inesperado del sistema
+ */
+export function showSystemErrorAlert({
+  title = "Error del sistema",
   text = "¡Ocurrió un fallo inesperado en el sistema!",
   footer,
-  confirmButtonText = "Entendido",
 } = {}) {
   return Swal.fire({
     icon: "error",
     title,
     text,
     footer,
-    confirmButtonText,
-
+    confirmButtonText: "Entendido",
     customClass: {
       popup: "rounded-2xl",
       title: "!text-red-600 font-bold",
@@ -115,7 +151,6 @@ export function showErrorAlert({
         "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
       footer: "text-sm text-gray-500",
     },
-
     buttonsStyling: false,
   });
 }

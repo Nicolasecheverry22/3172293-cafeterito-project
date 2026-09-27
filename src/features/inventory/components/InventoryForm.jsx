@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input, Button, Select, FileInput } from "@/shared";
 import { createInventorySchema } from "../schemas/inventorySchema";
+import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const DEFAULT_FORM_DATA = {
   productId: "",
@@ -43,6 +44,11 @@ export default function InventoryForm({
         fieldErrors[issue.path[0]] = issue.message;
       });
       setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        entity: "producto",
+        text: "Por favor completa todos los campos requeridos antes de guardar.",
+      });
       return;
     }
 
@@ -164,8 +170,13 @@ export default function InventoryForm({
         <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button variant="primary" size="md" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Guardar"}
+        <Button 
+          variant="primary" 
+          type="submit" 
+          disabled={isSubmitting}
+          className="w-full md:w-auto px-14 font-bold shadow-sm"
+        >
+          {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Producto"}
         </Button>
       </div>
     </form>

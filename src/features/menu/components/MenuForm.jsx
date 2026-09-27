@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input, Select, Button, FileInput, StatusSwitch } from "@/shared";
 import { createMenuSchema } from "../schemas/menuSchema";
 import { menuCategories } from "../data/categories";
+import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const DEFAULT_FORM_DATA = {
   nombre: "",
@@ -40,6 +41,11 @@ export default function MenuForm({
         fieldErrors[issue.path[0]] = issue.message;
       });
       setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        entity: "platillo",
+        text: "Por favor completa todos los campos requeridos antes de guardar.",
+      });
       return;
     }
 
@@ -126,7 +132,7 @@ export default function MenuForm({
             disabled={isSubmitting}
             className="w-full md:w-auto px-14 font-bold shadow-sm"
           >
-            {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Registrar"}
+            {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Platillo"}
           </Button>
         </div>
       </div>

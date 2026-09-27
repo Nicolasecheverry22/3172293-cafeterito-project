@@ -7,6 +7,7 @@ import { Input,
     StatusSwitch 
 } from "@/shared";
 import { createUserSchema } from "../schemas/userSchema";
+import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const ROLE_CHECKBOXES = [
   { name: "isSuperUser", label: "Administrador" },
@@ -60,6 +61,10 @@ export default function UserForm({
 
     if (formData.userEmail !== formData.confirmEmail) {
       setErrors((prev) => ({ ...prev, confirmEmail: "Los correos electrónicos no coinciden" }));
+      await showCreateErrorAlert({
+        entity: "usuario",
+        text: "Los correos electrónicos no coinciden.",
+      });
       return;
     }
 
@@ -72,6 +77,12 @@ export default function UserForm({
         fieldErrors[issue.path[0]] = issue.message;
       });
       setErrors(fieldErrors);
+
+      // Disparar alerta SweetAlert2 por validación fallida
+      await showCreateErrorAlert({
+        entity: "usuario",
+        text: "Por favor completa todos los campos requeridos antes de guardar.",
+      });
       return;
     }
 
@@ -230,7 +241,12 @@ export default function UserForm({
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            variant="primary"
+            disabled={isSubmitting}
+            className="w-full md:w-auto px-14 font-bold shadow-sm"
+          >
             {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Usuario"}
           </Button>
         </div>

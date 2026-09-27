@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 import { FormNavbar, Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
 import { Pencil } from "lucide-react";
 import { getDocumentTypes } from "@/services/selectService";
 import { users } from "../../users/data/users";
 import { createEditUserSchema } from "../../users/schemas/editUserSchema";
 import {
-  showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
-} from "../../../shared/services/alertService";
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
+} from "@/shared/services/alertService";
 
 export default function EditUser() {
   const navigate = useNavigate();
@@ -25,8 +25,7 @@ export default function EditUser() {
 
   useEffect(() => {
     if (!user) {
-      showErrorAlert({
-        title: "Usuario no encontrado",
+      showSystemErrorAlert({
         text: "El usuario que intentas editar no existe.",
       }).then(() => navigate("/userList", { replace: true }));
     }
@@ -42,7 +41,7 @@ export default function EditUser() {
     isActive: user?.isActive ?? true,
   });
 
-  if (!user) return null; 
+  if (!user) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,34 +65,61 @@ export default function EditUser() {
     setErrors({});
 
     try {
-      Object.assign(user, result.data);  
+      Object.assign(user, result.data);
       console.log("Usuario actualizado:", user);
 
-      await showSuccessAlert({
-        title: "Usuario actualizado",
+      await Swal.fire({
+        title: "¡Usuario actualizado!",
         text: "Los cambios fueron guardados correctamente.",
-        timer: 2000,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+            popup: "rounded-2x1",
+            title: "text-green-600",  
+            confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
+            timerProgressBar: "!bg-green-600",
+        },
+        buttonsStyling: false,
       });
 
       navigate(-1);
     } catch (error) {
       console.error("Error al actualizar el usuario:", error);
-      await showErrorAlert({
-        title: "Error al actualizar el usuario",
+      await showSystemErrorAlert({
         text: "Los cambios no pudieron guardarse.",
       });
     }
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Descartar cambios?",
       text: "Los cambios realizados no se guardarán.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, descartar",
       cancelButtonText: "Continuar editando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
-    if (result.isConfirmed) navigate(-1);
+    if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Edición cancelada",
+        text: "No se guardaron los cambios.",
+      });
+      navigate(-1);
+    }
   };
 
   return (

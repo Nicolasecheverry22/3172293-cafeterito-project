@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
@@ -8,8 +9,9 @@ import { menu } from "../../data/menu";
 
 import {
   showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
+  showCreateErrorAlert,
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
 } from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
@@ -55,8 +57,8 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   const handleGenerateReport = async () => {
     if (selectedFields.length === 0) {
-      await showErrorAlert({
-        title: "Selecciona al menos un campo",
+      showCreateErrorAlert({
+        entity: "reporte",
         text: "Debes elegir al menos un campo para generar el reporte.",
       });
 
@@ -64,8 +66,8 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
 
     if (scope === "category" && !category) {
-      await showErrorAlert({
-        title: "Categoría requerida",
+      showCreateErrorAlert({
+        entity: "categoría",
         text: "Debes seleccionar una categoría para filtrar el reporte.",
       });
 
@@ -83,17 +85,15 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       });
 
       await showSuccessAlert({
-        title: "Reporte generado",
+        title: "¡Reporte generado!",
         text: "El reporte del menú fue generado correctamente.",
-        timer: 2000,
       });
 
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte del menú:", error);
 
-      await showErrorAlert({
-        title: "Error al generar el reporte",
+      await showSystemErrorAlert({
         text: "No fue posible generar el reporte del menú. Intenta nuevamente.",
       });
     } finally {
@@ -104,21 +104,37 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const handleCancel = async () => {
     if (isGenerating) return;
 
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Cancelar configuración?",
       text: "La configuración del reporte no se guardará.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "Continuar configurando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Configuración cancelada",
+        text: "No se generó el reporte.",
+      });
       onClose();
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white p-6 rounded-lg w-[500px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de menú
         </h2>
