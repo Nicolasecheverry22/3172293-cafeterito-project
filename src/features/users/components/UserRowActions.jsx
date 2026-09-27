@@ -1,7 +1,7 @@
 // Iconos usados en los botones de acciones
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { showConfirmDeleteAlert, showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
+import { showConfirmDeleteAlert, showSuccessAlert, showErrorAlert, showCancelAlert } from "@/shared/services/alertService";
 // Fuente de datos mock de usuarios
 import { users as usersData } from "../data/users";
 
@@ -25,7 +25,14 @@ export default function UserRowActions({ user, onDeleted }) {
       text: `Esta acción eliminará a "${user.userName}" y no se puede revertir.`,
     });
 
-    if (!result.isConfirmed) return;
+    if (!result.isConfirmed) {
+      await showCancelAlert({
+        title: "Eliminación cancelada",
+        text: `El usuario "${user.userName}" no fue eliminado.`,
+        timer: 2000,
+      });
+      return;
+    }
 
     try {
       const index = usersData.findIndex((u) => u.id === user.id);

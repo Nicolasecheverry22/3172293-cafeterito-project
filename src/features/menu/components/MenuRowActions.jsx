@@ -5,13 +5,14 @@ import {
   showSuccessAlert,
   showErrorAlert,
 } from "@/shared/services/alertService";
+import ProductView from "../../views/ProductView"
 
 export default function MenuRowActions({ product, onDeleted }) {
   const navigate = useNavigate();
 
-  const handleEdit = () => {
-    navigate(`/menu/${product.id}/edit`);
-  };
+  // const handleEdit = () => {
+  //   navigate(`/menu/${product.id}/edit`);
+  // };
 
   const handleDelete = async () => {
     const result = await showConfirmDeleteAlert({
@@ -45,10 +46,12 @@ export default function MenuRowActions({ product, onDeleted }) {
   return (
     <div className="flex gap-2">
       <button
-        onClick={handleEdit}
+        onClick={() => navigate(ProductView)}
         className="p-1 rounded hover:bg-gray-100"
       >
-        <Pencil size={16} />
+        <Pencil 
+        
+        size={16} />
       </button>
 
       <button
