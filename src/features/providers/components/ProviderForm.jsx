@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Input, Select, Checkbox, Button, FileInput, StatusSwitch } from "@/shared";
 import { createProviderSchema } from "../schemas/providerSchema";
+import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const PRODUCT_CHECKBOXES = [
   { name: "productFood", label: "Alimentos y/o Bebidas" },
@@ -46,6 +47,15 @@ export default function ProviderForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (formData.providerEmail !== formData.providerEmailConfirm) {
+      setErrors((prev) => ({ ...prev, providerEmailConfirm: "Los correos electrónicos no coinciden" }));
+      await showCreateErrorAlert({
+        entity: "proveedor",
+        text: "Los correos electrónicos no coinciden.",
+      });
+      return;
+    }
+
     const schema = createProviderSchema({ currentProviderId });
     const result = schema.safeParse(formData);
 
@@ -55,6 +65,11 @@ export default function ProviderForm({
         fieldErrors[issue.path[0]] = issue.message;
       });
       setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        entity: "proveedor",
+        text: "Por favor completa todos los campos requeridos antes de guardar.",
+      });
       return;
     }
 
@@ -177,7 +192,12 @@ export default function ProviderForm({
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            variant="primary" 
+            disabled={isSubmitting}
+            className="w-full md:w-auto px-10 font-bold shadow-sm"
+          >
             {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Proveedor"}
           </Button>
         </div>

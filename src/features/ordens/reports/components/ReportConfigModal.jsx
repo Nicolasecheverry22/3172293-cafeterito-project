@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
@@ -6,8 +8,9 @@ import { generateOrdersReport } from "../services/generateOrdensReport";
 
 import {
   showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
+  showCreateErrorAlert,
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
 } from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
@@ -24,9 +27,15 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     { key: "status", label: "Estado", default: true },
   ];
 
-  const [selectedFields, setSelectedFields] = useState(
+  const [selectedFields, setSelectedFields] = useState(() =>
     orderFields.filter((f) => f.default)
   );
+
+  useEffect(() => {
+    if (scope !== "table") {
+      setTableNumber("");
+    }
+  }, [scope]);
 
   if (!isOpen) return null;
 
@@ -44,8 +53,8 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   const handleGenerate = async () => {
     if (selectedFields.length === 0) {
-      await showErrorAlert({
-        title: "Selecciona al menos un campo",
+      showCreateErrorAlert({
+        entity: "reporte",
         text: "Debes elegir al menos un campo para generar el reporte.",
       });
 
@@ -53,8 +62,8 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
 
     if (scope === "table" && !tableNumber.trim()) {
-      await showErrorAlert({
-        title: "Número de mesa requerido",
+      showCreateErrorAlert({
+        entity: "mesa",
         text: "Debes ingresar un número de mesa para filtrar el reporte.",
       });
 
@@ -72,17 +81,15 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       });
 
       await showSuccessAlert({
-        title: "Reporte generado",
+        title: "¡Reporte generado!",
         text: "El reporte de órdenes fue generado correctamente.",
-        timer: 2000,
       });
 
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte de órdenes:", error);
 
-      await showErrorAlert({
-        title: "Error al generar el reporte",
+      await showSystemErrorAlert({
         text: "No fue posible generar el reporte de órdenes. Intenta nuevamente.",
       });
     } finally {
@@ -93,27 +100,38 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const handleCancel = async () => {
     if (isGenerating) return;
 
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Cancelar configuración?",
       text: "La configuración del reporte no se guardará.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "Continuar configurando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Configuración cancelada",
+        text: "No se generó el reporte.",
+      });
       onClose();
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/30"
-        onClick={handleCancel}
-      />
-
-      <div className="relative bg-white rounded-lg shadow-lg w-full max-w-lg p-6 z-10">
-        <h2 className="text-xl font-semibold mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
+        <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de órdenes
         </h2>
 

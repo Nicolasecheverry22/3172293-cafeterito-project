@@ -1,15 +1,16 @@
-import { FormNavbar, Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getDocumentTypes } from "@/services/selectService";
+import Swal from "sweetalert2";
 import { Pencil } from "lucide-react";
+
+import { FormNavbar, Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
+import { getDocumentTypes } from "@/services/selectService";
 import { providers } from "../../providers/data/providers";
 import { createEditProviderSchema } from "../../providers/schemas/editProviderSchema";
 import {
-  showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
-} from "../../../shared/services/alertService";
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
+} from "@/shared/services/alertService";
 
 const PRODUCT_CHECKBOXES = [
   { name: "productFood", label: "Alimentos y/o Bebidas" },
@@ -32,8 +33,7 @@ export default function EditProvider() {
 
   useEffect(() => {
     if (!provider) {
-      showErrorAlert({
-        title: "Proveedor no encontrado",
+      showSystemErrorAlert({
         text: "El proveedor que intentas editar no existe.",
       }).then(() => navigate("/providerList", { replace: true }));
     }
@@ -77,34 +77,61 @@ export default function EditProvider() {
     setErrors({});
 
     try {
-      Object.assign(provider, result.data); // TODO: reemplazar por llamada real (ej. providerService.update(provider.id, result.data))
+      Object.assign(provider, result.data);
       console.log("Proveedor actualizado:", provider);
 
-      await showSuccessAlert({
-        title: "Proveedor actualizado",
-        text: "Los cambios fueron guardados correctamente.",
-        timer: 2000,
-      });
+      await Swal.fire({
+              title: "¡Proveedor actualizado!",
+              text: "Los cambios fueron guardados correctamente.",
+              icon: "success",
+              confirmButtonText: "Aceptar",
+              timer: 3000,
+              timerProgressBar: true,
+              customClass: {
+                  popup: "rounded-2x1",
+                  title: "text-green-600",  
+                  confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
+                  timerProgressBar: "!bg-green-600",
+              },
+              buttonsStyling: false,
+            });
 
       navigate(-1);
     } catch (error) {
       console.error("Error al actualizar el proveedor:", error);
-      await showErrorAlert({
-        title: "Error al actualizar el proveedor",
+      await showSystemErrorAlert({
         text: "Los cambios no pudieron guardarse.",
       });
     }
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Descartar cambios?",
       text: "Los cambios realizados no se guardarán.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, descartar",
       cancelButtonText: "Continuar editando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
-    if (result.isConfirmed) navigate(-1);
+    if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Edición cancelada",
+        text: "No se guardaron los cambios.",
+      });
+      navigate(-1);
+    }
   };
 
   return (

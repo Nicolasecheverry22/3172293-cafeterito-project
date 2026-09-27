@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 import { providerReportFields } from "../config/providerReportFields";
 import { generateProviderReport } from "../services/generateProviderReport";
 
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
-import { showSuccessAlert, showErrorAlert } from "@/shared/services/alertService";
+import {
+  showSuccessAlert,
+  showCreateErrorAlert,
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
+} from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
-
   const [format, setFormat] = useState("pdf");
   const [scope, setScope] = useState("all");
   const [documentNumber, setDocumentNumber] = useState("");
@@ -40,16 +45,16 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   const handleGenerateReport = async () => {
     if (selectedFields.length === 0) {
-      await showErrorAlert({
-        title: "Selecciona al menos un campo",
+      showCreateErrorAlert({
+        entity: "reporte",
         text: "Debes seleccionar al menos un campo para generar el reporte.",
       });
       return;
     }
 
     if (scope === "document" && !documentNumber.trim()) {
-      await showErrorAlert({
-        title: "Número de documento requerido",
+      showCreateErrorAlert({
+        entity: "documento",
         text: "Debes ingresar un número de documento para filtrar el reporte.",
       });
       return;
@@ -65,16 +70,14 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       });
 
       await showSuccessAlert({
-        title: "Reporte generado",
+        title: "¡Reporte generado!",
         text: "El reporte de proveedores fue generado correctamente.",
-        timer: 2000,
       });
 
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte:", error);
-      await showErrorAlert({
-        title: "Error al generar el reporte",
+      await showSystemErrorAlert({
         text: "No fue posible generar el reporte de proveedores. Intenta nuevamente.",
       });
     } finally {
@@ -82,10 +85,40 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
   };
 
+  const handleCancel = async () => {
+    if (isGenerating) return;
+
+    const result = await Swal.fire({
+      title: "¿Cancelar configuración?",
+      text: "La configuración del reporte no se guardará.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "Continuar configurando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
+    });
+
+    if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Configuración cancelada",
+        text: "No se generó el reporte.",
+      });
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
-
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de proveedores
         </h2>
@@ -98,7 +131,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             onChange={(e) => setFormat(e.target.value)}
             options={[
               { label: "PDF", value: "pdf" },
-              { label: "Excel", value: "excel" }
+              { label: "Excel", value: "excel" },
             ]}
           />
         </div>
@@ -135,7 +168,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             onChange={(e) => setScope(e.target.value)}
             options={[
               { label: "Todos los proveedores", value: "all" },
-              { label: "Filtrar por documento", value: "document" }
+              { label: "Filtrar por documento", value: "document" },
             ]}
           />
         </div>
@@ -154,11 +187,19 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="secondary" onClick={onClose} disabled={isGenerating}>
+          <Button
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isGenerating}
+          >
             Cancelar
           </Button>
 
-          <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating}>
+          <Button
+            variant="primary"
+            onClick={handleGenerateReport}
+            disabled={isGenerating}
+          >
             {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 // Configuración de campos disponibles para el reporte
 import { userReportFields } from "../config/userReportFields";
@@ -10,11 +11,12 @@ import { generateUserReport } from "../services/generateUserReport";
 import { Button, Input, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
-// Alertas
+// Alertas del servicio
 import {
   showSuccessAlert,
-  showErrorAlert,
-  showConfirmDeleteAlert,
+  showSystemErrorAlert,
+  showCreateErrorAlert,
+  showDeleteCancelAlert,
 } from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
@@ -54,16 +56,16 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   // Generar reporte
   const handleGenerateReport = async () => {
     if (selectedFields.length === 0) {
-      await showErrorAlert({
-        title: "Selecciona al menos un campo",
+      showCreateErrorAlert({
+        entity: "reporte",
         text: "Debes elegir al menos un campo para generar el reporte.",
       });
       return;
     }
 
     if (scope === "document" && !documentNumber.trim()) {
-      await showErrorAlert({
-        title: "Número de documento requerido",
+      showCreateErrorAlert({
+        entity: "documento",
         text: "Ingresa el número de documento para filtrar el reporte.",
       });
       return;
@@ -80,17 +82,15 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       });
 
       await showSuccessAlert({
-        title: "Reporte generado",
+        title: "¡Reporte generado!",
         text: "El reporte fue generado correctamente.",
-        timer: 2000,
       });
 
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte:", error);
 
-      await showErrorAlert({
-        title: "Error al generar el reporte",
+      await showSystemErrorAlert({
         text: "No fue posible generar el reporte. Intenta nuevamente.",
       });
     } finally {
@@ -102,14 +102,30 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const handleCancel = async () => {
     if (isGenerating) return;
 
-    const result = await showConfirmDeleteAlert({
+    const result = await Swal.fire({
       title: "¿Cancelar configuración?",
       text: "La configuración del reporte no se guardará.",
+      icon: "warning",
+      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "Continuar configurando",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-2xl",
+        title: "!text-amber-600 font-bold",
+        confirmButton:
+          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        cancelButton:
+          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+      },
+      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
+      showDeleteCancelAlert({
+        title: "Configuración cancelada",
+        text: "No se generó el reporte.",
+      });
       onClose();
     }
   };
