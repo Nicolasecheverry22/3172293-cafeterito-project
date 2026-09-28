@@ -8,7 +8,7 @@ export default function LoginPage() {
   const handleLoginSubmit = async (credentials) => {
     console.log("Datos de login validados:", credentials);
 
-    if (credentials.username !== "admin") {
+    if (credentials.username !== "admin@gmail.com") {
       throw new Error("Usuario o contraseña incorrectos.");
     }
 

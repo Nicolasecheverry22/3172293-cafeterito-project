@@ -2,30 +2,6 @@
 
 import Swal from "sweetalert2";
 
-export const showSuccessAlert = async ({
-  title = "¡Guardado con éxito!",
-  text = "La operación se completó correctamente.",
-  timer = 2000,
-  confirmButtonText = "Aceptar",
-} = {}) => {
-  return await Swal.fire({
-    title,
-    text,
-    icon: "success",
-    timer,
-    timerProgressBar: true,
-    confirmButtonText,
-    customClass: {
-            popup: "rounded-2x1",
-            title: "text-green-600",  
-            confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-            timerProgressBar: "!bg-green-600",
-        },
-
-    buttonsStyling: false,
-  });
-};
-
 /**
  * 1. Error al crear (usuario, proveedor, producto, etc.)
  * Se dispara al presionar crear si falta un campo o falla la validación del schema.
@@ -47,19 +23,19 @@ export const showCreateErrorAlert = async ({
     },
     buttonsStyling: false,
   });
-};
+}
 
 /**
  * 2. Confirmación antes de eliminar
  */
 export function showConfirmDeleteAlert({
-  entity = "registro",
+  title = "registro",
   text = "¡No podrás revertir esta acción!",
   confirmButtonText = "Sí, eliminar",
   cancelButtonText = "No, cancelar",
 } = {}) {
   return Swal.fire({
-    title: `¿Estás seguro de eliminar este ${entity}?`,
+    title,
     text,
     icon: "warning",
     showCancelButton: true,
@@ -81,25 +57,26 @@ export function showConfirmDeleteAlert({
 /**
  * 3. Eliminación exitosa
  */
-export function showDeleteSuccessAlert({
-  entity = "registro",
-  text = "El elemento ha sido eliminado correctamente.",
-  timer = 3000,
-} = {}) {
-  return Swal.fire({
-    icon: "success",
-    title: `${entity.charAt(0).toUpperCase() + entity.slice(1)} eliminado`,
+export const showSuccessAlert = async ({
+  title = "¡Guardado con éxito!",
+  text = "La operación se completó correctamente.",
+  timer = 2000,
+  confirmButtonText = "Aceptar",
+} = {}) => {
+  return await Swal.fire({
+    title,
     text,
-    confirmButtonText: "Aceptar",
+    icon: "success",
     timer,
     timerProgressBar: true,
+    confirmButtonText,
     customClass: {
-      popup: "rounded-2xl",
-      title: "!text-green-600 font-bold",
-      confirmButton:
-        "!bg-green-600 hover:!bg-green-700 text-white cursor-pointer px-4 py-2 rounded-lg",
-      timerProgressBar: "!bg-green-600",
-    },
+            popup: "rounded-2x1",
+            title: "text-green-600",  
+            confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
+            timerProgressBar: "!bg-green-600",
+        },
+
     buttonsStyling: false,
   });
 }
