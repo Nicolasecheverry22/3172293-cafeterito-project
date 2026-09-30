@@ -9,8 +9,9 @@ export default function Button ({
     ...props
 }){
     const variants = {
-        primary: "bg-brand text-text-primary hover:bg-brand-hover",
-        secondary: "bg-brand-soft text-primary hover:bg-brand-soft-hover"
+        primary: "bg-brand text-text-primary font-semibold hover:bg-brand-hover",
+        secondary: "bg-brand-soft text-text-primary hover:bg-brand-soft-hover",
+        tertiary: "bg-brand-soft-two font-semibold hover:bg-brand-soft-two-hover"
     };
 
     const sizes = {
@@ -21,7 +22,9 @@ export default function Button ({
             before:-inset-y-[8px] before:-inset-x-[0px]
         `,
         md: `
-            h-10 px-4 before:absolute before:content-['']
+            h-10 
+            px-4 
+            before:absolute before:content-['']
             before:-inset-y-[4px] before:-inset-x-[0px]
         `
     };

@@ -1,136 +1,147 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import authBg from "@/assets/images/burguer.jpg";
-import { Input, StatusSwitch } from "@/shared";
-import { UtensilsCrossed } from "lucide-react";
-
-// Datos mock o fallback de ejemplo si no hay backend aún
-const MOCK_PRODUCTS = [
-  {
-    id: "1",
-    nameProduct: "Hamburguesa Triple Carne",
-    categoryInfo: "Comidas Rápidas",
-    priceProduct: "40000",
-    productInfo:
-      "Tres jugosos medallones de carne 100% de res seleccionada (120g c/u) asadas a la parrilla, con triple capa de queso cheddar fundido, crujiente tocino ahumado, pepinillos artesanales, cebolla caramelizada y nuestra salsa especial de la casa, todo dentro de un suave pan brioche artesanal ligeramente tostado con mantequilla.",
-    isActive: true,
-    image: authBg,
-  },
-];
+import { FormNavbar, Input, Button, StatusSwitch } from "@/shared";
+import { useNavigate, useParams } from "react-router-dom";
+import { Package, SquarePen, ArrowLeft, Boxes } from "lucide-react";
+import { inventory as inventoryData } from "../inventory/data/inventory"
 
 export default function ProductView() {
-  const { id } = useParams(); // Lee el parametro :id desde la URL
-  const [product, setProduct] = useState(null);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-  useEffect(() => {
-    // Aquí puedes hacer un fetch/AXIOS a tu backend:
-    // const fetchProduct = async () => { ... }
-    
-    // Por ahora, buscamos el producto en datos estáticos de prueba:
-    const foundProduct = MOCK_PRODUCTS.find((item) => String(item.id) === String(id));
+  const item = inventoryData.find((p) => String(p.id) === String(id));
 
-    if (foundProduct) {
-      setProduct(foundProduct);
-    } else {
-      // Fallback por defecto si se accede directamente con un ID no mapeado
-      setProduct({
-        nameProduct: "Hamburguesa Triple Carne",
-        categoryInfo: "Comidas Rápidas",
-        priceProduct: "40000",
-        productInfo:
-          "Tres jugosos medallones de carne 100% de res seleccionada (120g c/u) asadas a la parrilla, con triple capa de queso cheddar fundido, crujiente tocino ahumado, pepinillos artesanales, cebolla caramelizada y nuestra salsa especial de la casa, todo dentro de un suave pan brioche artesanal ligeramente tostado con mantequilla.",
-        isActive: true,
-        image: authBg,
-      });
-    }
-  }, [id]);
+  if (!item) {
+    return (
+      <div className="min-h-screen w-full flex flex-col bg-background">
+        <div className="max-w-4xl mx-auto mt-12 p-8 bg-surface-muted rounded-3xl shadow-sm border border-border text-center">
+          <Package className="w-12 h-12 text-error mx-auto mb-4" />
+          <h1 className="text-main font-heading font-bold text-text-primary mb-2">
+            Producto no encontrado
+          </h1>
+          <p className="text-text-secondary mb-6">
+            El insumo o producto solicitado no existe en el inventario.
+          </p>
+          <Button variant="secondary" onClick={() => navigate("/inventory")}>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Volver al inventario
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-  if (!product) return null;
+  // Normalización de datos con fallbacks
+  const productName = item.productName ?? item.nameProduct ?? item.name ?? "";
+  const category = item.category ?? item.categoryInfo ?? "Sin Categoría";
+  const stock = item.stock ?? 0;
+  const unit = item.unit ?? "unidades";
+  const price = item.price ?? item.priceProduct ?? 0;
+  const isActive = item.isActive ?? item.is_active ?? true;
+
+  // Formato de moneda COP
+  const formattedPrice = new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+  }).format(price);
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
+      
 
-      <div className="flex items-center gap-3 mt-10 ml-30">
-        <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary">
-          Producto del Menú
+      {/* Encabezado Principal */}
+      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+        <Package className="w-9 h-9 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
+          Visualizar Producto
         </h1>
       </div>
 
-      <div className="flex flex-row">
-        {/* Sección de Imagen y Estado */}
-        <div
-          className="mt-50 mx-auto w-fit h-fit mb-40 mt-[110px]"
-          style={{
-            backgroundImage: `url(${product.image || authBg})`,
-            backgroundPosition: "center center",
-            backgroundSize: "350px 350px",
-            backgroundRepeat: "no-repeat",
-            width: "350px",
-          }}
-        >
-          <div className="flex justify-center mt-100 mb-2"></div>
-          <div className="flex justify-center">
-            <div className="flex items-center gap-10">
-              <span
-                className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
-                style={{
-                  fontFamily: "var(--main-font)",
-                }}
-              >
-                Estado
-              </span>
-              <StatusSwitch size="lg" checked={product.isActive} disabled />
-            </div>
-          </div>
+      {/* Grid Responsivo de 4 Columnas */}
+      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        
+        {/* Columna Izquierda: Estado */}
+        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+          <p className="text-text-primary font-heading font-bold text-lg">
+            Estado
+          </p>
+          <StatusSwitch size="lg" checked={Boolean(isActive)} disabled />
         </div>
 
-        {/* Sección de Detalle e Información */}
-        <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
-          <div className="w-56 flex flex-col gap-8">
+        {/* Columna Central (2 columnas): Información del Producto y Tarjeta de Existencias */}
+        <div className="lg:col-span-2 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col items-center gap-8">
+          
+          {/* Tarjeta Visual de Stock Disponible */}
+          <div className="p-6 bg-surface rounded-2xl border border-border/40 w-full flex flex-col items-center gap-2 text-center shadow-xs">
+            <Boxes className="w-12 h-12 text-text-primary" />
+            <span className="text-caption font-semibold text-text-secondary uppercase tracking-wider">
+              Stock Disponible
+            </span>
+            <div className="text-4xl font-heading font-bold text-text-primary mt-1">
+              {stock}{" "}
+              <span className="text-base font-normal text-text-secondary">
+                {unit}
+              </span>
+            </div>
+          </div>
+
+          {/* Formulario de Campos de Lectura */}
+          <div className="bg-surface rounded-2xl p-6 shadow-sm w-full border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="Nombre del Platillo"
-              name="nameProduct"
+              label="Nombre del Producto"
+              name="productName"
               type="text"
-              value={product.nameProduct || ""}
+              value={productName}
               disabled
             />
             <Input
               label="Categoría"
-              name="categoryInfo"
+              name="category"
               type="text"
-              value={product.categoryInfo || ""}
+              value={category}
               disabled
             />
-          </div>
-
-          <div className="w-90 flex flex-col gap-4 mt-[-130px]">
             <Input
-              className="mt-50"
-              label="Precio"
-              name="priceProduct"
+              label="Existencias"
+              name="stock"
               type="text"
-              value={
-                product.priceProduct
-                  ? `$ ${Number(product.priceProduct).toLocaleString("es-CO")}`
-                  : ""
-              }
+              value={`${stock} ${unit}`}
               disabled
             />
-            <div className="relative w-full">
-              <textarea
-                name="productInfo"
-                value={product.productInfo || ""}
+            <Input
+              label="Unidad de Medida"
+              name="unit"
+              type="text"
+              value={unit}
+              disabled
+            />
+            <div className="md:col-span-2">
+              <Input
+                label="Precio Unitario"
+                name="price"
+                type="text"
+                value={formattedPrice}
                 disabled
-                rows={5}
-                className="w-full rounded-md border border-gray-300 p-2 pt-6 text-sm resize-none bg-transparent cursor-default peer"
               />
-              <label className="absolute top-2 left-2 text-xs text-gray-500 pointer-events-none">
-                Descripción
-              </label>
             </div>
           </div>
         </div>
+
+        {/* Columna Derecha: Acciones */}
+        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+          <p className="text-text-primary font-heading font-bold text-lg">
+            Acciones
+          </p>
+          <Button
+            variant="secondary"
+            type="button"
+            size="md"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => navigate(`/EditProduct/${item.id}`)}
+          >
+            <SquarePen className="w-5 h-5" />
+            Editar Producto
+          </Button>
+        </div>
+
       </div>
     </div>
   );

@@ -17,6 +17,8 @@ html, body {
     --color-brand-hover: var(--semantic-brand-hover);
     --color-brand-soft: var(--semantic-brand-soft);
     --color-brand-soft-hover: var(--semantic-brand-soft-hover);
+    --color-brand-soft-two: var(--semantic-brand-soft-two);
+    --color-brand-soft-two-hover: var(--semantic-brand-soft-two-hover);
 
     /* ============= BACKGROUND ================== */
 

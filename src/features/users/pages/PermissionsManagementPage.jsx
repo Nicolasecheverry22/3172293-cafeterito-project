@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, ChevronDown } from "lucide-react";
+import { Save, ChevronDown, UserRoundKey } from "lucide-react";
 import Swal from "sweetalert2";
-import { Button, Checkbox, FormNavbar } from "@/shared";
+import { Button, Checkbox } from "@/shared";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -129,14 +129,15 @@ export default function PermissionsManagementPage() {
 
   return (
     <div className="w-full min-h-screen bg-background pb-10">
-      <FormNavbar />
+      
 
       <div className="w-full px-6 md:px-12 pt-8">
         <div className="mx-auto">
           {/* Encabezado */}
           <div className="flex items-center gap-4 mb-8">
             <div>
-              <h1 className="text-display font-heading font-bold text-text-primary flex items-center gap-3">
+              <h1 className="text-main font-heading font-bold text-text-primary flex items-center gap-3">
+              <UserRoundKey className="w-8 h-8 text-text-primary"/>
                 Gestión de Permisos
               </h1>
               <p className="text-body text-text-secondary mt-1">

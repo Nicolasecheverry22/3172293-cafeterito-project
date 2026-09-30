@@ -18,7 +18,7 @@ export default function HomePage() {
 
     return (
         <div className="flex flex-col gap-10">
-            <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border">
+            <div className="bg-surface/50 p-6 rounded-3xl shadow-sm border border-border">
                 <h2 className="text-title font-heading font-bold mb-4 text-text-primary">
                     Accesos rápidos
                 </h2>
@@ -62,9 +62,9 @@ export default function HomePage() {
                 </div>
             </div>
 
-            <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border">
+            <div className="bg-surface/50 p-6 rounded-3xl shadow-sm border border-border">
                 <h2 className="text-title font-heading font-bold mb-4 text-text-primary">
-                    Platillos destacados
+                    Platillos más vendidos
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

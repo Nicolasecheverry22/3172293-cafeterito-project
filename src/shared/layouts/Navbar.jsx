@@ -133,13 +133,13 @@ export default function Navbar() {
               <DropdownContent className="right-0 w-52">
 
                 <DropdownItem onClick={() => navigate("/permits")}>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center ml-6 gap-3">
                     <ShieldCheck className="w-5 h-5" />
                     <span className="font-medium font-body text-base">Permisos</span>
                   </div>
                 </DropdownItem>
 
-                <DropdownItem className="mt-1 p-0">
+                <DropdownItem className="p-0">
                   <LogoutButton className="w-full px-3 py-2" />
                 </DropdownItem>
                 

@@ -18,7 +18,7 @@ export default function InventoryRowActions({ product, onDeleted }) {
 
   const handleEdit = () => {
     const id = product.id || product.productId;
-    navigate(`/inventory/${id}/edit`);
+    navigate(`/EditProduct/${id}`);
   };
 
   const handleDelete = async () => {

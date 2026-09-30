@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
+import authBg from "@/assets/images/bg-1.png";
 import imageLogin from "@/assets/images/image-login.png";
 
 export default function LoginPage() {
@@ -16,7 +17,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4"
+        style={{
+          backgroundImage: `url(${authBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
       <div className="flex flex-col md:flex-row w-full max-w-5xl bg-background rounded-2xl shadow-xl overflow-hidden">
         <div className="hidden md:flex md:w-1/2 items-center justify-center p-8">
           <div className="w-full max-w-sm flex justify-center">
