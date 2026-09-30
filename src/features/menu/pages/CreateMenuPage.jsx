@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { UtensilsCrossed } from "lucide-react";
 import Swal from "sweetalert2";
 
-import { FormNavbar } from "@/shared";
 import MenuForm from "../components/MenuForm";
 import { menu as menuData } from "../data/menu";
 import {
@@ -72,7 +71,6 @@ export default function CreateMenuPage() {
 
   return (
     <div className="w-full min-h-screen bg-background pb-10">
-      <FormNavbar />
       <div className="w-full max-w-6xl mx-auto p-4">
         <div className="flex items-center gap-3 mb-6">
           <UtensilsCrossed className="w-8 h-8 text-text-primary" />

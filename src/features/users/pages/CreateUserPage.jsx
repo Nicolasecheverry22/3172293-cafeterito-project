@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import Swal from "sweetalert2";
-import { FormNavbar } from "@/shared";
 import UserForm from "../components/UserForm";
 import { getDocumentTypes } from "@/services/selectService";
 import { users as usersData } from "../data/users";
@@ -82,7 +81,6 @@ export default function CreateUserPage() {
 
   return (
     <div className="w-full min-h-screen bg-background pb-10">
-      <FormNavbar />
       <div className="w-full max-w-6xl mx-auto p-4">
         <div className="flex items-center gap-3 mb-6">
           <UserPlus className="w-8 h-8 text-text-primary" />

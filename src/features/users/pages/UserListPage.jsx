@@ -5,7 +5,6 @@ import { UserColumns } from "../table/UserColumns"
 import { users } from "../data/users"
 import { Button } from "../../../shared";
 import { Link } from "react-router-dom";
-import Navbar from "../../../shared/layouts/Navbar";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function UserListPage() {
@@ -13,7 +12,6 @@ export default function UserListPage() {
 
   return (
     <div>
-      <Navbar/>
       <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">Listado de Usuarios</h1>

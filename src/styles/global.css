@@ -2,6 +2,14 @@
 @import url(semantic.css);
 @import "tailwindcss";
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+}
 @theme {
     /* ============== BRAND ============== */
 
@@ -15,7 +23,7 @@
     --color-background: var(--semantic-background);
     --color-surface: var(--semantic-surface);
     --color-surface-muted: var(--semantic-surface-muted);
-    --color-background-inverse: var(--semantic-background-inverse);
+    --color-background-inverse: var(--semantic-surface-inverse);
 
     /* ============== TEXT ==================== */
 

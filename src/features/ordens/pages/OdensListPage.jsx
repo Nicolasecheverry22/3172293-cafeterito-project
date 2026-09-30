@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { DataTable, Button } from "@/shared";
-import Navbar from "../../../shared/layouts/Navbar";
 import { Link } from "react-router-dom";
 import { OrdensColumns } from "../table/OrdensColumns";
 import { ordens } from "../data/ordens";
@@ -11,7 +10,6 @@ export default function OrdenListPage() {
 
   return (
     <div>
-      <Navbar/>
       <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Listado de Órdenes</h2>
