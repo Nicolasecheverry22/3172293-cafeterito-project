@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { Utensils } from "lucide-react";
 import Swal from "sweetalert2";
 
-import { FormNavbar } from "@/shared";
 import OrderForm from "../components/OrderForm";
 import { waitersData, menuDishesData } from "../data/orderMockData";
 import { ordens as ordersData } from "../data/ordens";
@@ -88,7 +87,6 @@ export default function CreateOrderPage() {
 
   return (
     <div className="w-full min-h-screen bg-background pb-10">
-      <FormNavbar />
 
       <div className="max-w-3xl mx-auto space-y-8 p-4">
         <div className="flex items-center gap-3">

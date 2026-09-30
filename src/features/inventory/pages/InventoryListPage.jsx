@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DataTable, Button } from "@/shared";
 import { Link } from "react-router-dom";
-import Navbar from "../../../shared/layouts/Navbar";
 
 import { InventoryColumns } from "../table/InventoryColumns";
 import { inventory } from "../data/inventory";
@@ -13,7 +12,6 @@ export default function InventoryListPage() {
 
   return (
     <div>
-      <Navbar />
 
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">

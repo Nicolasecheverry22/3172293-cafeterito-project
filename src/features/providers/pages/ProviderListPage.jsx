@@ -4,7 +4,6 @@ import { ProviderColumns } from "../table/ProviderColumns";
 import { providers } from "../data/providers";
 import { Button } from "../../../shared";
 import { Link } from "react-router-dom";
-import Navbar from "../../../shared/layouts/Navbar";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function ProviderListPage() {
@@ -12,7 +11,6 @@ export default function ProviderListPage() {
 
   return (
     <div>
-      <Navbar />
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-semibold">

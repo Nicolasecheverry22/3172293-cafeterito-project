@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DataTable, Button } from "@/shared";
 import { Link } from "react-router-dom";
-import Navbar from "@/shared/layouts/Navbar";
 
 import { MenuColumns } from "../table/MenuColumns";
 import { menu } from "../data/menu";
@@ -12,7 +11,6 @@ export default function MenuListPage() {
 
   return (
     <div>
-      <Navbar />
 
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">

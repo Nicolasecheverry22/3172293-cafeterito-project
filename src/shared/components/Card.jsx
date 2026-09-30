@@ -1,45 +1,23 @@
-const Card = ({ product }) => {
+import { UtensilsCrossed } from "lucide-react";
 
+export default function Card({ product }) {
   const { title, image, price, description } = product;
 
   return (
-    <div className="
-      w-80
-      text-text-inverse
-      dark:bg-neutral-950/70
-      backdrop-blur-[2px]
-      shadow-lg
-      rounded-2xl
-      overflow-hidden
-      hover:shadow-black
-      transition-shadow
-      duration-700
-    ">
+    <div className="w-full bg-surface text-text-primary shadow-sm rounded-2xl overflow-hidden border border-border hover:shadow-md transition-shadow duration-300">
+      {image ? (
+        <img src={image} alt={title} className="w-full h-40 object-contain bg-background" />
+      ) : (
+        <div className="w-full h-40 flex items-center justify-center bg-background">
+          <UtensilsCrossed className="w-10 h-10 text-text-primary/30" />
+        </div>
+      )}
 
-      <img
-        src={image}
-        alt={title}
-        className="w-full h-48 object-contain"
-      />
-
-      <div className="p-5 space-y-3">
-
-        <h2 className="text-xl font-semibold">
-          {title}
-        </h2>
-
-        <p className="text-sm">
-          {description}
-        </p>
-
-        {/* Esto agrega separadores de miles */}
-        <p className="text-lg font-bold text-cyan-200">
-          ${price.toLocaleString()}
-        </p>
-
+      <div className="p-5 space-y-2">
+        <h2 className="text-body font-heading font-semibold text-text-primary">{title}</h2>
+        {description && <p className="text-small text-text-primary/70">{description}</p>}
+        <p className="text-body font-bold text-brand-hover">${price.toLocaleString()}</p>
       </div>
     </div>
   );
-};
-
-export default Card;
+}

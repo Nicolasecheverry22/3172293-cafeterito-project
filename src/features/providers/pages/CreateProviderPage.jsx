@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Truck } from "lucide-react";
 import Swal from "sweetalert2";
-import { FormNavbar } from "@/shared";
 import ProviderForm from "../components/ProviderForm";
 import { getDocumentTypes } from "@/services/selectService";
 import { providers as providersData } from "../data/providers";
@@ -72,7 +71,6 @@ export default function CreateProviderPage() {
 
   return (
     <div className="w-full min-h-screen bg-background pb-10">
-      <FormNavbar />
       <div className="w-full max-w-6xl mx-auto p-4">
         <div className="flex items-center gap-3 mb-6">
           <Truck className="w-8 h-8 text-text-primary" />

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FormNavbar } from "@/shared";
 import authBg from "@/assets/images/burguer.jpg";
 import { Input, StatusSwitch } from "@/shared";
 import { UtensilsCrossed } from "lucide-react";
@@ -50,7 +49,6 @@ export default function ProductView() {
 
   return (
     <div className="min-h-screen w-full flex flex-col">
-      <FormNavbar />
 
       <div className="flex items-center gap-3 mt-10 ml-30">
         <UtensilsCrossed className="w-16 h-16 text-text-primary" />
