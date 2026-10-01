@@ -1,41 +1,45 @@
+// src/providers/table/ProviderColumns.js
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { StatusSwitch } from "@/shared";
 import ProviderRowActions from "../components/ProviderRowActions";
 
-export const columns = [
-    {
-        accessorKey: "name",
-        header: "Nombre",
-    },
-    {
-        accessorKey: "email",
-        header: "Correo",
-    },
-    {
-        accessorKey: "phone",
-        header: "Teléfono",
-    },
-    {
-        accessorKey: "actions",
-        header: "Acciones",
-        cell: ({ row }) => (
-            <ProviderRowActions provider={row.original} />
-        ),
-    },
-];// Componente reutilizable que muestra un switch para activar o desactivar estados
-import { StatusSwitch } from "@/shared";
-
-// Definición de las columnas de la tabla de proveedores
-export const ProviderColumns = [
-
-  // Columna NIT (reemplaza ID)
+export const getProviderColumns = (sortConfig, onSort) => [
+  // Columna NIT (Ordenable)
   {
     accessorKey: "nit",
-    header: "NIT",
+    header: () => (
+      <button
+        type="button"
+        onClick={() => onSort("nit")}
+        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+      >
+        <span>NIT</span>
+        {sortConfig.key === "nit" ? (
+          sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+        ) : (
+          <ArrowUpDown size={16} className="text-gray-400" />
+        )}
+      </button>
+    ),
   },
 
-  // Columna Nombre
+  // Columna Nombre (Ordenable)
   {
     accessorKey: "providerName",
-    header: "Nombre",
+    header: () => (
+      <button
+        type="button"
+        onClick={() => onSort("providerName")}
+        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+      >
+        <span>Nombre</span>
+        {sortConfig.key === "providerName" ? (
+          sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+        ) : (
+          <ArrowUpDown size={16} className="text-gray-400" />
+        )}
+      </button>
+    ),
   },
 
   // Columna Email
@@ -50,11 +54,10 @@ export const ProviderColumns = [
     header: "Teléfono",
   },
 
-  // Columna Estado (activo / inactivo)
+  // Columna Estado
   {
     accessorKey: "is_active",
     header: "Estado",
-
     cell: ({ row }) => {
       const provider = row.original;
 
@@ -64,8 +67,6 @@ export const ProviderColumns = [
           provider.provider_id,
           value
         );
-
-        // updateProviderStatus(provider.provider_id, value)
       };
 
       return (
@@ -77,9 +78,10 @@ export const ProviderColumns = [
     },
   },
 
-  // Columna de acciones (editar / eliminar)
+  // Columna Acciones
   {
     id: "actions",
+    header: "Acciones",
     cell: ({ row }) => (
       <ProviderRowActions provider={row.original} />
     ),

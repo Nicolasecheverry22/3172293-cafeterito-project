@@ -68,7 +68,14 @@ export default function MenuRowActions({ product, onDeleted }) {
         <Eye size={16} />
       </button>
       <button
-        onClick={() => navigate(`/EditProduct/${product.id}`)}
+        onClick={() => navigate(`/MenuView/${provider.id}`)}
+        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        title="Visualizar proveedor"
+      >
+        <Eye size={16} />
+      </button>
+      <button
+        onClick={handleEdit}
         className="p-1 rounded hover:bg-gray-100"
       >
         <Pencil size={16} />

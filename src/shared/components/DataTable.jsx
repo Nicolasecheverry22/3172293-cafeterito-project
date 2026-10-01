@@ -123,7 +123,7 @@ export default function DataTable({ data, columns }) {
 
 
           {/* ================== CABECERA ================== */}
-          <thead className="bg-gray-100">
+          <thead className="bg-brand-soft-two">
 
 
             {/* TanStack agrupa cabeceras automáticamente */}
@@ -228,8 +228,8 @@ export default function DataTable({ data, columns }) {
 
           {/* Ir a la primera página */}
           <Button
-            size="sm"
-            variant="secondary"
+            size="md"
+            variant="primary"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
@@ -239,8 +239,8 @@ export default function DataTable({ data, columns }) {
 
           {/* Página anterior */}
           <Button
-            size="sm"
-            variant="secondary"
+            size="md"
+            variant="primary"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -257,7 +257,8 @@ export default function DataTable({ data, columns }) {
 
           {/* Página siguiente */}
           <Button
-            size="sm"
+            size="md"
+            variant="primary"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -267,7 +268,8 @@ export default function DataTable({ data, columns }) {
 
           {/* Ir a la última página */}
           <Button
-            size="sm"
+            size="md"
+            variant="primary"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >

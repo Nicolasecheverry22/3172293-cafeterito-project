@@ -16,7 +16,7 @@ export default function Card({ product }) {
       <div className="p-5 space-y-2">
         <h2 className="text-body font-heading font-semibold text-text-primary">{title}</h2>
         {description && <p className="text-small text-text-primary/70">{description}</p>}
-        <p className="text-body font-bold text-brand-hover">${price.toLocaleString()}</p>
+        <p className="text-body font-bold text-green-800">${price.toLocaleString()}</p>
       </div>
     </div>
   );

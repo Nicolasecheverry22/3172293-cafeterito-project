@@ -1,88 +1,62 @@
-// Componente reutilizable que muestra un switch para activar o desactivar estados
-import {StatusSwitch} from "@/shared";
-
-
-// Componente que contiene los botones de acciones (editar y eliminar) para cada usuario
+// src/users/table/UserColumns.js
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import UserRowActions from "../components/UserRowActions";
 
-
-// Definición de las columnas de la tabla de usuarios
-// Este arreglo suele usarse en librerías de tablas como TanStack Table
-export const UserColumns = [
-
-
-  // Columna ID
+export const getUserColumns = (sortConfig, onSort) => [
   {
-    accessorKey: "id", // Propiedad del objeto user que se mostrará en la columna
-    header: "Id",      // Título de la columna
+    accessorKey: "id",
+    header: () => (
+      <button
+        type="button"
+        onClick={() => onSort("id")}
+        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+      >
+        <span>ID</span>
+        {sortConfig.key === "id" ? (
+          sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+        ) : (
+          <ArrowUpDown size={16} className="text-gray-400" />
+        )}
+      </button>
+    ),
   },
-
-
-  // Columna Nombre
   {
-    accessorKey: "userName", // Campo del objeto user
-    header: "Nombre",    // Encabezado visible
+    accessorKey: "userName",
+    header: () => (
+      <button
+        type="button"
+        onClick={() => onSort("userName")}
+        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+      >
+        <span>Nombre</span>
+        {sortConfig.key === "userName" ? (
+          sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+        ) : (
+          <ArrowUpDown size={16} className="text-gray-400" />
+        )}
+      </button>
+    ),
   },
-
-
-  // Columna Email
+  {
+    accessorKey: "userRole",
+    header: "Rol",
+  },
   {
     accessorKey: "userEmail",
-    header: "Email",
+    header: "Correo",
   },
-
-
-  // Columna Dirección
   {
     accessorKey: "userPhone",
     header: "Teléfono",
   },
-
-
-  // Columna Estado (activo / inactivo)
   {
     accessorKey: "is_active",
     header: "Estado",
-
-
-    // Render personalizado de la celda
-    // Permite mostrar un componente en lugar de solo texto
-    cell: ({ row }) => {
-
-
-      // Se obtiene el objeto completo del usuario de la fila
-      const user = row.original;
-
-
-      // Función que se ejecuta cuando cambia el switch
-      const handleChange = (value) => {
-
-
-        // value representa el nuevo estado del switch (true o false)
-        console.log("Actualizar estado usuario:", user.user_id, value);
-
-
-        // Aquí normalmente se llamaría una API para actualizar el estado
-        // updateUserStatus(user.user_id, value)
-      };
-
-
-      return (
-        // Componente reutilizable para mostrar el switch
-        <StatusSwitch
-          checked={user.is_active} // Estado actual del usuario
-          onChange={handleChange}  // Función que maneja el cambio
-        />
-      );
-    },
+    cell: ({ row }) => (row.original.is_active ? "Activo" : "Inactivo"),
   },
-
-
-  // Columna de acciones (editar / eliminar)
   {
-    id: "actions", // No usa accessorKey porque no corresponde a un campo del usuario
-
-    // Renderiza el componente de acciones pasando el usuario completo
+    id: "actions",
+    header: "Acciones",
     cell: ({ row }) => <UserRowActions user={row.original} />,
   },
 ];

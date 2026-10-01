@@ -145,6 +145,7 @@ export default function OrderForm({
 
         <Button
           variant="secondary"
+          size= "md"
           type="button"
           onClick={addDishRow}
           className="flex items-center justify-center gap-2 w-full md:w-auto bg-brand/30 hover:bg-brand/50 text-text-primary font-medium"

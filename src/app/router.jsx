@@ -15,7 +15,6 @@ import ProvisionsView from "../features/views/ProvisionsView";
 import EditUser from "../features/views/edit/EditUser";
 import EditProvider from "../features/views/edit/EditProvider";
 import EditProduct from "../features/views/edit/EditProduct";
-import EditProvisions from "../features/views/edit/EditProvisions";
 import { MenuListPage, CreateMenuPage } from "@/features/menu";
 import { OrdensListPage, CreateOrderPage } from "@/features/ordens";
 
@@ -57,7 +56,7 @@ const router = createBrowserRouter([
       { path: "/EditUser/:id", element: <EditUser /> },
       { path: "/EditProduct/:id", element: <EditProduct /> },
       { path: "/EditProvider/:id", element: <EditProvider /> },
-      { path: "/EditProvisions/:id", element: <EditProvisions /> },
+      { path: "/EditProduct/:id", element: <EditProduct /> },
       { path: "/menuCreate", element: <CreateMenuPage /> },
       { path: "/ordensCreate", element: <CreateOrderPage /> },
       { path: "/permits", element: <PermissionsManagementPage /> },
@@ -66,3 +65,5 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
+
+

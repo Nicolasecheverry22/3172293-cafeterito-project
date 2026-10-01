@@ -36,10 +36,11 @@ export default function ProductView() {
     <div className="min-h-screen w-full flex flex-col">
       
 
-      <div className="flex items-center gap-3 mt-10 ml-30">
-        <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary">
-          Producto del Menú
+      {/* Encabezado Principal */}
+      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+        <Package className="w-9 h-9 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
+          Visualizar Producto
         </h1>
       </div>
 
@@ -74,7 +75,6 @@ export default function ProductView() {
             </span>
             <StatusSwitch size="lg" checked={product.isAvailable} disabled />
           </div>
-        </div>
 
         <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
           <div className="w-56 flex flex-col gap-8">
@@ -92,9 +92,6 @@ export default function ProductView() {
               value={product.category}
               disabled
             />
-          </div>
-
-          <div className="w-90 flex flex-col gap-4 mt-[-130px]">
             <Input
               className="mt-50"
               label="Precio"
@@ -108,15 +105,28 @@ export default function ProductView() {
                 name="description"
                 value={product.description || ""}
                 disabled
-                rows={5}
-                className="w-full rounded-md border border-gray-300 p-2 pt-6 text-sm resize-none bg-transparent cursor-default peer"
               />
-              <label className="absolute top-2 left-2 text-xs text-gray-500 pointer-events-none">
-                Descripción
-              </label>
             </div>
           </div>
         </div>
+
+        {/* Columna Derecha: Acciones */}
+        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+          <p className="text-text-primary font-heading font-bold text-lg">
+            Acciones
+          </p>
+          <Button
+            variant="secondary"
+            type="button"
+            size="md"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => navigate(`/EditProduct/${item.id}`)}
+          >
+            <SquarePen className="w-5 h-5" />
+            Editar Producto
+          </Button>
+        </div>
+
       </div>
     </div>
   );

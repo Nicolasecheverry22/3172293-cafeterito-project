@@ -4,9 +4,11 @@
     /* ============== BRAND============== */
 
     --semantic-brand: var(--color-primary-500);
-    --semantic-brand-hover: var(--color-primary-950);/*Generalmente es de un tono mas alto que el brand*/
-    --semantic-brand-soft: var(--color-tertiary-200);
-    --semantic-brand-soft-hover: var(--color-tertiary-400);
+    --semantic-brand-hover: var(--color-primary-950);
+    --semantic-brand-soft: var(--color-tertiary-300);
+    --semantic-brand-soft-hover: var(--color-tertiary-500);
+    --semantic-brand-soft-two: var(--color-secondary-300);
+    --semantic-brand-soft-two-hover: var(--color-secondary-600);
 
     /* ============= BACKGROUND================== */
 

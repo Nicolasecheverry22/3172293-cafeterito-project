@@ -1,0 +1,7 @@
+[
+  { "value": "Administrador", "label": "Administrador" },
+  { "value": "Cocinero", "label": "Cocinero" },
+  { "value": "Mesero", "label": "Mesero" },
+  { "value": "Caja", "label": "Caja" },
+  { "value": "Invitado", "label": "Invitado" }
+]

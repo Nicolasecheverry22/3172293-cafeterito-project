@@ -24,16 +24,9 @@ export default function ProviderView() {
         );
     }
 
-    const initial = provider.providerName.charAt(0).toUpperCase();
+  const provider = providers.find((p) => String(p.id) === String(id));
 
-    // Damos una lista de posibles colores y se le asigna segun el id del usuario
-    const colors = [
-        "#E57373", "#F06292", "#BA68C8", "#9575CD",
-        "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
-        "#FFD54F", "#FF8A65",
-    ];
-    const bgColor = colors[provider.id % colors.length];
-
+  if (!provider) {
     return (
         <div className="min-h-screen w-full flex flex-col">
 
@@ -70,116 +63,122 @@ export default function ProviderView() {
                         </div>
     
 
-                    <div className="flex justify-center mt-[-100px] mb-2">
-                        <Button
-                            variant="secondary"
-                            type="button"
-                            size="md"
-                            onClick={() => navigate(`/EditProvider/${provider.id}`)}
-                
-                        >
-                            <SquarePen className="w-5 h-5 gap-1"/>
-                            Editar Info
-                        </Button>
-                        
-                    </div>
-                    <div  className="flex justify-center">
+      {/* Encabezado Principal */}
+      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+        <Ambulance className="w-9 h-9 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
+          Visualizar Proveedor
+        </h1>
+      </div>
 
-                    <div className="flex items-center gap-10">
-                            <span className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
-                            style={{
-                                fontFamily: "var(--main-font)",
-                            }}>
-                                Estado
-                            </span>
-                            <StatusSwitch
-                            size="lg"
-                
-                            />
-                    </div>
-                    </div>
-
-                </div>
-
-                <div className="flex flex-row items-end justify-start gap-20 bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-70 mx-auto w-fit h-fit mt-[130px] mb-30">
-
-                    <div className="w-fit flex flex-col gap-8 ">
-                        <h2>Nit</h2>
-                        <h2>Nombre Proveedor</h2>
-                        <h2>Direccion</h2>
-                        <h2>Telefono</h2>
-                        <h2>Correo</h2>
-                    </div>
-
-                    <div className="w-80 flex flex-col gap-4">
-                        <Input
-                            label=""
-                            name="documentNumberInfo"
-                            type="text"
-                            value={provider.nit}
-                            disabled
-                        />
-                        <Input
-                            label=""
-                            name="nameInfo"
-                            type="text"
-                            value={provider.providerName}
-                            disabled
-                        />
-                        <Input
-                            label=""
-                            name="addressInfo"
-                            type="text"
-                            value={provider.providerAddress}
-                            disabled
-                        />
-                        <Input
-                            label=""
-                            name="phoneInfo"
-                            type="text"
-                            value={provider.providerPhone}
-                            disabled
-                        />
-                        <Input
-                            label=""
-                            name="emailInfo"
-                            type="email"
-                            value={provider.providerEmail}
-                            disabled
-                        />
-                    </div>
-                   
-                
-
-                </div>
-                
-
-            </div>
-            <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-70 mx-auto w-fit mt-[-200px] mr-70">
-
-                    <div className="w-90 flex items-center flex-col gap-4 mr-1 ">
-
-                        <h1
-                            className="text-[var(--color-black)] font-[var(--font-weight-bold)] text-[var(--fs-lg)]"
-                            style={{
-                                fontFamily: "var(--main-font)",
-                            }}
-                        >
-                            Productos que Suministra
-                            <br />
-                        </h1>
-
-                        <Input className="w-20"
-                            label=""
-                            type="text"
-                            value={provider.productService}
-                            disabled
-                        />
-                    
-                    </div>
-
-                </div>
-
+      {/* Grid Responsivo Estandarizado (4 columnas) */}
+      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        
+        {/* Columna 1: Avatar e Identificación */}
+        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+          <div
+            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-md border-2 border-white/20 select-none"
+            style={{ backgroundColor: bgColor }}
+          >
+            {initial}
+          </div>
+          <div>
+            <h2 className="font-heading font-bold text-text-primary text-lg">
+              {provider.providerName}
+            </h2>
+            <p className="text-caption text-text-secondary">
+              NIT: {provider.nit}
+            </p>
+          </div>
         </div>
-    );
+
+        {/* Columna 2 y 3 (Central): Información General del Proveedor */}
+        <div className="lg:col-span-2 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col gap-6">
+          <h2 className="text-lg font-heading font-bold text-text-primary border-b border-border/40 pb-2">
+            Información de Contacto
+          </h2>
+
+          <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="NIT / Documento"
+              name="nit"
+              type="text"
+              value={provider.nit || ""}
+              disabled
+            />
+            <Input
+              label="Nombre del Proveedor"
+              name="providerName"
+              type="text"
+              value={provider.providerName || ""}
+              disabled
+            />
+            <Input
+              label="Dirección"
+              name="providerAddress"
+              type="text"
+              value={provider.providerAddress || ""}
+              disabled
+            />
+            <Input
+              label="Teléfono"
+              name="providerPhone"
+              type="text"
+              value={provider.providerPhone || ""}
+              disabled
+            />
+            <div className="md:col-span-2">
+              <Input
+                label="Correo Electrónico"
+                name="providerEmail"
+                type="email"
+                value={provider.providerEmail || ""}
+                disabled
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Input
+                label="Productos / Servicios Suministrados"
+                name="productService"
+                type="text"
+                value={provider.productService || "No especificado"}
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Columna 4: Estado y Acciones */}
+        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
+          <div className="w-full flex flex-col items-center gap-2">
+            <p className="text-text-primary font-heading font-bold text-lg">
+              Estado
+            </p>
+            <StatusSwitch
+              size="lg"
+              checked={Boolean(provider.isActive)}
+              disabled
+            />
+          </div>
+
+          <div className="w-full pt-4 border-t border-border/40 flex flex-col gap-3">
+            <p className="text-text-primary font-heading font-bold text-md">
+              Acciones
+            </p>
+            <Button
+              variant="secondary"
+              type="button"
+              size="md"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => navigate(`/editProvider/${provider.id}`)}
+            >
+              <SquarePen className="w-5 h-5" />
+              Editar Info
+            </Button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
 }

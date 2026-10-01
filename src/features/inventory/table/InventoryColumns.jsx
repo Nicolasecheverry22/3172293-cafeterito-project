@@ -1,25 +1,45 @@
-// Columnas de la tabla de inventario
-// Usado normalmente con librerías como TanStack Table
-
+// src/inventory/table/InventoryColumns.js
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import InventoryRowActions from "../components/InventoryRowActions";
 
-
-// Definición de columnas del módulo Inventory
-export const InventoryColumns = [
-
-  // Columna ID
+export const getInventoryColumns = (sortConfig, onSort) => [
+  // Columna ID (Ordenable)
   {
     accessorKey: "id",
-    header: "Id",
+    header: () => (
+      <button
+        type="button"
+        onClick={() => onSort("id")}
+        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+      >
+        <span>Id</span>
+        {sortConfig.key === "id" ? (
+          sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+        ) : (
+          <ArrowUpDown size={16} className="text-gray-400" />
+        )}
+      </button>
+    ),
   },
 
-
-  // Columna Nombre del producto
+  // Columna Producto (Ordenable)
   {
     accessorKey: "productName",
-    header: "Producto",
+    header: () => (
+      <button
+        type="button"
+        onClick={() => onSort("productName")}
+        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+      >
+        <span>Producto</span>
+        {sortConfig.key === "productName" ? (
+          sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
+        ) : (
+          <ArrowUpDown size={16} className="text-gray-400" />
+        )}
+      </button>
+    ),
   },
-
 
   // Columna Categoría
   {
@@ -27,32 +47,24 @@ export const InventoryColumns = [
     header: "Categoría",
   },
 
-
-  // Columna cantidad disponible
+  // Columna Stock
   {
     accessorKey: "stock",
     header: "Stock",
   },
 
-
-  // Columna unidad de medida
+  // Columna Unidad
   {
     accessorKey: "unit",
     header: "Unidad",
   },
 
-
-  // Columna precio
+  // Columna Precio
   {
     accessorKey: "price",
     header: "Precio",
-
-
-    // Render personalizado para mostrar moneda colombiana
     cell: ({ row }) => {
-
       const price = row.original.price;
-
 
       return (
         <span>
@@ -66,14 +78,10 @@ export const InventoryColumns = [
     },
   },
 
-
-  // Columna acciones
+  // Columna Acciones
   {
     id: "actions",
-
-    cell: ({ row }) => (
-      <InventoryRowActions product={row.original} />
-    ),
+    header: "Acciones",
+    cell: ({ row }) => <InventoryRowActions product={row.original} />,
   },
-
 ];
