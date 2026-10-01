@@ -1,4 +1,4 @@
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye,Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -7,9 +7,7 @@ import { showSystemErrorAlert } from "@/shared/services/alertService";
 export default function MenuRowActions({ product, onDeleted }) {
   const navigate = useNavigate();
 
-  const handleEdit = () => {
-    navigate(`/menu/${product.id}/edit`);
-  };
+ 
 
   const handleDelete = async () => {
     const result = await Swal.fire({
@@ -62,6 +60,13 @@ export default function MenuRowActions({ product, onDeleted }) {
 
   return (
     <div className="flex gap-2">
+        <button
+        onClick={() => navigate(`/ProductView/${product.id}`)}
+        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        title="Visualizar proveedor"
+      >
+        <Eye size={16} />
+      </button>
       <button
         onClick={() => navigate(`/MenuView/${provider.id}`)}
         className="p-1 rounded hover:bg-gray-100 cursor-pointer"

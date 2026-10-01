@@ -1,50 +1,39 @@
-import { FormNavbar, Input, Button, StatusSwitch } from "@/shared";
-import { useNavigate, useParams } from "react-router-dom";
-import { Package, SquarePen, ArrowLeft, Boxes } from "lucide-react";
-import { inventory as inventoryData } from "../inventory/data/inventory"
+import { useParams } from "react-router-dom";
+import { Input, StatusSwitch } from "@/shared";
+import { UtensilsCrossed } from "lucide-react";
+import { menu } from "../menu/data/menu";
 
 export default function ProductView() {
-  const navigate = useNavigate();
   const { id } = useParams();
 
-  const item = inventoryData.find((p) => String(p.id) === String(id));
+  const product = menu.find((p) => p.id === Number(id));
 
-  if (!item) {
+  if (!product) {
     return (
-      <div className="min-h-screen w-full flex flex-col bg-background">
-        <div className="max-w-4xl mx-auto mt-12 p-8 bg-surface-muted rounded-3xl shadow-sm border border-border text-center">
-          <Package className="w-12 h-12 text-error mx-auto mb-4" />
-          <h1 className="text-main font-heading font-bold text-text-primary mb-2">
-            Producto no encontrado
+      <div className="min-h-screen w-full flex flex-col">
+        
+        <div className="flex items-center gap-3 mt-10 ml-30">
+          <UtensilsCrossed className="w-16 h-16 text-text-primary" />
+          <h1 className="text-main font-heading font-bold text-text-primary">
+            Producto del Menú
           </h1>
-          <p className="text-text-secondary mb-6">
-            El insumo o producto solicitado no existe en el inventario.
-          </p>
-          <Button variant="secondary" onClick={() => navigate("/inventory")}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Volver al inventario
-          </Button>
         </div>
+        <p className="ml-30 mt-8 text-red-500">Producto no encontrado.</p>
       </div>
     );
   }
 
-  // Normalización de datos con fallbacks
-  const productName = item.productName ?? item.nameProduct ?? item.name ?? "";
-  const category = item.category ?? item.categoryInfo ?? "Sin Categoría";
-  const stock = item.stock ?? 0;
-  const unit = item.unit ?? "unidades";
-  const price = item.price ?? item.priceProduct ?? 0;
-  const isActive = item.isActive ?? item.is_active ?? true;
+  const initial = product.productName.charAt(0).toUpperCase();
 
-  // Formato de moneda COP
-  const formattedPrice = new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(price);
+  const colors = [
+    "#E57373", "#F06292", "#BA68C8", "#9575CD",
+    "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
+    "#FFD54F", "#FF8A65",
+  ];
+  const bgColor = colors[product.id % colors.length];
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
+    <div className="min-h-screen w-full flex flex-col">
       
 
       {/* Encabezado Principal */}
@@ -55,70 +44,66 @@ export default function ProductView() {
         </h1>
       </div>
 
-      {/* Grid Responsivo de 4 Columnas */}
-      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        
-        {/* Columna Izquierda: Estado */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
-          <p className="text-text-primary font-heading font-bold text-lg">
-            Estado
-          </p>
-          <StatusSwitch size="lg" checked={Boolean(isActive)} disabled />
-        </div>
-
-        {/* Columna Central (2 columnas): Información del Producto y Tarjeta de Existencias */}
-        <div className="lg:col-span-2 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col items-center gap-8">
-          
-          {/* Tarjeta Visual de Stock Disponible */}
-          <div className="p-6 bg-surface rounded-2xl border border-border/40 w-full flex flex-col items-center gap-2 text-center shadow-xs">
-            <Boxes className="w-12 h-12 text-text-primary" />
-            <span className="text-caption font-semibold text-text-secondary uppercase tracking-wider">
-              Stock Disponible
-            </span>
-            <div className="text-4xl font-heading font-bold text-text-primary mt-1">
-              {stock}{" "}
-              <span className="text-base font-normal text-text-secondary">
-                {unit}
-              </span>
-            </div>
+      <div className="flex flex-row">
+        <div className="flex flex-col items-center gap-8 mx-auto mt-[110px] mb-40">
+          <div
+            style={{
+              backgroundColor: bgColor,
+              width: "150px",
+              height: "150px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "64px",
+              fontWeight: "bold",
+              color: "#fff",
+              userSelect: "none",
+            }}
+          >
+            {initial}
           </div>
 
-          {/* Formulario de Campos de Lectura */}
-          <div className="bg-surface rounded-2xl p-6 shadow-sm w-full border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex items-center gap-10">
+            <span
+              className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
+              style={{
+                fontFamily: "var(--main-font)",
+              }}
+            >
+              Estado
+            </span>
+            <StatusSwitch size="lg" checked={product.isAvailable} disabled />
+          </div>
+
+        <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
+          <div className="w-56 flex flex-col gap-8">
             <Input
-              label="Nombre del Producto"
+              label="Nombre del Platillo"
               name="productName"
               type="text"
-              value={productName}
+              value={product.productName}
               disabled
             />
             <Input
               label="Categoría"
               name="category"
               type="text"
-              value={category}
+              value={product.category}
               disabled
             />
             <Input
-              label="Existencias"
-              name="stock"
+              className="mt-50"
+              label="Precio"
+              name="price"
               type="text"
-              value={`${stock} ${unit}`}
+              value={`$ ${product.price.toLocaleString("es-CO")}`}
               disabled
             />
-            <Input
-              label="Unidad de Medida"
-              name="unit"
-              type="text"
-              value={unit}
-              disabled
-            />
-            <div className="md:col-span-2">
-              <Input
-                label="Precio Unitario"
-                name="price"
-                type="text"
-                value={formattedPrice}
+            <div className="relative w-full">
+              <textarea
+                name="description"
+                value={product.description || ""}
                 disabled
               />
             </div>

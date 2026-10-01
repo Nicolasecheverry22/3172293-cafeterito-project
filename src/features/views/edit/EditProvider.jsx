@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useNavigate as useNavParams, useParams as useParamValues } from "react-router-dom";
 import Swal from "sweetalert2";
-import { FormNavbar, Input, Button, StatusSwitch, Select } from "@/shared";
-import { Pencil, Building2 } from "lucide-react";
+import { Pencil } from "lucide-react";
+
+import {Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
+import { getDocumentTypes } from "@/services/selectService";
 import { providers } from "../../providers/data/providers";
 import { createEditProviderSchema } from "../../providers/schemas/editProviderSchema";
 
@@ -127,15 +129,12 @@ export default function EditProvider() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
-      
+    <div className="min-h-screen w-full flex flex-col">
+      I
 
-      {/* Encabezado */}
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
-        <Pencil className="w-9 h-9 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
-          Editar Proveedor
-        </h1>
+      <div className="flex items-center gap-3 mt-10 ml-12">
+        <Pencil className="w-10 h-10 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary">Editar Proveedor</h1>
       </div>
 
       {/* Formulario Principal */}

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "entradas",
+    "label": "Entradas"
+  },
+  {
+    "id": "plato_fuerte",
+    "label": "Plato Fuerte"
+  },
+  {
+    "id": "bebidas",
+    "label": "Bebidas"
+  },
+  {
+    "id": "postres",
+    "label": "Postres"
+  }
+]

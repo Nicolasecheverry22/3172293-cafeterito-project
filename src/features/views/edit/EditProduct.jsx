@@ -1,67 +1,30 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import { FormNavbar, Input, Button, StatusSwitch, Select } from "@/shared";
-import { Pencil } from "lucide-react";
-import { inventory as inventoryData } from "../../inventory/data/inventory";
-import { createEditProductSchema } from "../../inventory/schemas/editProductSchema";
-import { getCategoryTypes } from "@/services/selectService";
+import { UtensilsCrossed } from "lucide-react";
+import { menu } from "../../menu/data/menu";
+import menuCategoryTypes from "../../../data/selects/menuCategoryTypes.json";
+import { Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
 import {
-    showSuccessAlert,
-    showSystemErrorAlert,
-    showDeleteCancelAlert,
+  showSystemErrorAlert,
+  showDeleteCancelAlert,
 } from "@/shared/services/alertService";
-
-const DEFAULT_CATEGORIES = [
-  { value: "Carnes", label: "Carnes" },
-  { value: "Verduras", label: "Verduras" },
-  { value: "Tubérculos", label: "Tubérculos" },
-  { value: "Granos", label: "Granos" },
-  { value: "Lácteos", label: "Lácteos" },
-  { value: "Insumos", label: "Insumos" },
-  { value: "Panadería", label: "Panadería" },
-  { value: "Bebidas", label: "Bebidas" },
-  { value: "Salsas", label: "Salsas" },
-];
 
 export default function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [categoriesOptions, setCategoriesOptions] = useState(DEFAULT_CATEGORIES);
-  const [errors, setErrors] = useState({});
 
-  const item = inventoryData.find((p) => String(p.id) === String(id));
-
-  useEffect(() => {
-    if (getCategoryTypes) {
-      getCategoryTypes()
-        .then((res) => {
-          if (Array.isArray(res) && res.length > 0) {
-            setCategoriesOptions(res);
-          }
-        })
-        .catch(() => setCategoriesOptions(DEFAULT_CATEGORIES));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!item) {
-      showSystemErrorAlert({
-        text: "El producto que intentas editar no existe.",
-      }).then(() => navigate("/inventoryList", { replace: true }));
-    }
-  }, [item, navigate]);
+  const product = menu.find((p) => p.id === Number(id));
 
   const [formData, setFormData] = useState({
-    productName: item?.productName ?? item?.nameProduct ?? "",
+    productName: "",
     category: "",
-    stock: item?.stock ?? 0,
-    unit: item?.unit ?? "",
-    price: item?.price ?? item?.priceProduct ?? 0,
-    isActive: item?.isActive ?? item?.is_active ?? true,
+    price: "",
+    description: "",
+    productImage: [],
   });
 
-  if (!item) return null;
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,34 +34,26 @@ export default function EditProduct() {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    const schema = createEditProductSchema({ currentProductId: item.id });
-    const result = schema.safeParse(formData);
-
-    if (!result.success) {
-      console.log("Errores de validación:", result.error.flatten().fieldErrors);
-      const fieldErrors = {};
-      result.error.issues.forEach((issue) => {
-        fieldErrors[issue.path[0]] = issue.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-
     try {
-      Object.assign(item, {
-        ...result.data,
-        stock: Number(result.data.stock),
-        price: Number(result.data.price),
-      });
+      console.log(formData);
 
-      await showSuccessAlert({
+      await Swal.fire({
         title: "¡Producto actualizado!",
         text: "Los cambios fueron guardados correctamente.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: {
+          popup: "rounded-2xl",
+          title: "text-green-600",
+          confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
+          timerProgressBar: "!bg-green-600",
+        },
+        buttonsStyling: false,
       });
 
-      navigate("/inventoryList");
+      navigate(-1);
     } catch (error) {
       console.error("Error al actualizar el producto:", error);
       await showSystemErrorAlert({
@@ -132,96 +87,121 @@ export default function EditProduct() {
         title: "Edición cancelada",
         text: "No se guardaron los cambios.",
       });
-      navigate("/inventoryList");
+      navigate(-1);
     }
   };
 
-  return (
-    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
-      
+  if (!product) {
+    return (
+      <div className="min-h-screen w-full flex flex-col">
+        
+        <div className="flex items-center gap-3 mt-10 ml-30">
+          <UtensilsCrossed className="w-16 h-16 text-text-primary" />
+          <h1 className="text-main font-heading font-bold text-text-primary">
+            Producto del Menú
+          </h1>
+        </div>
+        <p className="ml-30 mt-8 text-red-500">Producto no encontrado.</p>
+      </div>
+    );
+  }
 
-      {/* Encabezado */}
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
-        <Pencil className="w-9 h-9 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
-          Editar Producto
+  return (
+    <div className="min-h-screen w-full flex flex-col">
+
+      <div className="flex items-center gap-3 mt-10 ml-30">
+        <UtensilsCrossed className="w-16 h-16 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary">
+          Producto del Menú
         </h1>
       </div>
 
-      {/* Formulario Principal */}
-      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        
-        {/* Columna Izquierda: Estado */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
-          <p className="text-text-primary font-heading font-bold text-lg">Estado</p>
-          <StatusSwitch
-            size="lg"
-            checked={formData.isActive}
-            onChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))}
-          />
+      <div className="flex flex-row">
+        <div className="flex flex-col items-center gap-8 mx-auto mt-[110px] mb-40">
+          <div className="bg-surface-muted rounded-3xl p-8 shadow-sm w-fit h-fit">
+            <FileInput
+              value={formData.productImage}
+              onChange={(files) => setFormData((prev) => ({ ...prev, productImage: files }))}
+              multiple={true}
+            />
+            {errors.productImage && (
+              <span className="text-error text-caption mt-1">{errors.productImage}</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-10">
+            <span
+              className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
+              style={{
+                fontFamily: "var(--main-font)",
+              }}
+            >
+              Estado
+            </span>
+            <StatusSwitch size="lg" checked={product.isAvailable} disabled />
+          </div>
         </div>
 
-        {/* Columna Derecha: Campos de Entrada */}
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col gap-8">
-          
-          <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input
-              label="Nombre del Producto"
-              name="productName"
-              type="text"
-              value={formData.productName}
-              onChange={handleChange}
-              error={errors.productName}
-            />
-            <Select
-              label="Categoría"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              placeholder="Seleccione una categoría"
-              options={categoriesOptions}
-              error={errors.category}
-            />
-            <Input
-              label="Stock Disponible"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              error={errors.stock}
-            />
-            <Input
-              label="Unidad de Medida"
-              name="unit"
-              type="text"
-              value={formData.unit}
-              onChange={handleChange}
-              error={errors.unit}
-            />
-            <div className="md:col-span-2">
-              <Input
-                label="Precio Unitario ($ COP)"
-                name="price"
-                type="number"
-                value={formData.price}
-                onChange={handleChange}
-                error={errors.price}
-              />
+        <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
+          <form onSubmit={handleSave}>
+            <div className="flex flex-row gap-20">
+              <div className="w-56 flex flex-col gap-8">
+                <Input
+                  label="Nombre del Platillo"
+                  name="productName"
+                  type="text"
+                  value={formData.productName}
+                  placeholder={product.productName}
+                  onChange={handleChange}
+                />
+                <Select
+                  label="Categoría"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  placeholder={product.category}
+                  options={menuCategoryTypes}
+                  error={errors.category}
+                />
+              </div>
+
+              <div className="w-90 flex flex-col gap-4 mt-[-130px]">
+                <Input
+                  className="mt-36"
+                  label="Precio"
+                  name="price"
+                  type="text"
+                  value={formData.price}
+                  placeholder={`$ ${product.price.toLocaleString("es-CO")}`}
+                  onChange={handleChange}
+                />
+                <div className="relative w-full">
+                  <textarea
+                    name="description"
+                    placeholder={product.description || ""}
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={5}
+                    className="w-full rounded-md border border-gray-300 p-2 pt-6 text-sm resize-none bg-transparent cursor-default peer"
+                  />
+                  <label className="absolute top-2 left-2 text-xs text-gray-500 pointer-events-none">
+                    Descripción
+                  </label>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Botones de Acción */}
-          <div className="flex gap-4 items-center justify-end border-t border-border/40 pt-6">
-            <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
-              Cancelar
-            </Button>
-            <Button variant="primary" size="md" type="submit">
-              Guardar Cambios
-            </Button>
-          </div>
-
+            <div className="flex gap-6 items-center justify-end mt-10">
+              <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
+                Cancelar
+              </Button>
+              <Button variant="primary" size="md" type="submit">
+                Guardar
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

@@ -11,11 +11,7 @@ export default function InventoryRowActions({ product, onDeleted }) {
   const navigate = useNavigate();
 
   // Redirigir a la vista del producto pasando su ID
-  const handleView = () => {
-    const id = product.id || product.productId;
-    navigate(`/ProductView/${id}`);
-  };
-
+ 
   const handleEdit = () => {
     const id = product.id || product.productId;
     navigate(`/EditProduct/${id}`);
@@ -69,15 +65,14 @@ export default function InventoryRowActions({ product, onDeleted }) {
   return (
     <div className="flex gap-2">
       <button
-        onClick={handleView}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
-        title="Visualizar producto"
+        onClick={() => navigate(`/ProvisionsView/${product.id}`)}
+        className="p-1 rounded hover:bg-gray-100"
       >
         <Eye size={16} />
       </button>
 
       <button
-        onClick={handleEdit}
+        onClick={() => navigate(`/EditProvisions/${product.id}`)}
         className="p-1 rounded hover:bg-gray-100 cursor-pointer"
         title="Editar producto"
       >

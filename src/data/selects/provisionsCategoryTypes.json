@@ -1,0 +1,38 @@
+[
+  {
+    "id": "carnes",
+    "label": "Carnes"
+  },
+  {
+    "id": "verduras",
+    "label": "Verduras"
+  },
+  {
+    "id": "tuberculos",
+    "label": "Tubérculos"
+  },
+  {
+    "id": "granos",
+    "label": "Granos"
+  },
+  {
+    "id": "lacteos",
+    "label": "Lácteos"
+  },
+  {
+    "id": "insumos",
+    "label": "Insumos"
+  },
+  {
+    "id": "panaderia",
+    "label": "Panadería"
+  },
+  {
+    "id": "bebidas",
+    "label": "Bebidas"
+  },
+  {
+    "id": "salsas",
+    "label": "Salsas"
+  }
+]

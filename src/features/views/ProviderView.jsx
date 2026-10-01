@@ -1,48 +1,66 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { FormNavbar, Input, Button, StatusSwitch } from "@/shared";
-import { SquarePen, Ambulance, ArrowLeft, Building2 } from "lucide-react";
+import { useNavigate,useParams } from "react-router-dom";
+import { Input,Button,StatusSwitch} from "../../shared";
+import {SquarePen,Ambulance,UserRoundSearch} from "lucide-react"
 import { providers } from "../providers/data/providers";
 
 export default function ProviderView() {
-  const navigate = useNavigate();
-  const { id } = useParams();
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+    const provider = providers.find((p) => p.id === Number(id));
+
+    if (!provider) {
+        return (
+            <div className="min-h-screen w-full flex flex-col">
+                 
+                <div className="flex items-center gap-3 mt-10 ml-12">
+                    <UserRoundSearch className="w-10 h-10 text-text-primary" />
+                    <h1 className="text-main font-heading font-bold text-text-primary">
+                        Visualizar Usuario
+                    </h1>
+                </div>
+                <p className="ml-12 mt-8 text-red-500">Usuario no encontrado.</p>
+            </div>
+        );
+    }
 
   const provider = providers.find((p) => String(p.id) === String(id));
 
   if (!provider) {
     return (
-      <div className="min-h-screen w-full flex flex-col bg-background">
-        
-        <div className="max-w-4xl mx-auto mt-12 p-8 bg-surface-muted rounded-3xl shadow-sm border border-border text-center">
-          <Building2 className="w-12 h-12 text-error mx-auto mb-4" />
-          <h1 className="text-main font-heading font-bold text-text-primary mb-2">
-            Proveedor no encontrado
-          </h1>
-          <p className="text-text-secondary mb-6">
-            El proveedor solicitado no se encuentra registrado en el sistema.
-          </p>
-          <Button variant="secondary" onClick={() => navigate("/providerList")}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Volver a proveedores
-          </Button>
-        </div>
-      </div>
-    );
-  }
+        <div className="min-h-screen w-full flex flex-col">
 
-  const initial = provider.providerName
-    ? provider.providerName.charAt(0).toUpperCase()
-    : "P";
+             
+            {/* Con esto logro que todo lo que esta contenido por la caja principal donde se encuentra la imagen y la infromacion del usuario queden columnas "una aal fente de la otra" con flex felx row */}
+            <div className="flex items-center gap-3 mt-10 ml-30">
+                <Ambulance className="w-10 h-10 text-text-primary" />
+                <h1 className="text-main font-heading font-bold text-text-primary">
+                Visualizar Proveedor
+                </h1>
+            </div>
+            <div className="flex flex-row ">
 
-  // Colores consistentes para la inicial del avatar
-  const colors = [
-    "#E57373", "#F06292", "#BA68C8", "#9575CD",
-    "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
-    "#FFD54F", "#FF8A65",
-  ];
-  const bgColor = colors[(provider.id || 0) % colors.length];
-
-  return (
-    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
+                <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-[-100px] mx-auto w-fit h-fit mb-40 mt-[110px]"
+                >
+                    {/* Avatar con inicial */}
+                        <div className="bg-[var(--color-gray-200)] rounded-3xl p-8 shadow-sm mt-[-100px] mx-auto w-fit h-fit mb-40 mt-[110px]"
+                            style={{
+                                backgroundColor: bgColor,
+                                marginTop:"50px",
+                                width: "150px",
+                                height: "150px",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "64px",
+                                fontWeight: "bold",
+                                color: "#fff",
+                                userSelect: "none",
+                            }}
+                        >
+                            {initial}
+                        </div>
     
 
       {/* Encabezado Principal */}
