@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Pencil } from "lucide-react";
 
-import {  Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
+import {Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
 import { getDocumentTypes } from "@/services/selectService";
 import { providers } from "../../providers/data/providers";
 import { createEditProviderSchema } from "../../providers/schemas/editProviderSchema";
@@ -136,6 +136,7 @@ export default function EditProvider() {
 
   return (
     <div className="min-h-screen w-full flex flex-col">
+      I
 
       <div className="flex items-center gap-3 mt-10 ml-12">
         <Pencil className="w-10 h-10 text-text-primary" />

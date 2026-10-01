@@ -11,8 +11,11 @@ import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
 import ProviderView from "../features/views/ProviderView";
 import UserView from "../features/views/UserView";
 import ProductView from "../features/views/ProductView";
+import ProvisionsView from "../features/views/ProvisionsView";
 import EditUser from "../features/views/edit/EditUser";
 import EditProvider from "../features/views/edit/EditProvider";
+import EditProduct from "../features/views/edit/EditProduct";
+import EditProvisions from "../features/views/edit/EditProvisions";
 import { MenuListPage, CreateMenuPage } from "@/features/menu";
 import { OrdensListPage, CreateOrderPage } from "@/features/ordens";
 
@@ -49,9 +52,12 @@ const router = createBrowserRouter([
       { path: "/inventoryCreate", element: <CreateInventoryPage /> },
       { path: "/ProviderView/:id", element: <ProviderView /> },
       { path: "/ProductView/:id", element: <ProductView /> },
+      { path: "/ProvisionsView/:id", element: <ProvisionsView /> },
       { path: "/UserView/:id", element: <UserView /> },
       { path: "/EditUser/:id", element: <EditUser /> },
+      { path: "/EditProduct/:id", element: <EditProduct /> },
       { path: "/EditProvider/:id", element: <EditProvider /> },
+      { path: "/EditProvisions/:id", element: <EditProvisions /> },
       { path: "/menuCreate", element: <CreateMenuPage /> },
       { path: "/ordensCreate", element: <CreateOrderPage /> },
       { path: "/permits", element: <PermissionsManagementPage /> },
