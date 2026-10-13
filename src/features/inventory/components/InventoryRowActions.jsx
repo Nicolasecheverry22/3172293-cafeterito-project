@@ -1,90 +1,87 @@
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 import {
   showSuccessAlert,
   showDeleteCancelAlert,
   showSystemErrorAlert,
+  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
 
-export default function InventoryRowActions({ product, onDeleted }) {
+export default function InventoryRowActions({ provision, onDeleted }) {
   const navigate = useNavigate();
 
-  // Redirigir a la vista del producto pasando su ID
- 
+  // Obtener el ID dinámico de forma segura (soporta id o provisionId)
+  const targetId = provision?.id ?? provision?.provisionId;
+
+  const handleView = () => {
+    if (!provision.id) return;
+    navigate(`/InventoryView/${provision.id}`);
+  };
+
   const handleEdit = () => {
-    const id = product.id || product.productId;
-    navigate(`/EditProduct/${id}`);
+    if (!provision.id) return;
+    navigate(`/editInventory/${provision.id}`); 
   };
 
   const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: "¿Eliminar producto?",
-      text: `Esta acción eliminará "${product.productName || product.nombre || "este producto"}" del inventario y no se podrá revertir.`,
-      icon: "warning",
-      showCancelButton: true,
+    if (!targetId) return;
+
+    const result = await showConfirmDeleteAlert({
+      title: "¿Eliminar suministro?",
+      text: `Esta acción eliminará "${provision.provisionName || provision.nombre || "este suministro"}" del inventario y no se podrá revertir.`,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (!result.isConfirmed) {
       showDeleteCancelAlert({
         title: "Operación cancelada",
-        text: "El producto no fue eliminado.",
+        text: "El suministro no fue eliminado.",
       });
       return;
     }
 
     try {
-      console.log("Producto eliminado:", product.id);
+      console.log("Suministro eliminado:", targetId);
 
       await showSuccessAlert({
-        title: "¡Producto eliminado!",
-        text: "El producto fue eliminado del inventario correctamente.",
+        title: "¡Suministro eliminado!",
+        text: "El suministro fue eliminado del inventario correctamente.",
       });
 
-      onDeleted?.(product.id);
+      onDeleted?.(targetId);
     } catch (error) {
-      console.error("Error al eliminar el producto:", error);
+      console.error("Error al eliminar el suministro:", error);
       await showSystemErrorAlert({
-        text: "El producto no pudo ser eliminado. Intenta nuevamente.",
+        text: "El suministro no pudo ser eliminado. Intenta nuevamente.",
       });
     }
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-center">
       <button
-        onClick={() => navigate(`/ProvisionsView/${product.id}`)}
-        className="p-1 rounded hover:bg-gray-100"
+        onClick={handleView}
+        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        title="Ver detalles"
       >
-        <Eye size={16} />
+        <Eye size={18} />
       </button>
 
       <button
-        onClick={() => navigate(`/EditProvisions/${product.id}`)}
+        onClick={handleEdit}
         className="p-1 rounded hover:bg-gray-100 cursor-pointer"
-        title="Editar producto"
+        title="Editar suministro"
       >
-        <Pencil size={16} />
+        <Pencil size={18} />
       </button>
 
       <button
         onClick={handleDelete}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer text-red-600 hover:text-red-800"
-        title="Eliminar producto"
+        className="p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-800 transition-colors cursor-pointer"
+        title="Eliminar suministro"
       >
-        <Trash2 size={16} />
+        <Trash2 size={18} />
       </button>
     </div>
   );

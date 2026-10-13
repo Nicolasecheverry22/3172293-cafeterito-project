@@ -71,8 +71,10 @@ export const getProviderColumns = (sortConfig, onSort) => [
 
       return (
         <StatusSwitch
+          size="sm"
           checked={provider.is_active}
           onChange={handleChange}
+          disabled
         />
       );
     },

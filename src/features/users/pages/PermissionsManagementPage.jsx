@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Save, ChevronDown, UserRoundKey } from "lucide-react";
-import Swal from "sweetalert2";
 import { Button, Checkbox } from "@/shared";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
   showDeleteCancelAlert,
   showSystemErrorAlert,
+  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
 
 export default function PermissionsManagementPage() {
@@ -20,33 +20,33 @@ export default function PermissionsManagementPage() {
   const [formData, setFormData] = useState({
     master_usuarios: false,
     usr_crear: false,
-    usr_visualizar: false,
+    usr_visualizar: true,
     usr_actualizar: false,
-    usr_listar: false,
+    usr_listar: true,
     usr_activar: false,
     usr_reporte: false,
 
     master_consumo: false,
     cons_crear: false,
-    cons_visualizar: false,
+    cons_visualizar: true,
     cons_actualizar: false,
-    cons_listar: false,
+    cons_listar: true,
     cons_activar: false,
     cons_reporte: false,
 
     master_devolutivo: false,
     dev_crear: false,
-    dev_visualizar: false,
+    dev_visualizar: true,
     dev_actualizar: false,
-    dev_listar: false,
+    dev_listar: true,
     dev_activar: false,
     dev_reporte: false,
 
     master_prestamos: false,
     pres_crear: false,
-    pres_visualizar: false,
+    pres_visualizar: true,
     pres_actualizar: false,
-    pres_listar: false,
+    pres_listar: true,
     pres_activar: false,
     pres_reporte: false,
     pres_retornar: false,
@@ -61,25 +61,12 @@ export default function PermissionsManagementPage() {
     }));
   };
 
-  // Manejo de la confirmación al pulsar "Cancelar"
   const handleCancel = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Estás seguro de cancelar?",
       text: "Los cambios realizados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, salir",
       cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
@@ -128,19 +115,18 @@ export default function PermissionsManagementPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background pb-10">
+    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-4 border border-border/40 shadow-2xl">
       
 
       <div className="w-full px-6 md:px-12 pt-8">
         <div className="mx-auto">
-          {/* Encabezado */}
           <div className="flex items-center gap-4 mb-8">
             <div>
-              <h1 className="text-main font-heading font-bold text-text-primary flex items-center gap-3">
-              <UserRoundKey className="w-8 h-8 text-text-primary"/>
+              <h1 className="text-main font-heading font-bold text-text-primary/ flex items-center gap-3">
+              <UserRoundKey className="w-8 h-8 text-text-primary/"/>
                 Gestión de Permisos
               </h1>
-              <p className="text-body text-text-secondary mt-1">
+              <p className="text-body text-text-inverse/40 mt-1">
                 Asignación de roles y accesos al sistema.
               </p>
             </div>
@@ -152,7 +138,7 @@ export default function PermissionsManagementPage() {
           >
             <div className="lg:col-span-1 flex flex-col gap-10 mt-4">
               <div className="flex flex-col gap-2 relative">
-                <label className="text-body text-text-primary font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]">
+                <label className="text-body text-text-primary/ font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]">
                   Grupos usuarios
                 </label>
                 <div className="relative mt-2">
@@ -170,7 +156,7 @@ export default function PermissionsManagementPage() {
               </div>
 
               <div className="flex flex-col gap-2 relative">
-                <label className="text-body text-text-primary font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]">
+                <label className="text-body text-text-primary/ font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]">
                   Usuario individual
                 </label>
                 <div className="relative mt-2">

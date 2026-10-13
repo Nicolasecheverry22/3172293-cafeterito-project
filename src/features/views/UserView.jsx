@@ -48,11 +48,11 @@ export default function UserView() {
   const bgColor = colors[user.id % colors.length];
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
+    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
 
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
-        <UserRoundSearch className="w-9 h-9 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
+      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-12 flex items-center gap-3">
+        <UserRoundSearch className="w-9 h-9 text-text-primary/" />
+        <h1 className="text-main font-heading font-bold text-text-primary/ text-2xl">
           Visualizar Usuario
         </h1>
       </div>
@@ -66,7 +66,7 @@ export default function UserView() {
           </p>
           <StatusSwitch
             size="lg"
-            checked={Boolean(isActive)}
+            checked={isActive}
             disabled
           />
         </div>
@@ -145,7 +145,7 @@ export default function UserView() {
             Acciones
           </p>
           <Button
-            variant="secondary"
+            variant="tertiary"
             type="button"
             size="md"
             className="w-full flex items-center justify-center gap-2"

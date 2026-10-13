@@ -1,46 +1,31 @@
 // Iconos usados en los botones de acciones
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 import {
+  showConfirmDeleteAlert,
   showDeleteCancelAlert,
   showSystemErrorAlert,
+  showSuccessAlert
 } from "@/shared/services/alertService";
-// Fuente de datos mock de usuarios
+
 import { users as usersData } from "../data/users";
 
-// Componente que renderiza las acciones de cada fila de usuario
-// Recibe como prop el objeto user
+
 export default function UserRowActions({ user, onDeleted }) {
-  // Hook que permite redirigir a otra ruta desde código
   const navigate = useNavigate();
 
-  // Acción para editar el usuario
-  // Redirige a la página de edición usando el id del usuario
+ 
   const handleEdit = () => {
     navigate(`/EditUser/${user.id}`);
   };
 
-  // Acción para eliminar el usuario, con confirmación previa
+  
   const handleDelete = async () => {
-    // Confirmación previa de eliminación
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Eliminar usuario?",
-      text: `Esta acción eliminará a "${user.userName || user.nombre || "este usuario"}" y no se podrá revertir.`,
-      icon: "warning",
-      showCancelButton: true,
+      text: `Esta acción eliminará a "${user.userName || user.nombre || "este usuario"} y no se podrá revertir.`,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (!result.isConfirmed) {
@@ -54,25 +39,14 @@ export default function UserRowActions({ user, onDeleted }) {
     try {
       const index = usersData.findIndex((u) => u.id === user.id);
       if (index !== -1) usersData.splice(index, 1);
-      // TODO: reemplazar por llamada real (ej. userService.delete(user.id))
+      
 
-      await Swal.fire({
+      const result = await showSuccessAlert({
         title: "¡Usuario eliminado!",
-        text: "El usuario fue eliminado correctamente.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        timer: 3000,
-        timerProgressBar: true,
-        customClass: {
-            popup: "rounded-2x1",
-            title: "text-green-600",  
-            confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-            timerProgressBar: "!bg-green-600",
-        },
-        buttonsStyling: false,
+        text: "El usuario fue eliminado correctamente."
       });
 
-      onDeleted?.(user.id); // permite a la tabla padre refrescar su lista sin recargar la página
+      onDeleted?.(user.id); 
     } catch (error) {
       console.error("Error al eliminar el usuario:", error);
       await showSystemErrorAlert({

@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useNavigate as useNavParams, useParams as useParamValues } from "react-router-dom";
-import Swal from "sweetalert2";
 import { Pencil } from "lucide-react";
 
-import {Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
-import { getDocumentTypes } from "@/services/selectService";
+import { Input, StatusSwitch, Select, FileInput, Button } from "@/shared";
 import { providers } from "../../providers/data/providers";
 import { createEditProviderSchema } from "../../providers/schemas/editProviderSchema";
 
 import {
   showSystemErrorAlert,
   showDeleteCancelAlert,
+  showSuccessAlert,
+  showConfirmDeleteAlert,
+  showCreateErrorAlert
 } from "@/shared/services/alertService";
 
 const DOCUMENT_TYPES = [
@@ -44,6 +44,7 @@ export default function EditProvider() {
     providerEmail: provider?.providerEmail ?? "",
     productService: provider?.productService ?? "",
     isActive: provider?.isActive ?? true,
+    file: provider?.file ?? [],
   });
 
   if (!provider) return null;
@@ -51,43 +52,53 @@ export default function EditProvider() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleFileChange = (files) => {
+    setFormData((prev) => ({ ...prev, file: files }));
+    if (errors.file) {
+      setErrors((prev) => ({ ...prev, file: undefined }));
+    }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
 
-    const schema = createEditProviderSchema({ currentProviderId: provider.id });
-    const result = schema.safeParse(formData);
-
-    if (!result.success) {
-      const fieldErrors = {};
-      result.error.issues.forEach((issue) => {
-        fieldErrors[issue.path[0]] = issue.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-
     try {
-      Object.assign(provider, { ...result.data });
+      const schema = createEditProviderSchema({ currentProviderId: provider.id });
+      const result = schema.safeParse(formData);
 
-      await Swal.fire({
+      if (!result.success) {
+        console.error("Errores específicos de validación (Zod):", result.error.format());
+
+        const fieldErrors = {};
+        result.error.issues.forEach((issue) => {
+          fieldErrors[issue.path[0]] = issue.message;
+        });
+        setErrors(fieldErrors);
+
+        await showCreateErrorAlert({
+          entity: "producto",
+          text: "Por favor revisa los errores indicados en el formulario antes de guardar.",
+        });
+      return;
+      }
+
+      setErrors({});
+
+      // Actualización directa del objeto de proveedor en el mock data
+      Object.assign(provider, {
+        ...result.data,
+        id: provider.id,
+      });
+
+      await showSuccessAlert({
         title: "¡Proveedor actualizado!",
         text: "Los cambios fueron guardados correctamente.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        timer: 3000,
-        timerProgressBar: true,
-        customClass: {
-          popup: "rounded-2xl",
-          title: "text-green-600 font-heading font-bold",
-          confirmButton:
-            "bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg cursor-pointer font-medium",
-          timerProgressBar: "!bg-green-600",
-        },
-        buttonsStyling: false,
       });
 
       navigate("/providerList");
@@ -100,23 +111,11 @@ export default function EditProvider() {
   };
 
   const handleCancel = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Descartar cambios?",
       text: "Los cambios realizados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, descartar",
       cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
@@ -129,24 +128,20 @@ export default function EditProvider() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
-      I
-
-      <div className="flex items-center gap-3 mt-10 ml-12">
-        <Pencil className="w-10 h-10 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary">Editar Proveedor</h1>
+    <div className="w-full max-w-6xl mx-auto bg-[#a1a1a1]/80 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
+      <div className="flex items-center gap-3 mb-6">
+        <Pencil className="w-8 h-8 text-black" />
+        <h1 className="text-3xl font-heading font-black text-black">
+          Editar Proveedor
+        </h1>
       </div>
 
-      {/* Formulario Principal */}
-      <form
-        onSubmit={handleSave}
-        className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start"
-      >
-        {/* Columna Izquierda: Estado */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
-          <p className="text-text-primary font-heading font-bold text-lg">
+      <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Bloque Izquierdo: Estado */}
+        <div className="lg:col-span-3 bg-[#d4d4d4] rounded-3xl p-6 flex flex-col items-center justify-center gap-4 text-center shadow-md">
+          <span className="text-black font-heading font-bold text-lg">
             Estado
-          </p>
+          </span>
           <StatusSwitch
             size="lg"
             checked={formData.isActive}
@@ -156,9 +151,22 @@ export default function EditProvider() {
           />
         </div>
 
-        {/* Columna Derecha: Campos de Formulario */}
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col gap-8">
-          <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Bloque Derecho: FileInput + Inputs del Formulario */}
+        <div className="lg:col-span-9 bg-[#d4d4d4] rounded-3xl p-8 flex flex-col items-center gap-6 shadow-md">
+          {/* Subir imagen / FileInput centrado */}
+          <div className="w-full flex justify-center">
+            <FileInput
+              value={formData.file}
+              onChange={handleFileChange}
+              accept="image/*,.pdf"
+            />
+            {errors.file && (
+              <span className="text-red-600 text-xs mt-1 block">{errors.file}</span>
+            )}
+          </div>
+
+          {/* Sub-tarjeta contenedora de los campos de texto */}
+          <div className="w-full bg-[#a1a1a1]/70 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select
               label="Tipo de Documento"
               name="providerDocumentType"
@@ -175,23 +183,13 @@ export default function EditProvider() {
               onChange={handleChange}
               error={errors.nit}
             />
-            <div className="md:col-span-2">
-              <Input
-                label="Nombre del Proveedor"
-                name="providerName"
-                type="text"
-                value={formData.providerName}
-                onChange={handleChange}
-                error={errors.providerName}
-              />
-            </div>
             <Input
-              label="Dirección"
-              name="providerAddress"
+              label="Nombre del Proveedor"
+              name="providerName"
               type="text"
-              value={formData.providerAddress}
+              value={formData.providerName}
               onChange={handleChange}
-              error={errors.providerAddress}
+              error={errors.providerName}
             />
             <Input
               label="Teléfono"
@@ -201,16 +199,22 @@ export default function EditProvider() {
               onChange={handleChange}
               error={errors.providerPhone}
             />
-            <div className="md:col-span-2">
-              <Input
-                label="Correo Electrónico"
-                name="providerEmail"
-                type="email"
-                value={formData.providerEmail}
-                onChange={handleChange}
-                error={errors.providerEmail}
-              />
-            </div>
+            <Input
+              label="Dirección"
+              name="providerAddress"
+              type="text"
+              value={formData.providerAddress}
+              onChange={handleChange}
+              error={errors.providerAddress}
+            />
+            <Input
+              label="Correo Electrónico"
+              name="providerEmail"
+              type="email"
+              value={formData.providerEmail}
+              onChange={handleChange}
+              error={errors.providerEmail}
+            />
             <div className="md:col-span-2">
               <Input
                 label="Productos Suministrados"
@@ -224,13 +228,8 @@ export default function EditProvider() {
           </div>
 
           {/* Botones de Acción */}
-          <div className="flex gap-4 items-center justify-end border-t border-border/40 pt-6">
-            <Button
-              variant="secondary"
-              size="md"
-              type="button"
-              onClick={handleCancel}
-            >
+          <div className="w-full flex items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>
             <Button variant="primary" size="md" type="submit">

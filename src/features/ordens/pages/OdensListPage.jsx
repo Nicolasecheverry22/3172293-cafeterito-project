@@ -61,7 +61,7 @@ export default function OrdenListPage() {
           <div className="flex items-center gap-4">
             <Button
               size="md"
-              variant="secondary"
+              variant="tertiary"
               onClick={() => setIsModalOpen(true)}
             >
               Reportar órdenes

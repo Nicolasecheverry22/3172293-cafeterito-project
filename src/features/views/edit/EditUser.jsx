@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Swal from "sweetalert2";
-import { FormNavbar, Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
+import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
 import { Pencil } from "lucide-react";
 import { getDocumentTypes, getRoles } from "@/services/selectService";
 import { users } from "../../users/data/users";
@@ -9,6 +8,9 @@ import { createEditUserSchema } from "../../users/schemas/editUserSchema";
 import {
   showSystemErrorAlert,
   showDeleteCancelAlert,
+  showConfirmDeleteAlert,
+  showSuccessAlert,
+  showCreateErrorAlert
 } from "@/shared/services/alertService";
 
 export default function EditUser() {
@@ -35,7 +37,7 @@ export default function EditUser() {
 
   const [formData, setFormData] = useState({
     userImage: user?.userImage ?? [],
-    userDocumentTypes: user?.userDocumentTypes ?? "",
+    userDocumentTypes: user?.userDocumentTypes ?? "CC",
     userName: user?.userName ?? "",
     userAddress: user?.userAddress ?? "",
     userPhone: user?.userPhone ?? "",
@@ -49,6 +51,11 @@ export default function EditUser() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Limpia el error del campo cuando el usuario empieza a escribir nuevamente
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSave = async (e) => {
@@ -57,41 +64,40 @@ export default function EditUser() {
     const schema = createEditUserSchema({ currentUserId: user.id });
     const result = schema.safeParse(formData);
 
+    // Si falla la validación con Zod
     if (!result.success) {
-  
-    console.log("Campos con error:", result.error.flatten().fieldErrors);
-    
-    const fieldErrors = {};
-    result.error.issues.forEach((issue) => {
-      fieldErrors[issue.path[0]] = issue.message;
-    });
-    setErrors(fieldErrors);
-    return;
+      console.log("Campos con error:", result.error.flatten().fieldErrors);
+
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        title: "Campos inválidos",
+        text: "Por favor revisa los campos señalados en el formulario antes de guardar.",
+      });
+
+      return;
     }
 
     setErrors({});
 
     try {
-      // Actualizamos los datos del objeto usuario
-      Object.assign(user, result.data);
-
-      await Swal.fire({
-        title: "¡Usuario actualizado!",
-        text: "Los cambios fueron guardados correctamente.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        timer: 3000,
-        timerProgressBar: true,
-        customClass: {
-          popup: "rounded-2xl",
-          title: "text-green-600 font-heading font-bold",
-          confirmButton: "bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg cursor-pointer font-medium",
-          timerProgressBar: "!bg-green-600",
-        },
-        buttonsStyling: false,
+      // Actualizamos los datos del usuario sincronizando todas las variantes de estado
+      Object.assign(user, {
+        ...result.data,
+        isActive: formData.isActive,
+        is_active: formData.isActive,
+        status: formData.isActive ? "Activo" : "Inactivo",
       });
 
-      // Redirección explícita a la lista de usuarios
+      await showSuccessAlert({
+        title: "¡Usuario actualizado!",
+        text: "Los cambios fueron guardados correctamente.",
+      });
+
       navigate("/userList");
     } catch (error) {
       console.error("Error al actualizar el usuario:", error);
@@ -102,23 +108,11 @@ export default function EditUser() {
   };
 
   const handleCancel = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Descartar cambios?",
       text: "Los cambios realizados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, descartar",
       cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
@@ -131,7 +125,7 @@ export default function EditUser() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background pb-12">
+    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-2 border border-border/40 shadow-2xl">
 
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <Pencil className="w-9 h-9 text-text-primary" />
@@ -156,7 +150,12 @@ export default function EditUser() {
           <div className="w-full flex flex-col items-center">
             <FileInput
               value={formData.userImage}
-              onChange={(files) => setFormData((prev) => ({ ...prev, userImage: files }))}
+              onChange={(files) => {
+                setFormData((prev) => ({ ...prev, userImage: files }));
+                if (errors.userImage) {
+                  setErrors((prev) => ({ ...prev, userImage: undefined }));
+                }
+              }}
               multiple={true}
             />
             {errors.userImage && (

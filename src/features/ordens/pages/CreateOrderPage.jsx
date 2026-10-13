@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Utensils } from "lucide-react";
-import Swal from "sweetalert2";
+
 
 import OrderForm from "../components/OrderForm";
 import { waitersData, menuDishesData } from "../data/orderMockData";
@@ -10,6 +10,7 @@ import {
   showSuccessAlert,
   showSystemErrorAlert,
   showDeleteCancelAlert,
+  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
 
 export default function CreateOrderPage() {
@@ -24,7 +25,7 @@ export default function CreateOrderPage() {
     id: ordersData.length + 1,
     tableNumber: validatedData.tableNumber,
     waiter: waiterName,
-    status: "pending",
+    status: "Activa",
     createdAt: new Date().toISOString().slice(0, 10),
     observations: validatedData.observations ?? "",
     items: validatedData.items.map((item) => {
@@ -57,23 +58,11 @@ export default function CreateOrderPage() {
   };
 
   const handleCancel = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Cancelar registro?",
       text: "Los datos ingresados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
       cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
@@ -86,7 +75,7 @@ export default function CreateOrderPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background pb-10">
+    <div className="bg-surface/60 rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
 
       <div className="max-w-3xl mx-auto space-y-8 p-4">
         <div className="flex items-center gap-3">
@@ -97,7 +86,7 @@ export default function CreateOrderPage() {
           </h1>
         </div>
 
-        <div className="bg-background p-6 md:p-8 rounded-2xl border border-border shadow-sm">
+        <div className="bg-surface/70 rounded-3xl p-8 shadow-sm">
           <OrderForm
             mode="create"
             onSubmit={handleCreateOrder}

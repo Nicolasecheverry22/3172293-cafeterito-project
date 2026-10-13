@@ -1,18 +1,30 @@
 [
   {
-    "id": "entradas",
+    "value": "Entradas",
     "label": "Entradas"
   },
   {
-    "id": "plato_fuerte",
+    "value": "Platos fuertes",
     "label": "Plato Fuerte"
   },
   {
-    "id": "bebidas",
+    "value": "Bebidas",
     "label": "Bebidas"
   },
   {
-    "id": "postres",
+    "value": "Postres",
     "label": "Postres"
+  },
+  {
+    "value": "Comida rápida",
+    "label": "Comida rápida"
+  },
+  {
+    "value": "Saludable",
+    "label": "Saludable"
+  },
+  {
+    "value": "Acompañamientos",
+    "label": "Acompañamientos"
   }
 ]

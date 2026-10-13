@@ -174,7 +174,7 @@ export default function DataTable({ data, columns }) {
             {table.getRowModel().rows.map(row => (
 
 
-              <tr key={row.id} className="hover:bg-gray-50">
+              <tr key={row.id} className="hover:bg-surface/70">
 
 
                 {/* Celdas visibles de cada fila */}
@@ -216,7 +216,7 @@ export default function DataTable({ data, columns }) {
 
         {/* ================== INFORMACIÓN ================== */}
         {/* Cantidad de registros visibles */}
-        <span className="text-sm text-gray-600">
+        <span className="text-sm">
           Mostrando {table.getRowModel().rows.length} de{" "}
           {table.getFilteredRowModel().rows.length} registros
         </span>

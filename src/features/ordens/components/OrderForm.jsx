@@ -92,7 +92,6 @@ export default function OrderForm({
         value={formData.tableNumber}
         onChange={handleChange}
         placeholder="No. Mesa"
-        className="text-center font-bold"
         error={errors.tableNumber}
       />
 
@@ -106,8 +105,8 @@ export default function OrderForm({
       />
 
       <div className="space-y-4">
-        <label className="block text-caption text-text-secondary font-medium">
-          Platillos / Productos del Menú
+        <label className="block text-caption text-text-primary font-medium">
+          Platillos del Menú
         </label>
 
         {orderItems.map((item) => (
@@ -133,7 +132,7 @@ export default function OrderForm({
             <button
               type="button"
               onClick={() => removeDishRow(item.id)}
-              className="p-3 text-text-muted hover:text-error hover:bg-error/10 transition-colors rounded-lg flex items-center justify-center h-12 border border-border"
+              className="p-3 text-text-primary hover:text-error hover:bg-error/20 transition-colors rounded-lg flex items-center justify-center h-12 border border-border"
               aria-label="Eliminar platillo"
             >
               <Trash2 className="w-5 h-5" />
@@ -148,14 +147,14 @@ export default function OrderForm({
           size= "md"
           type="button"
           onClick={addDishRow}
-          className="flex items-center justify-center gap-2 w-full md:w-auto bg-brand/30 hover:bg-brand/50 text-text-primary font-medium"
+          className="flex items-center justify-center gap-2 w-full md:w-auto bg-brand/50 hover:bg-brand/80 text-text-primary font-medium"
         >
           Agregar producto <Plus className="w-4 h-4" />
         </Button>
       </div>
 
       <div>
-        <label className="block text-caption text-text-secondary font-medium mb-1">Observaciones</label>
+        <label className="block text-caption text-text-primary font-medium mb-1">Observaciones</label>
         <textarea
           name="observations"
           value={formData.observations}
@@ -173,7 +172,7 @@ export default function OrderForm({
         <div className="border-t border-border pt-4 space-y-2">
           <h3 className="font-heading font-bold text-text-primary text-body">Resumen del pedido</h3>
           {summary.map((row) => (
-            <div key={row.id} className="flex justify-between text-small text-text-secondary">
+            <div key={row.id} className="flex justify-between text-small text-text-primary">
               <span>{row.label} × {row.quantity}</span>
               <span>${row.subtotal.toLocaleString("es-CO")}</span>
             </div>

@@ -1,59 +1,150 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Swal from "sweetalert2";
-import { Input, Button, StatusSwitch, FileInput, Select } from "@/shared";
-import { UtensilsCrossed } from "lucide-react";
-import provisionsCategoryTypes from "../../../data/selects/provisionsCategoryTypes.json";
-import { inventory } from "../../inventory/data/inventory";
+import { Pencil } from "lucide-react";
+import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
+import { inventory as inventoryData } from "../../inventory/data/inventory";
+import { createEditProvisionsSchema } from "../../inventory/schemas/editProvisionsSchema";
+import { getCategoryTypes } from "@/services/selectService";
 import {
   showSystemErrorAlert,
   showDeleteCancelAlert,
+  showSuccessAlert,
+  showConfirmDeleteAlert,
+  showCreateErrorAlert
 } from "@/shared/services/alertService";
 
-export default function ProvisionsView() {
+const DEFAULT_CATEGORIES = [
+  { value: "Carnes", label: "Carnes" },
+  { value: "Verduras", label: "Verduras" },
+  { value: "Tubérculos", label: "Tubérculos" },
+  { value: "Granos", label: "Granos" },
+  { value: "Lácteos", label: "Lácteos" },
+  { value: "Insumos", label: "Insumos" },
+  { value: "Panadería", label: "Panadería" },
+  { value: "Bebidas", label: "Bebidas" },
+  { value: "Salsas", label: "Salsas" },
+];
+
+const UNIT_OPTIONS = [
+  { value: "kg", label: "Kilogramos (kg)" },
+  { value: "g", label: "Gramos (g)" },
+  { value: "lt", label: "Litros (lt)" },
+  { value: "ml", label: "Mililitros (ml)" },
+  { value: "unid", label: "Unidades (unid)" },
+  { value: "lb", label: "Libras (lb)" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "Activo", label: "Activo" },
+  { value: "Vencido", label: "Vencido" },
+  { value: "Agotado", label: "Agotado" },
+  { value: "Averia", label: "Avería" },
+];
+
+export default function EditProvisions() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [categoriesOptions, setCategoriesOptions] = useState(DEFAULT_CATEGORIES);
+  const [errors, setErrors] = useState({});
 
-  const product = inventory.find((p) => p.id === Number(id));
+  // Búsqueda del suministro por id o provisionId
+  const item = inventoryData.find(
+    (p) => String(p.id) === String(id) || String(p.provisionId) === String(id)
+  );
+
+  useEffect(() => {
+    if (getCategoryTypes) {
+      getCategoryTypes()
+        .then((res) => {
+          if (Array.isArray(res) && res.length > 0) {
+            setCategoriesOptions(res);
+          }
+        })
+        .catch(() => setCategoriesOptions(DEFAULT_CATEGORIES));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!item) {
+      showSystemErrorAlert({
+        text: "El suministro que intentas editar no existe.",
+      }).then(() => navigate("/inventoryList", { replace: true }));
+    }
+  }, [item, navigate]);
 
   const [formData, setFormData] = useState({
-    productName: "",
-    category: "",
-    price: "",
-    stock: "",
-    productImage: [],
+    provisionName: item?.provisionName ?? item?.nameProvision ?? item?.name ?? "",
+    category: item?.category ?? "",
+    status: item?.status ?? item?.provisionStatus ?? "Activo",
+    unit: item?.unit ?? "",
+    batch: item?.batch ?? item?.provisionCode ?? "",
+    stock: item?.stock ?? item?.quantity ?? "",
+    minStock: item?.minStock ?? "",
+    maxStock: item?.maxStock ?? "",
+    price: item?.price ?? item?.priceProvision ?? item?.foodPrice ?? "",
+    isActive: item?.isActive ?? item?.is_active ?? true,
+    provisionImage: item?.provisionImage ?? item?.image ?? [],
   });
 
-  const [errors, setErrors] = useState({});
+  if (!item) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
+
+  
 
   const handleSave = async (e) => {
     e.preventDefault();
 
-    try {
-      console.log(formData);
+    const currentId = item.id ?? item.provisionId;
+    const schema = createEditProvisionsSchema({ currentProvisionId: currentId });
+    const result = schema.safeParse(formData);
 
-      await Swal.fire({
-        title: "¡Suministro actualizado!",
-        text: "Los cambios fueron guardados correctamente.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        timer: 3000,
-        timerProgressBar: true,
-        customClass: {
-          popup: "rounded-2xl",
-          title: "text-green-600",
-          confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-          timerProgressBar: "!bg-green-600",
-        },
-        buttonsStyling: false,
+    if (!result.success) {
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        entity: "suministro",
+        text: "Por favor revisa los errores indicados en el formulario antes de guardar.",
+      });
+      return;
+    }
+
+    setErrors({});
+
+    try {
+      
+      Object.assign(item, {
+        ...result.data,
+        provisionName: result.data.provisionName,
+        price: Number(result.data.price),
+        priceProvision: Number(result.data.price),
+        stock: Number(result.data.stock),
+        minStock: Number(result.data.minStock),
+        maxStock: Number(result.data.maxStock),
+        batch: result.data.batch,
+        provisionCode: result.data.batch,
+        status: formData.status,             
+        provisionStatus: formData.status,    
+        isActive: formData.isActive,
+        is_active: formData.isActive,
       });
 
-      navigate(-1);
+      await showSuccessAlert({
+        title: "¡Suministro actualizado!",
+        text: "Los cambios fueron guardados correctamente.",
+      });
+
+      navigate("/inventoryList");
     } catch (error) {
       console.error("Error al actualizar el suministro:", error);
       await showSystemErrorAlert({
@@ -62,24 +153,35 @@ export default function ProvisionsView() {
     }
   };
 
+  const handleStatusChange = async (e) => {
+    const newStatus = e.target.value;
+    const oldStatus = formData.status;
+
+    if (newStatus === oldStatus) return;
+
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cambiar estado?",
+      text: `¿Estás seguro de cambiar el estado de "${oldStatus}" a "${newStatus}"?`,
+      confirmButtonText: "Sí, cambiar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (result.isConfirmed) {
+      setFormData((prev) => ({
+        ...prev,
+        status: newStatus,
+        provisionStatus: newStatus,
+        isActive: newStatus.toLowerCase() === "activo" || newStatus.toLowerCase() === "disponible",
+      }));
+    }
+  };
+
   const handleCancel = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Descartar cambios?",
       text: "Los cambios realizados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, descartar",
       cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
@@ -87,119 +189,146 @@ export default function ProvisionsView() {
         title: "Edición cancelada",
         text: "No se guardaron los cambios.",
       });
-      navigate(-1);
+      navigate("/inventoryList");
     }
   };
 
-  if (!product) {
-    return (
-      <div className="min-h-screen w-full flex flex-col">
-        
-        <div className="flex items-center gap-3 mt-10 ml-30">
-          <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-          <h1 className="text-main font-heading font-bold text-text-primary">
-            Suministros 
-          </h1>
-        </div>
-        <p className="ml-30 mt-8 text-red-500">Producto no encontrado.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen w-full flex flex-col">
-      
-
-      <div className="flex items-center gap-3 mt-10 ml-30">
-        <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary">
-          Suministros de Inventario
+    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+      <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
+        <Pencil className="w-8 h-8 text-text-primary" />
+        <h1 className="text-2xl font-heading font-bold text-text-primary">
+          Editar suministro
         </h1>
       </div>
 
-      <form onSubmit={handleSave}>
-        <div className="flex flex-row">
-          <div className="flex flex-col items-center gap-8 mx-auto mt-[110px] mb-40">
-            <div className="bg-surface-muted rounded-3xl p-8 shadow-sm w-fit h-fit">
-              <FileInput
-                value={formData.productImage}
-                onChange={(files) => setFormData((prev) => ({ ...prev, productImage: files }))}
-                multiple={true}
-              />
-              {errors.productImage && (
-                <span className="text-error text-caption mt-1">{errors.productImage}</span>
-              )}
-            </div>
+      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* COLUMNA 1 */}
+        <div className="space-y-4">
+          <Input
+            label="Nombre del suministro"
+            name="provisionName"
+            type="text"
+            value={formData.provisionName}
+            placeholder="Ingrese el nombre"
+            onChange={handleChange}
+            error={errors.provisionName}
+          />
 
-            <div className="flex items-center gap-10">
-              <span
-                className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
-                style={{
-                  fontFamily: "var(--main-font)",
-                }}
-              >
-                Estado
+          <Select
+            label="Categoría"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            options={categoriesOptions}
+            error={errors.category}
+          />
+
+          <Select
+            label="Unidad de medida"
+            name="unit"
+            value={formData.unit}
+            onChange={handleChange}
+            options={UNIT_OPTIONS}
+            error={errors.unit}
+          />
+
+          <Select
+            label="Estado del suministro"
+            name="status"
+            value={formData.status}
+            onChange={handleStatusChange} 
+            placeholder="Seleccione estado"
+            options={STATUS_OPTIONS}
+            error={errors.status}
+          />
+
+          
+        </div>
+
+        {/* COLUMNA 2 */}
+        <div className="space-y-4">
+          <Input
+            label="Stock actual"
+            name="stock"
+            type="number"
+            value={formData.stock}
+            placeholder="Ingrese el stock"
+            onChange={handleChange}
+            error={errors.stock}
+          />
+
+          <Input
+            label="Precio unitario ($)"
+            name="price"
+            type="number"
+            value={formData.price}
+            placeholder="Ingrese el precio"
+            onChange={handleChange}
+            error={errors.price}
+          />
+
+          <Input
+            label="Lote"
+            name="batch"
+            type="text"
+            value={formData.batch}
+            placeholder="Ingrese el lote"
+            onChange={handleChange}
+            error={errors.batch}
+          />
+
+          <Input
+            label="Stock mínimo"
+            name="minStock"
+            type="number"
+            value={formData.minStock}
+            placeholder="Ingrese stock mínimo"
+            onChange={handleChange}
+            error={errors.minStock}
+          />
+
+          <Input
+            label="Stock máximo"
+            name="maxStock"
+            type="number"
+            value={formData.maxStock}
+            placeholder="Ingrese stock máximo"
+            onChange={handleChange}
+            error={errors.maxStock}
+          />
+        </div>
+
+        {/* COLUMNA 3 */}
+        <div className="flex flex-col justify-between h-full space-y-6">
+          <div>
+            
+            <FileInput
+              value={formData.provisionImage}
+              onChange={(files) =>
+                setFormData((prev) => ({ ...prev, provisionImage: files }))
+              }
+            />
+            {errors.provisionImage && (
+              <span className="text-error text-caption block mt-1">
+                {errors.provisionImage}
               </span>
-              <StatusSwitch size="lg" checked={product.isAvailable} disabled />
-            </div>
+            )}
           </div>
 
-          <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
-            <div className="w-56 flex flex-col gap-8">
-              <Input
-                label="Nombre Suministro"
-                name="productName"
-                type="text"
-                value={formData.productName}
-                placeholder={product.productName}
-                onChange={handleChange}
-              />
-              <Select
-                label="Categoría"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                placeholder={product.category}
-                options={provisionsCategoryTypes}
-                error={errors.category}
-              />
-            </div>
-
-            <div className="w-90 flex flex-col gap-4 mt-[-130px]">
-              <Input
-                className="mt-36"
-                label="Precio"
-                name="price"
-                type="text"
-                value={formData.price}
-                placeholder={`$ ${product.price.toLocaleString("es-CO")}`}
-                onChange={handleChange}
-              />
-            <div className="w-90 flex flex-col gap-4 mt-[-130px]">
-              <Input
-                className="mt-36"
-                label="Stock"
-                name="stock"
-                type="text"
-                value={formData.stock}
-                placeholder={String(product.stock)}
-                onChange={handleChange}
-              />
-              
-              </div>
-            </div>
+          <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40">
+            <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
+              Cancelar
+            </Button>
+            <Button variant="primary" size="md" type="submit">
+              Guardar Cambios
+            </Button>
           </div>
         </div>
 
-        <div className="flex gap-6 items-center justify-end mr-20 mb-10">
-          <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
-            Cancelar
-          </Button>
-          <Button variant="primary" size="md" type="submit">
-            Guardar
-          </Button>
-        </div>
       </form>
-      </div>
+    </div>
   );
 }
+

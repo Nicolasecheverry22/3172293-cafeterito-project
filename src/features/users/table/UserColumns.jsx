@@ -42,6 +42,10 @@ export const getUserColumns = (sortConfig, onSort) => [
     header: "Rol",
   },
   {
+    accessorKey: "userDocument",
+    header: "Documento",
+  },
+  {
     accessorKey: "userEmail",
     header: "Correo",
   },
@@ -52,7 +56,27 @@ export const getUserColumns = (sortConfig, onSort) => [
   {
     accessorKey: "is_active",
     header: "Estado",
-    cell: ({ row }) => (row.original.is_active ? "Activo" : "Inactivo"),
+    cell: ({ row }) => {
+      // 1. Verificamos tanto is_active como isActive de forma flexible
+      const activeValue = 
+        row.original.is_active ?? 
+        row.original.isActive ?? 
+        true;
+
+      const isActive = Boolean(activeValue);
+
+      const statusStyles = isActive
+        ? "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold"
+        : "bg-rose-100 text-rose-800 border-rose-300 font-semibold";
+
+      return (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border capitalize ${statusStyles}`}
+        >
+          {isActive ? "Activo" : "Inactivo"}
+        </span>
+      );
+    },
   },
   {
     id: "actions",

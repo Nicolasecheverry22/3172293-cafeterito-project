@@ -4,10 +4,12 @@ import { Pencil, Trash2, Eye } from "lucide-react";
 // Hook de React Router para navegar programáticamente entre rutas
 import { useNavigate } from "react-router-dom";
 
-import Swal from "sweetalert2";
+
 import {
   showDeleteCancelAlert,
   showSystemErrorAlert,
+  showConfirmDeleteAlert,
+  showSuccessAlert
 } from "@/shared/services/alertService";
 
 import { providers as providersData } from "../data/providers";
@@ -20,23 +22,11 @@ export default function ProviderRowActions({ provider, onDeleted }) {
   };
 
   const handleDelete = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Eliminar proveedor?",
       text: `Esta acción eliminará a "${provider.providerName || provider.nombre || "este proveedor"}" y no se podrá revertir.`,
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (!result.isConfirmed) {
@@ -52,21 +42,10 @@ export default function ProviderRowActions({ provider, onDeleted }) {
       if (index !== -1) providersData.splice(index, 1);
       // TODO: reemplazar por llamada real (ej. providerService.delete(provider.id))
 
-      await Swal.fire({
-              title: "¡Proveedor eliminado!",
-              text: "El proveedor fue eliminado correctamente.",
-              icon: "success",
-              confirmButtonText: "Aceptar",
-              timer: 3000,
-              timerProgressBar: true,
-              customClass: {
-                  popup: "rounded-2x1",
-                  title: "text-green-600",  
-                  confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-                  timerProgressBar: "!bg-green-600",
-              },
-              buttonsStyling: false,
-            });
+      await showSuccessAlert({
+        title: "¡Proveedor eliminado!",
+        text: "El proveedor fue eliminado correctamente.",
+      });
 
       onDeleted?.(provider.id);
     } catch (error) {

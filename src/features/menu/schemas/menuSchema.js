@@ -29,11 +29,8 @@ export function createMenuSchema({ currentMenuItemId = null } = {}) {
         .max(200, "La descripción es demasiado larga"),
 
       estado: z.boolean(),
-
-      imagen: z
-        .array(z.instanceof(File))
-        .min(1, "Debe cargar una imagen del platillo"),
     })
+    
     .refine(
       (data) =>
         !existingMenu.some(

@@ -15,7 +15,7 @@ const DEFAULT_FORM_DATA = {
   providerDocumentType: "",
   providerDocumentNumber: "",
   providerName: "",
-  isActive: true,
+  isActive: true, // Activo por defecto
   providerEmail: "",
   providerEmailConfirm: "",
   providerAddress: "",
@@ -25,6 +25,16 @@ const DEFAULT_FORM_DATA = {
   productFruits: false,
   productOthers: false,
   images: [],
+};
+
+// Función para mapear los productos seleccionados en formato texto para la tabla/detalle
+const getSelectedProductsText = (data) => {
+  const selected = [];
+  if (data.productFood) selected.push("Alimentos y/o Bebidas");
+  if (data.productSupplies) selected.push("Insumos");
+  if (data.productFruits) selected.push("Frutas y/o Verduras");
+  if (data.productOthers) selected.push("Otro");
+  return selected.join(", ") || "Ninguno";
 };
 
 export default function ProviderForm({
@@ -76,7 +86,29 @@ export default function ProviderForm({
     setErrors({});
     setIsSubmitting(true);
     try {
-      await onSubmit(result.data);
+      const productsText = getSelectedProductsText(formData);
+
+      // Payload mapeando exactamente las claves que lee la tabla de proveedores
+      const finalPayload = {
+        ...result.data,
+        ...formData,
+
+        // NIT / Documento (clave exacta para la columna 'NIT')
+        nit: formData.providerDocumentNumber,
+        providerDocumentNumber: formData.providerDocumentNumber,
+
+        // Estado (claves en booleano y string para encender el switch)
+        isActive: formData.isActive,
+        is_active: formData.isActive,
+        status: formData.isActive,
+        state: formData.isActive ? "activo" : "inactivo",
+
+        // Productos suministrados
+        productService: productsText,
+        product_service: productsText,
+      };
+
+      await onSubmit(finalPayload);
     } finally {
       setIsSubmitting(false);
     }

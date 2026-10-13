@@ -1,203 +1,169 @@
-import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Swal from "sweetalert2";
-import { Input, Button, StatusSwitch, FileInput } from "@/shared";
-import { UtensilsCrossed } from "lucide-react";
+import { Input, Button, StatusSwitch } from "@/shared";
+import { SquarePen, UtensilsCrossed } from "lucide-react";
 import { inventory } from "../inventory/data/inventory";
-import {
-  showSystemErrorAlert,
-  showDeleteCancelAlert,
-} from "@/shared/services/alertService";
 
 export default function ProvisionsView() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const product = inventory.find((p) => p.id === Number(id));
+  const provision = inventory.find((p) => String(p.id) === String(id));
 
-  const [formData, setFormData] = useState({
-    productName: "",
-    category: "",
-    price: "",
-    stock: "",
-    productImage: [],
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-
-    try {
-      console.log(formData);
-
-      await Swal.fire({
-        title: "¡Suministro actualizado!",
-        text: "Los cambios fueron guardados correctamente.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        timer: 3000,
-        timerProgressBar: true,
-        customClass: {
-          popup: "rounded-2xl",
-          title: "text-green-600",
-          confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-          timerProgressBar: "!bg-green-600",
-        },
-        buttonsStyling: false,
-      });
-
-      navigate(-1);
-    } catch (error) {
-      console.error("Error al actualizar el suministro:", error);
-      await showSystemErrorAlert({
-        text: "Los cambios no pudieron guardarse.",
-      });
-    }
-  };
-
-  const handleCancel = async () => {
-    const result = await Swal.fire({
-      title: "¿Descartar cambios?",
-      text: "Los cambios realizados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sí, descartar",
-      cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
-    });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Edición cancelada",
-        text: "No se guardaron los cambios.",
-      });
-      navigate(-1);
-    }
-  };
-
-  if (!product) {
+  if (!provision) {
     return (
       <div className="min-h-screen w-full flex flex-col">
-        
-        <div className="flex items-center gap-3 mt-10 ml-30">
-          <UtensilsCrossed className="w-16 h-16 text-text-primary" />
+        <div className="flex items-center gap-3 mt-10 ml-12">
+          <UtensilsCrossed className="w-10 h-10 text-text-primary" />
           <h1 className="text-main font-heading font-bold text-text-primary">
-            Suministros 
+            Visualizar Suministro
           </h1>
         </div>
-        <p className="ml-30 mt-8 text-red-500">Producto no encontrado.</p>
+        <p className="ml-12 mt-8 text-red-500">Suministro no encontrado.</p>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen w-full flex flex-col">
-      
+  const provisionName =
+    provision.provisionName || provision.provisionName || provision.nameprovision || "Suministro";
 
-      <div className="flex items-center gap-3 mt-10 ml-30">
-        <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary">
-          Suministros de Inventario
+  // Lote del suministro
+  const batchNumber = provision.batch || provision.lot || provision.lote || "LOT-101A";
+
+  // Iniciales dinámicas para el avatar
+  const getInitials = (name) => {
+    if (!name) return "S";
+    const words = name.trim().split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  return (
+    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+      {/* Encabezado Principal */}
+      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+        <UtensilsCrossed className="w-9 h-9 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
+          Visualizar Suministro de Inventario
         </h1>
       </div>
 
-      <form onSubmit={handleSave}>
-        <div className="flex flex-row">
-          <div className="flex flex-col items-center gap-8 mx-auto mt-[110px] mb-40">
-            <div className="bg-surface-muted rounded-3xl p-8 shadow-sm w-fit h-fit">
-              <FileInput
-                value={formData.productImage}
-                onChange={(files) => setFormData((prev) => ({ ...prev, productImage: files }))}
-                multiple={true}
-              />
-              {errors.productImage && (
-                <span className="text-error text-caption mt-1">{errors.productImage}</span>
+      {/* Grid Responsivo Estandarizado */}
+      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        
+        {/* Columna 1: Estado General y Acciones */}
+        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
+          <div className="w-full flex flex-col items-center gap-3">
+            <p className="text-text-primary font-heading font-bold text-md">
+              Estado
+            </p>
+            <StatusSwitch checked={provision.isActive ?? true} disabled />
+          </div>
+
+          <div className="w-full flex flex-col gap-3">
+            <p className="text-text-primary font-heading font-bold text-md">
+              Acciones
+            </p>
+            <Button
+              variant="tertiary"
+              type="button"
+              size="md"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => navigate(`/editInventory/${provision.id}`)}
+            >
+              <SquarePen className="w-5 h-5" />
+              Editar Info
+            </Button>
+          </div>
+        </div>
+
+        {/* Columna 2, 3 y 4: Información Detallada */}
+        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6">
+          
+          {/* Tarjeta Compacta del Suministro */}
+          <div className="w-full max-w-xs bg-surface rounded-2xl p-4 flex flex-col items-center text-center shadow-md border border-border/30">
+            {/* Avatar / Imagen Dinámica Compacta */}
+            <div className="mb-2 flex items-center justify-center">
+              {provision.image || provision.imageUrl ? (
+                <img
+                  src={provision.image || provision.imageUrl}
+                  alt={provisionName}
+                  className="w-14 h-14 object-cover shadow-md border-2 border-white/50"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-[#ec4899] text-white font-black text-xl flex items-center justify-center shadow-md uppercase select-none">
+                  {getInitials(provisionName)}
+                </div>
               )}
             </div>
 
-            <div className="flex items-center gap-10">
-              <span
-                className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
-                style={{
-                  fontFamily: "var(--main-font)",
-                }}
-              >
-                Estado
-              </span>
-              <StatusSwitch size="lg" checked={product.isAvailable} disabled />
-            </div>
+            
+
+            {/* Lote con alto contraste y visibilidad */}
+            <p className="text-xs font-bold text-text-primary/90 tracking-wide uppercase mt-1">
+              LOTE: <span className="font-extrabold text-black">{batchNumber}</span>
+            </p>
           </div>
 
-          <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
-            <div className="w-56 flex flex-col gap-8">
-              <Input
-                label="Nombre Suministro"
-                name="productName"
-                type="text"
-                value={formData.productName}
-                placeholder={product.productName}
-                onChange={handleChange}
-              />
-              <Input
-                label="Categoría"
-                name="category"
-                type="text"
-                value={formData.category}
-                placeholder={product.category}
-                onChange={handleChange}
-              />
-            </div>
+          {/* Formulario de Información (Inputs deshabilitados) */}
+          <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Nombre del Suministro"
+              value={provisionName}
+              disabled
+            />
 
-            <div className="w-90 flex flex-col gap-4 mt-[-130px]">
-              <Input
-                className="mt-36"
-                label="Precio"
-                name="price"
-                type="text"
-                value={formData.price}
-                placeholder={`$ ${product.price.toLocaleString("es-CO")}`}
-                onChange={handleChange}
-              />
-            <div className="w-90 flex flex-col gap-4 mt-[-130px]">
-              <Input
-                className="mt-36"
-                label="Stock"
-                name="stock"
-                type="text"
-                value={formData.stock}
-                placeholder={String(product.stock)}
-                onChange={handleChange}
-              />
-              
-              </div>
-            </div>
+            <Input
+              label="Categoría"
+              value={provision.category || ""}
+              disabled
+            />
+
+            <Input
+              label="Estado del Suministro"
+              value={provision.status || "activo"}
+              disabled
+            />
+
+            <Input
+              label="Unidad de Medida"
+              value={provision.unit || ""}
+              disabled
+            />
+
+            <Input
+              label="Stock Actual"
+              value={provision.stock ?? 0}
+              disabled
+            />
+
+            <Input
+              label="Stock Mínimo"
+              value={provision.minStock ?? 0}
+              disabled
+            />
+
+            <Input
+              label="Stock Máximo"
+              value={provision.maxStock ?? 0}
+              disabled
+            />
+
+            <Input
+              label="Precio Unitario ($ COP)"
+              value={
+                provision.price
+                  ? `$ ${Number(provision.price).toLocaleString("es-CO")}`
+                  : "$ 0"
+              }
+              disabled
+            />
           </div>
         </div>
 
-        <div className="flex gap-6 items-center justify-end mr-20 mb-10">
-          <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
-            Cancelar
-          </Button>
-          <Button variant="primary" size="md" type="submit">
-            Guardar
-          </Button>
-        </div>
-      </form>
       </div>
+    </div>
   );
 }
+

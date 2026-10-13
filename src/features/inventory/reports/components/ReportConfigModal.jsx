@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Swal from "sweetalert2";
+
 
 // Componentes UI reutilizables
 import { Button, Select } from "@/shared";
@@ -15,6 +15,7 @@ import {
   showSystemErrorAlert,
   showCreateErrorAlert,
   showDeleteCancelAlert,
+  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
@@ -24,7 +25,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const inventoryReportFields = [
-    { key: "productName", label: "Producto", default: true },
+    { key: "provisionName", label: "Suministro", default: true },
     { key: "category", label: "Categoría", default: true },
     { key: "stock", label: "Stock", default: true },
     { key: "unit", label: "Unidad", default: true },
@@ -104,23 +105,11 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const handleCancel = async () => {
     if (isGenerating) return;
 
-    const result = await Swal.fire({
-      title: "¿Cancelar configuración?",
+    const result = await showConfirmDeleteAlert({
+      title: "¿Cancelar Reporte?",
       text: "La configuración del reporte no se guardará.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, cancelar",
-      cancelButtonText: "Continuar configurando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
+      cancelButtonText: "Continuar reportando",
     });
 
     if (result.isConfirmed) {
@@ -134,7 +123,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-lg">
+      <div className="w-full max-w-lg rounded-xl bg-surface/90 p-6 shadow-lg">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de inventario
         </h2>

@@ -8,21 +8,20 @@ export default function Select({
     onChange,
     value,
     options = [],
+    className = "",
 }){
     return (
-        <div>
+        <div className={`w-full flex flex-col gap-1 ${className}`}>
             {/* Label solo se muestra si es Truthy un uno logico */}
-            {label &&(
-                <label 
+            {label && (
+              <label
                 htmlFor={htmlFor}
-                className="
-                    block
-                    text-caption
-                    text-secondary
-                "
-            >
+                  className={`block text-caption font-label ${
+                    error ? "text-error" : "text-secondary"
+                  }`}
+              >
                 {label}
-            </label>
+              </label>
             )}
             {/* Select */}
             <select 
@@ -59,7 +58,7 @@ export default function Select({
                 ))}
             </select>
             {error && (
-                <p className="text-caption text-red-800 place-self-start mt-1">{error}</p>
+                <p className="text-caption text-error place-self-start mt-1">{error}</p>
             )}
         </div>
     )

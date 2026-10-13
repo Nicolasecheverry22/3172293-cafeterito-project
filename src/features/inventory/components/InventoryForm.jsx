@@ -1,41 +1,87 @@
+
+
 import { useState } from "react";
-import { Input, Button, Select, FileInput } from "@/shared";
+import { 
+  Input, 
+  Select, 
+  Button, 
+  FileInput,
+} from "@/shared";
 import { createInventorySchema } from "../schemas/inventorySchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const DEFAULT_FORM_DATA = {
-  productId: "",
-  productImage: [],
-  productName: "",
-  productDescription: "",
-  productCategory: "",
-  productCode: "",
-  foodPrice: "",
-  foodBrand: "",
-  foodQuantity: "",
+  provisionName: "",
+  category: "",
+  unit: "",
+  stock: "",
+  price: "",
+  batch: "",
+  minStock: "",
+  maxStock: "",
+  provisionImage: [],
+  isActive: true,
+  status: "",
+  provisionStatus: "",
 };
 
+const STATUS_OPTIONS = [
+  { value: "Activo", label: "Activo" },
+  { value: "Vencido", label: "Vencido" },
+  { value: "Agotado", label: "Agotado" },
+  { value: "Averia", label: "Avería" },
+];
+
+const UNIT_OPTIONS = [
+  { value: "kg", label: "Kilogramos (kg)" },
+  { value: "g", label: "Gramos (g)" },
+  { value: "lt", label: "Litros (lt)" },
+  { value: "ml", label: "Mililitros (ml)" },
+  { value: "unid", label: "Unidades (unid)" },
+  { value: "lb", label: "Libras (lb)" },
+];
+
 export default function InventoryForm({
-  mode = "create", 
-  initialData = null,
-  currentProductId = null,
+  mode = "create",
+  currentProvisionId = null,
   categoryTypes = [],
   onSubmit,
   onCancel,
 }) {
-  const [formData, setFormData] = useState(initialData ?? DEFAULT_FORM_DATA);
+  const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleStatusChange = (e) => {
+    const selectedStatus = e.target.value;
+    
+    const isActivo = selectedStatus.toLowerCase() === "activo" || selectedStatus.toLowerCase() === "disponible";
+
+    setFormData((prev) => ({
+      ...prev,
+      status: selectedStatus,
+      provisionStatus: selectedStatus,
+      isActive: isActivo,
+    }));
+
+    if (errors.status) {
+      setErrors((prev) => ({ ...prev, status: undefined }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const schema = createInventorySchema({ currentProductId });
+    // Ejecutar validación de Zod con las reglas de negocio
+    const schema = createInventorySchema({ currentProvisionId });
     const result = schema.safeParse(formData);
 
     if (!result.success) {
@@ -46,8 +92,8 @@ export default function InventoryForm({
       setErrors(fieldErrors);
 
       await showCreateErrorAlert({
-        entity: "producto",
-        text: "Por favor completa todos los campos requeridos antes de guardar.",
+        entity: "suministro",
+        text: "Por favor revisa los errores indicados en el formulario antes de guardar.",
       });
       return;
     }
@@ -62,123 +108,141 @@ export default function InventoryForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-        <div className="flex flex-col items-center">
-          <FileInput
-            value={formData.productImage}
-            onChange={(files) => setFormData((prev) => ({ ...prev, productImage: files }))}
-            multiple={true}
-            accept="image/png"
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      {/* COLUMNA 1 */}
+      <div className="space-y-4">
+        <Input
+          label="Nombre del suministro"
+          name="provisionName"
+          type="text"
+          value={formData.provisionName}
+          placeholder="Ingrese el nombre (Ej. Pollo)"
+          onChange={handleChange}
+          error={errors.provisionName}
+        />
+
+        <Select
+          label="Categoría"
+          name="category"
+          value={formData.category}
+          options={categoryTypes}
+          onChange={handleChange}
+          error={errors.category}
+        />
+
+        <Select
+          label="Unidad de medida"
+          name="unit"
+          value={formData.unit}
+          options={UNIT_OPTIONS}
+          onChange={handleChange}
+          error={errors.unit}
+        />
+
+        
+      <Select
+            label="Estado del suministro"
+            name="status"
+            value={formData.status}
+            onChange={handleStatusChange} 
+            placeholder="Seleccione estado"
+            options={STATUS_OPTIONS}
+            error={errors.status}
           />
-          {errors.productImage && (
-            <span className="text-error text-caption mt-1">{errors.productImage}</span>
+      </div>
+
+      {/* COLUMNA 2 */}
+      <div className="space-y-4">
+        <Input
+          label="Stock actual"
+          name="stock"
+          type="number"
+          value={formData.stock}
+          placeholder="Ingrese el stock (Ej. 28)"
+          onChange={handleChange}
+          error={errors.stock}
+        />
+
+        <Input
+          label="Precio unitario ($)"
+          name="price"
+          type="number"
+          value={formData.price}
+          placeholder="Ingrese el precio (Ej. 12000)"
+          onChange={handleChange}
+          error={errors.price}
+        />
+
+        <Input
+          label="Lote"
+          name="batch"
+          type="text"
+          value={formData.batch}
+          placeholder="Ingrese el lote (Ej. LOT-101A)"
+          onChange={handleChange}
+          error={errors.batch}
+        />
+
+        <Input
+          label="Stock mínimo"
+          name="minStock"
+          type="number"
+          value={formData.minStock}
+          placeholder="Ingrese stock mínimo (Ej. 10)"
+          onChange={handleChange}
+          error={errors.minStock}
+        />
+
+        <Input
+          label="Stock máximo"
+          name="maxStock"
+          type="number"
+          value={formData.maxStock}
+          placeholder="Ingrese stock máximo (Ej. 50)"
+          onChange={handleChange}
+          error={errors.maxStock}
+        />
+      </div>
+
+      {/* COLUMNA 3 */}
+      <div className="flex flex-col justify-between h-full space-y-6">
+        <div>
+          <span className="font-label text-text-primary text-small block mb-2 font-semibold">
+            Imagen del suministro
+          </span>
+          <FileInput
+            value={formData.provisionImage}
+            onChange={(files) =>
+              setFormData((prev) => ({ ...prev, provisionImage: files }))
+            }
+          />
+          {errors.provisionImage && (
+            <span className="text-error text-caption block mt-1">
+              {errors.provisionImage}
+            </span>
           )}
         </div>
 
-        <div className="flex flex-col gap-4">
-          <Input
-            label="ID del Producto"
-            name="productId"
-            type="text"
-            value={formData.productId}
-            onChange={handleChange}
-            placeholder="Ej: PROD-001"
-            error={errors.productId}
-            disabled={mode === "edit"}
-          />
-
-          <Input
-            label="Nombre del Producto"
-            name="productName"
-            type="text"
-            value={formData.productName}
-            onChange={handleChange}
-            placeholder="Escribe el nombre del producto"
-            error={errors.productName}
-          />
-
-          <Input
-            label="Descripción"
-            name="productDescription"
-            type="text"
-            value={formData.productDescription}
-            onChange={handleChange}
-            placeholder="Escribe la descripción del producto"
-            error={errors.productDescription}
-          />
-
-          <Select
-            label="Categoría de alimentos"
-            name="productCategory"
-            value={formData.productCategory}
-            onChange={handleChange}
-            placeholder="Seleccione una Categoría"
-            options={categoryTypes}
-            error={errors.productCategory}
-          />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Input
-            label="Código de Barras"
-            name="productCode"
-            type="text"
-            value={formData.productCode}
-            onChange={handleChange}
-            placeholder="Escribe el código de barras"
-            error={errors.productCode}
-          />
-
-          <Input
-            label="Precio"
-            name="foodPrice"
-            type="number"
-            min="0"
-            step="0.01"
-            value={formData.foodPrice}
-            onChange={handleChange}
-            placeholder="Ingrese precio del producto"
-            error={errors.foodPrice}
-          />
-
-          <Input
-            label="Marca"
-            name="foodBrand"
-            type="text"
-            value={formData.foodBrand}
-            onChange={handleChange}
-            placeholder="Ej: Alpina"
-            error={errors.foodBrand}
-          />
-
-          <Input
-            label="Cantidad"
-            name="foodQuantity"
-            type="number"
-            min="0"
-            step="1"
-            value={formData.foodQuantity}
-            onChange={handleChange}
-            placeholder="Ej: 10"
-            error={errors.foodQuantity}
-          />
+        <div className="flex gap-4 items-center justify-end pt-4">
+          <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitting}
+            className="w-full md:w-auto px-10 font-bold shadow-sm"
+          >
+            {isSubmitting
+              ? "Guardando..."
+              : mode === "edit"
+              ? "Guardar Cambios"
+              : "Crear Suministro"}
+          </Button>
         </div>
       </div>
 
-      <div className="flex gap-4 items-center justify-end mt-4">
-        <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button 
-          variant="primary" 
-          type="submit" 
-          disabled={isSubmitting}
-          className="w-full md:w-auto px-14 font-bold shadow-sm"
-        >
-          {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Producto"}
-        </Button>
-      </div>
     </form>
   );
 }

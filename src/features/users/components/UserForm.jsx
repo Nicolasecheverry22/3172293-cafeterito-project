@@ -27,7 +27,7 @@ const DEFAULT_FORM_DATA = {
   userDocumentNumber: "",
   userPassword: "",
   userImage: [],
-  isActive: false,
+  isActive: true, // Habilitado por defecto
   isSuperUser: false,
   isCook: false,
   isWaiter: false,
@@ -35,6 +35,15 @@ const DEFAULT_FORM_DATA = {
   isGuest: false,
   startDate: "",
   endDate: "",
+};
+
+const getSelectedRole = (data) => {
+  if (data.isSuperUser) return "Administrador";
+  if (data.isCook) return "Cocinero";
+  if (data.isWaiter) return "Mesero";
+  if (data.isCashier) return "Caja";
+  if (data.isGuest) return "Invitado";
+  return "";
 };
 
 export default function UserForm({
@@ -78,7 +87,6 @@ export default function UserForm({
       });
       setErrors(fieldErrors);
 
-      // Disparar alerta SweetAlert2 por validación fallida
       await showCreateErrorAlert({
         entity: "usuario",
         text: "Por favor completa todos los campos requeridos antes de guardar.",
@@ -88,8 +96,21 @@ export default function UserForm({
 
     setErrors({});
     setIsSubmitting(true);
+
     try {
-      await onSubmit(result.data);
+      const finalPayload = {
+        ...result.data,
+        ...formData,
+        userRole: getSelectedRole(formData),
+        userDocument: formData.userDocumentNumber,
+        is_active: formData.isActive,
+        address: formData.address,
+        userAddress: formData.address,
+        user_address: formData.address,
+      };
+
+      // Una sola llamada al submit
+      await onSubmit(finalPayload);
     } finally {
       setIsSubmitting(false);
     }

@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
  * Se dispara al presionar crear si falta un campo o falla la validación del schema.
  */
 export const showCreateErrorAlert = async ({
-  entity = "registro",
+  entity = "",
   title = "Campos incompletos",
   text,
 } = {}) => {

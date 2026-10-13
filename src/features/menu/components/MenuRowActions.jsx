@@ -1,52 +1,31 @@
-import { Eye,Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+
 
 import { showSystemErrorAlert } from "@/shared/services/alertService";
 
 export default function MenuRowActions({ product, onDeleted }) {
   const navigate = useNavigate();
 
- 
+  const handleEdit = () => {
+    navigate(`/EditProduct/${product.id}`);
+  };
 
   const handleDelete = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Eliminar platillo?",
       text: `Esta acción eliminará "${product.productName}" y no se puede revertir.`,
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      await Swal.fire({
-              title: "¡Platillo eliminado!",
-              text: "El platillo fue eliminado correctamente.",
-              icon: "success",
-              confirmButtonText: "Aceptar",
-              timer: 3000,
-              timerProgressBar: true,
-              customClass: {
-                  popup: "rounded-2x1",
-                  title: "text-green-600",  
-                  confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-                  timerProgressBar: "!bg-green-600",
-              },
-              buttonsStyling: false,
-            });
+      const result = await showSuccessAlert({
+        title: "¡Platillo eliminado!",
+        text: "El platillo fue eliminado correctamente.",
+      });
 
       onDeleted?.(product.id);
     } catch (error) {
@@ -60,30 +39,29 @@ export default function MenuRowActions({ product, onDeleted }) {
 
   return (
     <div className="flex gap-2">
-        <button
+      {/* Visualizar Platillo */}
+      <button
         onClick={() => navigate(`/ProductView/${product.id}`)}
         className="p-1 rounded hover:bg-gray-100 cursor-pointer"
-        title="Visualizar proveedor"
+        title="Visualizar platillo"
       >
         <Eye size={16} />
       </button>
-      <button
-        onClick={() => navigate(`/MenuView/${provider.id}`)}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
-        title="Visualizar proveedor"
-      >
-        <Eye size={16} />
-      </button>
+
+      {/* Editar Platillo */}
       <button
         onClick={handleEdit}
-        className="p-1 rounded hover:bg-gray-100"
+        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        title="Editar platillo"
       >
         <Pencil size={16} />
       </button>
 
+      {/* Eliminar Platillo */}
       <button
         onClick={handleDelete}
         className="p-1 rounded hover:bg-gray-100 cursor-pointer text-red-600 hover:text-red-800"
+        title="Eliminar platillo"
       >
         <Trash2 size={16} />
       </button>

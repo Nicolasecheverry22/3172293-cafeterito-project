@@ -97,7 +97,19 @@ export const getMenuColumns = (sortConfig, onSort) => [
     accessorKey: "isAvailable",
     header: "Estado",
     cell: ({ row }) => {
-      return row.original.isAvailable ? "Disponible" : "No disponible";
+      const isAvailable = row.original.isAvailable;
+
+      const statusStyles = isAvailable
+        ? "bg-green-100 text-green-800 border-green-200"
+        : "bg-red-100 text-red-800 border-red-200";
+
+      return (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${statusStyles}`}
+        >
+          {isAvailable ? "Disponible" : "No disponible"}
+        </span>
+      );
     },
   },
 
@@ -108,3 +120,4 @@ export const getMenuColumns = (sortConfig, onSort) => [
     cell: ({ row }) => <MenuRowActions product={row.original} />,
   },
 ];
+

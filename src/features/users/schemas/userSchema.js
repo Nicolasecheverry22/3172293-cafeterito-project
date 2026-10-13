@@ -44,27 +44,54 @@ export function createUserSchema({ currentUserId = null } = {}) {
       startDate: z.string().optional(),
       endDate: z.string().optional(),
     })
+
+    // 1. Validar unificación de Correo (Existente)
     .refine(
       (data) =>
         !existingUsers.some(
           (user) =>
-            user.userEmail?.toLowerCase() === data.userEmail.toLowerCase() &&
+            user.userEmail?.toLowerCase() === data.userEmail?.toLowerCase() &&
             user.id !== currentUserId
         ),
       { message: "Este correo ya está registrado", path: ["userEmail"] }
     )
+
+    // 2. Validar unificación de Número de Documento (NUEVO)
+    .refine(
+      (data) =>
+        !existingUsers.some((user) => {
+          const docInUser = user.userDocumentNumber || user.userDocument || user.documentNumber;
+          return (
+            docInUser?.toString().trim() === data.userDocumentNumber?.toString().trim() &&
+            user.id !== currentUserId
+          );
+        }),
+      { message: "Este número de documento ya está registrado", path: ["userDocumentNumber"] }
+    )
+
+    // 3. Validar unificación de Teléfono (NUEVO)
+    .refine(
+      (data) =>
+        !existingUsers.some(
+          (user) =>
+            user.userPhone?.toString().trim() === data.userPhone?.toString().trim() &&
+            user.id !== currentUserId
+        ),
+      { message: "Este número de teléfono ya está registrado", path: ["userPhone"] }
+    )
+
+    // 4. Validar Selección de Roles
     .refine(
       (data) => data.isSuperUser || data.isCook || data.isWaiter || data.isCashier || data.isGuest,
       { message: "Debe seleccionar al menos un rol", path: ["isSuperUser"] }
     )
+
+    // 5. Fechas obligatorias para roles no administradores
     .refine((data) => data.isSuperUser || Boolean(data.startDate), {
       message: "Debe ingresar la fecha de inicio para roles distintos de administrador",
       path: ["startDate"],
     })
-    .refine((data) => data.isSuperUser || Boolean(data.endDate), {
-      message: "Debe ingresar la fecha de finalización para roles distintos de administrador",
-      path: ["endDate"],
-    });
+    
 }
 
 export const userSchema = createUserSchema();

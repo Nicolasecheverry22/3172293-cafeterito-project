@@ -1,61 +1,95 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Swal from "sweetalert2";
-import { UtensilsCrossed } from "lucide-react";
-import { menu } from "../../menu/data/menu";
+import { Pencil } from "lucide-react";
+import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
+import { menu as menuData } from "../../menu/data/menu";
+import { createMenuSchema } from "../../menu/schemas/editMenuSchema";
 import menuCategoryTypes from "../../../data/selects/menuCategoryTypes.json";
-import { Input, Button, StatusSwitch, FileInput, Select, Checkbox } from "@/shared";
 import {
   showSystemErrorAlert,
   showDeleteCancelAlert,
+  showSuccessAlert,
+  showConfirmDeleteAlert,
+  showCreateErrorAlert
 } from "@/shared/services/alertService";
 
 export default function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [categoriesOptions, setCategoriesOptions] = useState(menuCategoryTypes);
+  const [errors, setErrors] = useState({});
 
-  const product = menu.find((p) => p.id === Number(id));
+  const item = menuData.find((p) => String(p.id) === String(id));
+
+  useEffect(() => {
+    if (!item) {
+      showSystemErrorAlert({
+        text: "El platillo que intentas editar no existe.",
+      }).then(() => navigate("/menuList", { replace: true }));
+    }
+  }, [item, navigate]);
 
   const [formData, setFormData] = useState({
-    productName: "",
-    category: "",
-    price: "",
-    description: "",
-    productImage: [],
+    nombre: item?.productName ?? "",
+    categoria: item?.category ?? "",
+    precio: item?.price ?? "",
+    descripcion: item?.description ?? "",
+    estado: item?.isAvailable ?? true,
+    imagen: item?.productImage ?? [],
   });
 
-  const [errors, setErrors] = useState({});
+  if (!item) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpia el error del campo cuando el usuario interactúa
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
 
-    try {
-      console.log(formData);
+    const schema = createMenuSchema({ currentMenuItemId: item.id });
+    const result = schema.safeParse(formData);
 
-      await Swal.fire({
-        title: "¡Producto actualizado!",
-        text: "Los cambios fueron guardados correctamente.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        timer: 3000,
-        timerProgressBar: true,
-        customClass: {
-          popup: "rounded-2xl",
-          title: "text-green-600",
-          confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-          timerProgressBar: "!bg-green-600",
-        },
-        buttonsStyling: false,
+    if (!result.success) {
+      const fieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(fieldErrors);
+
+      await showCreateErrorAlert({
+        entity: "producto",
+        text: "Por favor revisa los errores indicados en el formulario antes de guardar.",
+      });
+      return;
+    }
+
+    setErrors({});
+
+    try {
+      Object.assign(item, {
+        ...result.data,
+        productName: result.data.nombre,
+        category: result.data.categoria,
+        price: Number(result.data.precio),
+        description: result.data.descripcion,
+        isAvailable: formData.estado,
+        productImage: formData.imagen,
       });
 
-      navigate(-1);
+      await showSuccessAlert({
+        title: "¡Platillo actualizado!",
+        text: "Los cambios fueron guardados correctamente.",
+      });
+
+      navigate("/menuList");
     } catch (error) {
-      console.error("Error al actualizar el producto:", error);
+      console.error("Error al actualizar el platillo:", error);
       await showSystemErrorAlert({
         text: "Los cambios no pudieron guardarse.",
       });
@@ -63,23 +97,11 @@ export default function EditProduct() {
   };
 
   const handleCancel = async () => {
-    const result = await Swal.fire({
+    const result = await showConfirmDeleteAlert({
       title: "¿Descartar cambios?",
       text: "Los cambios realizados no se guardarán.",
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Sí, descartar",
       cancelButtonText: "Continuar editando",
-      reverseButtons: true,
-      customClass: {
-        popup: "rounded-2xl",
-        title: "!text-amber-600 font-bold",
-        confirmButton:
-          "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
-        cancelButton:
-          "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      },
-      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
@@ -87,121 +109,121 @@ export default function EditProduct() {
         title: "Edición cancelada",
         text: "No se guardaron los cambios.",
       });
-      navigate(-1);
+      navigate("/menuList");
     }
   };
 
-  if (!product) {
-    return (
-      <div className="min-h-screen w-full flex flex-col">
-        
-        <div className="flex items-center gap-3 mt-10 ml-30">
-          <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-          <h1 className="text-main font-heading font-bold text-text-primary">
-            Producto del Menú
-          </h1>
-        </div>
-        <p className="ml-30 mt-8 text-red-500">Producto no encontrado.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen w-full flex flex-col">
-
-      <div className="flex items-center gap-3 mt-10 ml-30">
-        <UtensilsCrossed className="w-16 h-16 text-text-primary" />
-        <h1 className="text-main font-heading font-bold text-text-primary">
-          Producto del Menú
+    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+      <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
+        <Pencil className="w-8 h-8 text-text-primary" />
+        <h1 className="text-2xl font-heading font-bold text-text-primary">
+          Editar platillo
         </h1>
       </div>
 
-      <div className="flex flex-row">
-        <div className="flex flex-col items-center gap-8 mx-auto mt-[110px] mb-40">
-          <div className="bg-surface-muted rounded-3xl p-8 shadow-sm w-fit h-fit">
-            <FileInput
-              value={formData.productImage}
-              onChange={(files) => setFormData((prev) => ({ ...prev, productImage: files }))}
-              multiple={true}
+      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* COLUMNA 1 */}
+        <div className="space-y-4">
+          <Input
+            label="Nombre del platillo"
+            name="nombre"
+            type="text"
+            value={formData.nombre}
+            placeholder="Ingrese el nombre"
+            onChange={handleChange}
+            error={errors.nombre}
+          />
+
+          <Select
+            label="Categoría"
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleChange}
+            options={categoriesOptions}
+            error={errors.categoria}
+          />
+
+          <Input
+            label="Precio"
+            name="precio"
+            type="number"
+            min="0"
+            step="0.01"
+            value={formData.precio}
+            placeholder="Ingrese el precio"
+            onChange={handleChange}
+            error={errors.precio}
+          />
+        </div>
+
+        {/* COLUMNA 2 */}
+        <div className="space-y-4">
+          <div className="relative w-full">
+            <label className="text-xs text-secondary block mb-1">
+              Descripción
+            </label>
+            <textarea
+              name="descripcion"
+              value={formData.descripcion}
+              onChange={handleChange}
+              rows={5}
+              placeholder="Ingrese descripción del platillo"
+              className={`w-full rounded-md border p-3 text-sm bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                errors.descripcion ? "border-error" : "border-border/40"
+              }`}
             />
-            {errors.productImage && (
-              <span className="text-error text-caption mt-1">{errors.productImage}</span>
+            {errors.descripcion && (
+              <span className="text-error text-caption block mt-1">
+                {errors.descripcion}
+              </span>
             )}
           </div>
 
-          <div className="flex items-center gap-10">
-            <span
-              className="text-[var(--color-black)] font-[var(--font-weight-regular)] text-[var(--fs-lg)]"
-              style={{
-                fontFamily: "var(--main-font)",
-              }}
-            >
-              Estado
-            </span>
-            <StatusSwitch size="lg" checked={product.isAvailable} disabled />
+          <div className="flex items-center gap-6 pt-4">
+            <span className="text-text-primary font-medium text-body">Estado</span>
+            <StatusSwitch
+              size="lg"
+              checked={formData.estado}
+              onChange={(checked) => setFormData((prev) => ({ ...prev, estado: checked }))}
+            />
           </div>
         </div>
 
-        <div className="flex flex-row items-center justify-start gap-20 mx-auto w-fit h-fit mt-[130px] mb-30">
-          <form onSubmit={handleSave}>
-            <div className="flex flex-row gap-20">
-              <div className="w-56 flex flex-col gap-8">
-                <Input
-                  label="Nombre del Platillo"
-                  name="productName"
-                  type="text"
-                  value={formData.productName}
-                  placeholder={product.productName}
-                  onChange={handleChange}
-                />
-                <Select
-                  label="Categoría"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder={product.category}
-                  options={menuCategoryTypes}
-                  error={errors.category}
-                />
-              </div>
+        {/* COLUMNA 3 */}
+        <div className="flex flex-col justify-between h-full space-y-6">
+          <div>
+            <span className="font-label text-text-primary text-small block mb-2 font-semibold">
+              Imagen del platillo
+            </span>
+            <FileInput
+              value={formData.imagen}
+              onChange={(files) => {
+                setFormData((prev) => ({ ...prev, imagen: files }));
+                if (errors.imagen) setErrors((prev) => ({ ...prev, imagen: undefined }));
+              }}
+              multiple={false}
+              accept="image/*"
+            />
+            {errors.imagen && (
+              <span className="text-error text-caption block mt-1">
+                {errors.imagen}
+              </span>
+            )}
+          </div>
 
-              <div className="w-90 flex flex-col gap-4 mt-[-130px]">
-                <Input
-                  className="mt-36"
-                  label="Precio"
-                  name="price"
-                  type="text"
-                  value={formData.price}
-                  placeholder={`$ ${product.price.toLocaleString("es-CO")}`}
-                  onChange={handleChange}
-                />
-                <div className="relative w-full">
-                  <textarea
-                    name="description"
-                    placeholder={product.description || ""}
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={5}
-                    className="w-full rounded-md border border-gray-300 p-2 pt-6 text-sm resize-none bg-transparent cursor-default peer"
-                  />
-                  <label className="absolute top-2 left-2 text-xs text-gray-500 pointer-events-none">
-                    Descripción
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-6 items-center justify-end mt-10">
-              <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
-                Cancelar
-              </Button>
-              <Button variant="primary" size="md" type="submit">
-                Guardar
-              </Button>
-            </div>
-          </form>
+          <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40">
+            <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
+              Cancelar
+            </Button>
+            <Button variant="primary" size="md" type="submit">
+              Guardar Cambios
+            </Button>
+          </div>
         </div>
-      </div>
+
+      </form>
     </div>
   );
 }

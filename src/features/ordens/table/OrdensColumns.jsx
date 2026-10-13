@@ -28,7 +28,7 @@ export const getOrdensColumns = (sortConfig, onSort) => [
     header: "Mesa",
   },
 
-  // Nueva Columna: Fecha
+  // Columna Fecha
   {
     accessorKey: "createdAt",
     header: () => (
@@ -97,11 +97,32 @@ export const getOrdensColumns = (sortConfig, onSort) => [
     accessorKey: "status",
     header: "Estado",
     cell: ({ row }) => {
-      const status = row.original.status;
+      const status = row.original.status?.toLowerCase();
 
-      if (status === "activa") return "Activa";
-      if (status === "pagada") return "Pagada";
-      return status;
+      // Mapeo de colores y estilos según el estado de la orden
+      const statusStyles = {
+        activa: "bg-amber-100 text-amber-800 border-amber-200",
+        pagada: "bg-green-100 text-green-800 border-green-200",
+        cancelada: "bg-red-100 text-red-800 border-red-200",
+        pendiente: "bg-blue-100 text-blue-800 border-blue-200",
+      };
+
+      const statusLabels = {
+        activa: "Activa",
+        pagada: "Pagada",
+        cancelada: "Cancelada",
+        pendiente: "Pendiente",
+      };
+
+      return (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${
+            statusStyles[status] || "bg-gray-100 text-gray-800 border-gray-200"
+          }`}
+        >
+          {statusLabels[status] || status}
+        </span>
+      );
     },
   },
 
