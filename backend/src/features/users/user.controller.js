@@ -30,7 +30,14 @@ export const userController = {
         } catch(err){
             console.log("ERROR BACKEND:", err);
 
-            res.status(500).json({
+            // 23505 = unique_violation de PostgreSQL (correo o documento repetido)
+            if (err.code === "23505") {
+                return res.status(409).json({
+                    error: "Ya existe un usuario con ese correo o número de documento",
+                });
+            }
+
+            res.status(err.statusCode || 500).json({
                 error:err.message,
             });
         }
@@ -87,6 +94,33 @@ export const userController = {
         } catch(err){
             console.log("ERROR BACKEND:", err);
             res.status(500).json({ error: err.message });
+        }
+    },
+
+    // Permisos del usuario (directos + heredados de grupos)
+    async getPermissions(req, res){
+        try{
+            const id = Number(req.params.id);
+            const permissions = await userService.getPermissions(id);
+            res.json(permissions);
+        } catch(err){
+            console.log("ERROR BACKEND:", err);
+            res.status(err.statusCode || 500).json({ error: err.message });
+        }
+    },
+
+    // Reemplaza los permisos directos del usuario
+    async updatePermissions(req, res){
+        try{
+            const id = Number(req.params.id);
+            const { permissionIds } = req.body;
+
+            await userService.updatePermissions(id, permissionIds);
+
+            res.json({ message: "Permisos actualizados correctamente" });
+        } catch(err){
+            console.log("ERROR BACKEND:", err);
+            res.status(err.statusCode || 500).json({ error: err.message });
         }
     }
 }

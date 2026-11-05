@@ -10,6 +10,10 @@ router.get("/", userController.getAll);
 // Obtener un usuario por id (para la vista de detalle)
 router.get("/:id", userController.getById);
 
+// Permisos individuales del usuario (pantalla Gestión de Permisos)
+router.get("/:id/permissions", userController.getPermissions);
+router.put("/:id/permissions", userController.updatePermissions);
+
 // Crear usuario (registro público desde el formulario del frontend)
 router.post("/", userController.create);
 

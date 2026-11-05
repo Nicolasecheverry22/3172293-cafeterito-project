@@ -35,6 +35,29 @@ export async function createUser(payload) {
   return data;
 }
 
+// Permisos del usuario: directos + heredados de grupos (GET /api/users/:id/permissions).
+export async function getUserPermissions(id) {
+  const res = await fetch(`${API_URL}/users/${id}/permissions`);
+  if (!res.ok) {
+    throw new Error(`Error ${res.status} al cargar los permisos del usuario`);
+  }
+  return res.json();
+}
+
+// Reemplaza los permisos directos del usuario (PUT /api/users/:id/permissions).
+export async function updateUserPermissions(id, permissionIds) {
+  const res = await fetch(`${API_URL}/users/${id}/permissions`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ permissionIds }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Error ${res.status} al guardar los permisos del usuario`);
+  }
+  return data;
+}
+
 // Elimina un usuario por su id (DELETE /api/users/:id).
 export async function deleteUser(id) {
   const res = await fetch(`${API_URL}/users/${id}`, { method: "DELETE" });
