@@ -1,0 +1,75 @@
+import { pool } from "../../config/db.js";
+
+// Consultas SQL del recurso providers (proveedores).
+export const providerRepository = {
+  async create(data) {
+    const {
+      nit,
+      providerName,
+      providerEmail,
+      providerPhone,
+      providerAddress,
+      productService,
+      isActive,
+    } = data;
+    const query = `
+      INSERT INTO providers
+        (nit, provider_name, provider_email, provider_phone, provider_address, product_service, is_active)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id;
+    `;
+    const values = [
+      nit,
+      providerName,
+      providerEmail,
+      providerPhone,
+      providerAddress,
+      productService,
+      isActive ?? true,
+    ];
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  },
+
+  async getAll() {
+    const query = `
+      SELECT id,
+             nit,
+             provider_name AS "providerName",
+             provider_email AS "providerEmail",
+             provider_phone AS "providerPhone",
+             provider_address AS "providerAddress",
+             product_service AS "productService",
+             is_active
+      FROM providers
+      ORDER BY id;
+    `;
+    const result = await pool.query(query);
+    return result.rows;
+  },
+
+  async getById(id) {
+    const query = `
+      SELECT id,
+             nit,
+             provider_name AS "providerName",
+             provider_email AS "providerEmail",
+             provider_phone AS "providerPhone",
+             provider_address AS "providerAddress",
+             product_service AS "productService",
+             is_active
+      FROM providers
+      WHERE id = $1;
+    `;
+    const result = await pool.query(query, [id]);
+    return result.rows[0];
+  },
+
+  async remove(id) {
+    const result = await pool.query(
+      "DELETE FROM providers WHERE id = $1 RETURNING id",
+      [id]
+    );
+    return result.rows[0];
+  },
+};

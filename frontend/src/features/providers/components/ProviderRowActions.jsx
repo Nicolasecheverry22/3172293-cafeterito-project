@@ -12,7 +12,7 @@ import {
   showSuccessAlert
 } from "@/shared/services/alertService";
 
-import { providers as providersData } from "../data/providers";
+import { deleteProvider } from "@/services/providerApi";
 
 export default function ProviderRowActions({ provider, onDeleted }) {
   const navigate = useNavigate();
@@ -38,9 +38,7 @@ export default function ProviderRowActions({ provider, onDeleted }) {
     }
 
     try {
-      const index = providersData.findIndex((p) => p.id === provider.id);
-      if (index !== -1) providersData.splice(index, 1);
-      // TODO: reemplazar por llamada real (ej. providerService.delete(provider.id))
+      await deleteProvider(provider.id);
 
       await showSuccessAlert({
         title: "¡Proveedor eliminado!",

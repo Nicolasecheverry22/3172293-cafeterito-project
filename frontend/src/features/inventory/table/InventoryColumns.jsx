@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import InventoryRowActions from "../components/InventoryRowActions";
 
-export const getInventoryColumns = (sortConfig, onSort) => [
+export const getInventoryColumns = (sortConfig, onSort, onDeleted) => [
   {
     accessorKey: "id",
     header: () => (
@@ -125,6 +125,6 @@ export const getInventoryColumns = (sortConfig, onSort) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <InventoryRowActions provision={row.original} />,
+    cell: ({ row }) => <InventoryRowActions provision={row.original} onDeleted={onDeleted} />,
   },
 ];

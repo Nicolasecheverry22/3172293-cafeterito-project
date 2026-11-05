@@ -3,7 +3,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { StatusSwitch } from "@/shared";
 import ProviderRowActions from "../components/ProviderRowActions";
 
-export const getProviderColumns = (sortConfig, onSort) => [
+export const getProviderColumns = (sortConfig, onSort, onDeleted) => [
   // Columna NIT (Ordenable)
   {
     accessorKey: "nit",
@@ -85,7 +85,7 @@ export const getProviderColumns = (sortConfig, onSort) => [
     id: "actions",
     header: "Acciones",
     cell: ({ row }) => (
-      <ProviderRowActions provider={row.original} />
+      <ProviderRowActions provider={row.original} onDeleted={onDeleted} />
     ),
   },
 ];

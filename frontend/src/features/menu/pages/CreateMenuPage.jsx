@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UtensilsCrossed } from "lucide-react";
 import MenuForm from "../components/MenuForm";
-import { menu as menuData } from "../data/menu";
+import { createProduct } from "@/services/productApi";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -24,21 +24,17 @@ export default function CreateMenuPage() {
     }
 
     try {
-      const newItem = {
-        id: menuData.length + 1,
+      await createProduct({
         productName: validatedData.nombre,
         category: validatedData.categoria,
         price: Number(validatedData.precio),
         description: validatedData.descripcion,
         isAvailable: validatedData.estado ?? true,
-        productImage: validatedData.imagen,
-      };
-
-      menuData.push(newItem);
+      });
 
       await showSuccessAlert({
         title: "¡Platillo creado!",
-        text: "El platillo fue registrado correctamente.",
+        text: "El platillo fue registrado correctamente en la base de datos.",
       });
 
       navigate(-1);

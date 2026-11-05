@@ -1,16 +1,29 @@
 // src/providers/pages/ProviderListPage.js
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
 import { getProviderColumns } from "../table/ProviderColumns";
-import { providers as initialProviders } from "../data/providers";
+import { getProviders } from "@/services/providerApi";
 import { Link } from "react-router-dom";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function ProviderListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [providers, setProviders] = useState([]);
+  const [loadError, setLoadError] = useState(null);
 
   // Estado para controlar columna y dirección del ordenamiento
   const [sortConfig, setSortConfig] = useState({ key: "nit", direction: "asc" });
+
+  // Carga los proveedores desde la base de datos
+  const loadProviders = useCallback(() => {
+    getProviders()
+      .then(setProviders)
+      .catch((err) => setLoadError(err.message));
+  }, []);
+
+  useEffect(() => {
+    loadProviders();
+  }, [loadProviders]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -21,7 +34,7 @@ export default function ProviderListPage() {
 
   // Reordena dinámicamente el arreglo de proveedores
   const sortedProviders = useMemo(() => {
-    return [...initialProviders].sort((a, b) => {
+    return [...providers].sort((a, b) => {
       const { key, direction } = sortConfig;
 
       if (key === "nit") {
@@ -38,12 +51,12 @@ export default function ProviderListPage() {
 
       return 0;
     });
-  }, [sortConfig]);
+  }, [providers, sortConfig]);
 
   // Genera la configuración de columnas dinámicas
   const columns = useMemo(
-    () => getProviderColumns(sortConfig, handleSort),
-    [sortConfig]
+    () => getProviderColumns(sortConfig, handleSort, loadProviders),
+    [sortConfig, loadProviders]
   );
 
   return (
@@ -70,6 +83,12 @@ export default function ProviderListPage() {
             </Link>
           </div>
         </div>
+
+        {loadError && (
+          <p className="text-red-500 text-sm mb-4">
+            No se pudieron cargar los proveedores: {loadError}
+          </p>
+        )}
 
         <div className="overflow-x-auto bg-surface/0 shadow-xs">
           <DataTable data={sortedProviders} columns={columns} />

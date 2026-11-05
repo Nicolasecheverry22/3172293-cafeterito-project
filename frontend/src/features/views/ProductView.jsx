@@ -1,15 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Input, StatusSwitch, Button } from "@/shared";
 import { UtensilsCrossed, SquarePen } from "lucide-react";
-import { menu } from "../menu/data/menu";
+import { getProductById } from "@/services/productApi";
 
 export default function ProductView() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const product = menu.find((p) => String(p.id) === String(id));
+  const [product, setProduct] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!product) {
+  useEffect(() => {
+    getProductById(id)
+      .then((data) => setProduct(data))
+      .catch(() => setNotFound(true));
+  }, [id]);
+
+  if (notFound) {
     return (
       <div className="min-h-screen w-full flex flex-col">
         <div className="flex items-center gap-3 mt-10 ml-12">
@@ -19,6 +27,14 @@ export default function ProductView() {
           </h1>
         </div>
         <p className="ml-12 mt-8 text-red-500">Producto no encontrado.</p>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando producto...</p>
       </div>
     );
   }

@@ -1,15 +1,23 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Input, Button, StatusSwitch } from "../../shared";
 import { SquarePen, Ambulance } from "lucide-react";
-import { providers } from "../providers/data/providers";
+import { getProviderById } from "@/services/providerApi";
 
 export default function ProviderView() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const provider = providers.find((p) => String(p.id) === String(id));
+  const [provider, setProvider] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!provider) {
+  useEffect(() => {
+    getProviderById(id)
+      .then((data) => setProvider(data))
+      .catch(() => setNotFound(true));
+  }, [id]);
+
+  if (notFound) {
     return (
       <div className="min-h-screen w-full flex flex-col">
         <div className="flex items-center gap-3 mt-10 ml-12">
@@ -19,6 +27,14 @@ export default function ProviderView() {
           </h1>
         </div>
         <p className="ml-12 mt-8 text-red-500">Proveedor no encontrado.</p>
+      </div>
+    );
+  }
+
+  if (!provider) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando proveedor...</p>
       </div>
     );
   }

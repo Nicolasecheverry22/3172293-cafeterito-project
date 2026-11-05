@@ -12,6 +12,9 @@ import authRoutes from "./features/auth/auth.routes.js";
 import accessRoutes from "./features/access/access.routes.js";
 import groupsRoutes from "./features/groups/groups.routes.js";
 import permissionsRoutes from "./features/permissions/permissions.routes.js";
+import productRoutes from "./features/products/product.routes.js";
+import inventoryRoutes from "./features/inventory/inventory.routes.js";
+import providerRoutes from "./features/providers/provider.routes.js";
 
 // CReamos la instancia pricpipal de la aplicacion Express
 const app = express();
@@ -29,4 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/access", accessRoutes);
 app.use("/api/groups", groupsRoutes);
 app.use("/api/permissions", permissionsRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/providers", providerRoutes);
 export default app;
