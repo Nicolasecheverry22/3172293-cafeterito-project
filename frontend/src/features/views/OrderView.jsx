@@ -1,15 +1,38 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Input, Button } from "@/shared";
 import { ClipboardList, SquarePen } from "lucide-react";
-import { ordens } from "../ordens/data/ordens";
+import { getOrderById } from "@/services/orderApi";
+
+const STATUS_STYLES = {
+  activa: "bg-amber-100 text-amber-800 border-amber-200",
+  pagada: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  cancelada: "bg-red-100 text-red-800 border-red-200",
+};
+
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+  }).format(amount ?? 0);
+
+const formatDate = (isoDate) => (isoDate ? isoDate.split("-").reverse().join("/") : "-");
 
 export default function OrderView() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const order = ordens.find((o) => String(o.id) === String(id));
+  const [order, setOrder] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!order) {
+  useEffect(() => {
+    getOrderById(id)
+      .then(setOrder)
+      .catch(() => setNotFound(true));
+  }, [id]);
+
+  if (notFound) {
     return (
       <div className="min-h-screen w-full flex flex-col">
         <div className="flex items-center gap-3 mt-10 ml-12">
@@ -23,32 +46,15 @@ export default function OrderView() {
     );
   }
 
-  // Estilos de estado idénticos a los de la tabla
-  const getStatusBadge = (status) => {
-    const st = status?.toLowerCase() || "";
-    const styles =
-      st === "pagada"
-        ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-        : "bg-amber-100 text-amber-800 border-amber-200"; 
-
+  if (!order) {
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border capitalize ${styles}`}>
-        {order.status}
-      </span>
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando orden...</p>
+      </div>
     );
-  };
+  }
 
-  const formatCurrency = (amount) =>
-    new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(amount);
-
-  // Cálculo automático del total basado en los items (dish, quantity, price)
-  const calculatedTotal = order.items
-    ? order.items.reduce((acc, curr) => acc + curr.price * curr.quantity, 0)
-    : 0;
+  const status = order.status?.toLowerCase() ?? "";
 
   return (
     <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
@@ -60,22 +66,23 @@ export default function OrderView() {
         </h1>
       </div>
 
-      {/* Grid Responsivo Estandarizado */}
       <div className="max-w-7xl w-full mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        
+
         {/* Columna 1: Estado General y Acciones */}
         <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
           <div className="w-full flex flex-col items-center gap-3">
-            <p className="text-text-primary font-heading font-bold text-md">
-              Estado
-            </p>
-            {getStatusBadge(order.status)}
+            <p className="text-text-primary font-heading font-bold text-md">Estado</p>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border capitalize ${
+                STATUS_STYLES[status] || "bg-gray-100 text-gray-800 border-gray-200"
+              }`}
+            >
+              {order.status}
+            </span>
           </div>
 
           <div className="w-full flex flex-col gap-3">
-            <p className="text-text-primary font-heading font-bold text-md">
-              Acciones
-            </p>
+            <p className="text-text-primary font-heading font-bold text-md">Acciones</p>
             <Button
               variant="tertiary"
               type="button"
@@ -89,29 +96,20 @@ export default function OrderView() {
           </div>
         </div>
 
-        {/* Columna 2, 3 y 4: Información Detallada */}
+        {/* Columnas 2-4: Información Detallada */}
         <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6">
-          
+
           {/* Datos Generales */}
           <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Input
-              label="Cliente"
-              value={order.clientName || "Cliente Ocasional"}
-              disabled
-            />
-            <Input
-              label="Número de Mesa"
-              value={`Mesa ${order.tableNumber ?? "-"}`}
-              disabled
-            />
-            <Input
-              label="Mesero Asignado"
-              value={order.waiter || "Sin asignar"}
-              disabled
-            />
+            <Input label="Número de Mesa" value={`Mesa ${order.tableNumber ?? "-"}`} disabled />
+            <Input label="Mesero Asignado" value={order.waiter || "Sin asignar"} disabled />
+            <Input label="Fecha" value={formatDate(order.createdAt)} disabled />
+            <div className="md:col-span-3">
+              <Input label="Observaciones" value={order.observations || "Sin observaciones"} disabled />
+            </div>
           </div>
 
-          {/* Tabla de Platillos Seleccionados */}
+          {/* Tabla de Platillos */}
           <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 space-y-4">
             <h3 className="text-lg font-heading font-bold text-text-primary">
               Detalle de Platillos
@@ -128,18 +126,12 @@ export default function OrderView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.items && order.items.length > 0 ? (
-                    order.items.map((item, index) => (
-                      <tr key={index} className="border-b border-border/20">
-                        <td className="py-3 px-3 font-medium text-text-primary">
-                          {item.dish}
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          {item.quantity}
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          {formatCurrency(item.price)}
-                        </td>
+                  {order.items?.length > 0 ? (
+                    order.items.map((item) => (
+                      <tr key={item.id} className="border-b border-border/20">
+                        <td className="py-3 px-3 font-medium text-text-primary">{item.dish}</td>
+                        <td className="py-3 px-3 text-center">{item.quantity}</td>
+                        <td className="py-3 px-3 text-right">{formatCurrency(item.price)}</td>
                         <td className="py-3 px-3 text-right font-semibold text-text-primary">
                           {formatCurrency(item.price * item.quantity)}
                         </td>
@@ -158,13 +150,13 @@ export default function OrderView() {
 
             <div className="flex justify-end items-center pt-4 border-t border-border/40">
               <p className="text-lg font-heading font-bold text-text-primary">
-                Total: <span className="text-primary">{formatCurrency(calculatedTotal)}</span>
+                {/* El total lo calcula la BD (SUM de cantidad × precio de venta) */}
+                Total: <span className="text-primary">{formatCurrency(order.total)}</span>
               </p>
             </div>
           </div>
 
         </div>
-
       </div>
     </div>
   );

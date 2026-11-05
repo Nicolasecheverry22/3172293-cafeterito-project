@@ -37,6 +37,19 @@ export const inventoryController = {
     }
   },
 
+  async update(req, res) {
+    try {
+      const updated = await inventoryService.update(Number(req.params.id), req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Suministro no encontrado" });
+      }
+      res.json({ message: "Suministro actualizado correctamente", inventoryId: updated.id });
+    } catch (err) {
+      console.log("ERROR BACKEND:", err);
+      res.status(err.statusCode || 500).json({ error: err.message });
+    }
+  },
+
   async remove(req, res) {
     try {
       const deleted = await inventoryService.remove(Number(req.params.id));

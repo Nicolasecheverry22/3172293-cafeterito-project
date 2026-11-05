@@ -1,4 +1,3 @@
-
 DELETE FROM groups
 WHERE group_name IN ('Instructor', 'Aprendiz');
 
@@ -8,5 +7,4 @@ VALUES
     ('Cocinero', true),
     ('Mesero',   true),
     ('Caja',     true),
-    ('Invitado', true)
-ON CONFLICT (group_name) DO NOTHING;
+    ('Invitado', true);

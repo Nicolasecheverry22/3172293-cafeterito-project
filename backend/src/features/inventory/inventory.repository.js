@@ -59,6 +59,23 @@ export const inventoryRepository = {
     return result.rows[0];
   },
 
+  // Actualiza todos los campos editables. Retorna undefined si el id no existe.
+  async update(id, data) {
+    const {
+      provisionName, category, unit, stock, price,
+      batch, minStock, maxStock, status,
+    } = data;
+    const result = await pool.query(
+      `UPDATE inventory
+       SET provision_name = $1, category = $2, unit = $3, stock = $4, price = $5,
+           batch = $6, min_stock = $7, max_stock = $8, status = $9
+       WHERE id = $10
+       RETURNING id`,
+      [provisionName, category, unit, stock, price, batch, minStock, maxStock, status, id]
+    );
+    return result.rows[0];
+  },
+
   async remove(id) {
     const result = await pool.query(
       "DELETE FROM inventory WHERE id = $1 RETURNING id",

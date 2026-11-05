@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
 import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
-import { menu as menuData } from "../../menu/data/menu";
+import { getProductById, updateProduct } from "@/services/productApi";
 import { createMenuSchema } from "../../menu/schemas/editMenuSchema";
 import menuCategoryTypes from "../../../data/selects/menuCategoryTypes.json";
 import {
@@ -16,29 +16,39 @@ import {
 export default function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [categoriesOptions, setCategoriesOptions] = useState(menuCategoryTypes);
+  const [categoriesOptions] = useState(menuCategoryTypes);
   const [errors, setErrors] = useState({});
 
-  const item = menuData.find((p) => String(p.id) === String(id));
+  const [item, setItem] = useState(null);
+  const [formData, setFormData] = useState(null);
 
+  // Carga el platillo real desde la BD
   useEffect(() => {
-    if (!item) {
-      showSystemErrorAlert({
-        text: "El platillo que intentas editar no existe.",
-      }).then(() => navigate("/menuList", { replace: true }));
-    }
-  }, [item, navigate]);
+    getProductById(id)
+      .then((data) => {
+        setItem(data);
+        setFormData({
+          nombre: data.productName ?? "",
+          categoria: data.category ?? "",
+          precio: data.price ?? "",
+          descripcion: data.description ?? "",
+          estado: Boolean(data.isAvailable),
+          imagen: [],
+        });
+      })
+      .catch(() =>
+        showSystemErrorAlert({ text: "El platillo que intentas editar no existe." })
+          .then(() => navigate("/menuList", { replace: true }))
+      );
+  }, [id, navigate]);
 
-  const [formData, setFormData] = useState({
-    nombre: item?.productName ?? "",
-    categoria: item?.category ?? "",
-    precio: item?.price ?? "",
-    descripcion: item?.description ?? "",
-    estado: item?.isAvailable ?? true,
-    imagen: item?.productImage ?? [],
-  });
-
-  if (!item) return null;
+  if (!formData) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando...</p>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +62,7 @@ export default function EditProduct() {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    const schema = createMenuSchema({ currentMenuItemId: item.id });
+    const schema = createMenuSchema();
     const result = schema.safeParse(formData);
 
     if (!result.success) {
@@ -72,14 +82,13 @@ export default function EditProduct() {
     setErrors({});
 
     try {
-      Object.assign(item, {
-        ...result.data,
+      // PUT /api/products/:id
+      await updateProduct(item.id, {
         productName: result.data.nombre,
         category: result.data.categoria,
         price: Number(result.data.precio),
         description: result.data.descripcion,
         isAvailable: formData.estado,
-        productImage: formData.imagen,
       });
 
       await showSuccessAlert({
@@ -91,7 +100,7 @@ export default function EditProduct() {
     } catch (error) {
       console.error("Error al actualizar el platillo:", error);
       await showSystemErrorAlert({
-        text: "Los cambios no pudieron guardarse.",
+        text: error.message || "Los cambios no pudieron guardarse.",
       });
     }
   };

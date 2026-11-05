@@ -3,6 +3,15 @@
 
 import { pool } from "../../config/db.js";
 
+// Nombres de los grupos (roles) del usuario como arreglo: ["Caja", "Mesero"]
+const USER_GROUPS_SUBQUERY = `
+    COALESCE((
+        SELECT ARRAY_AGG(g.group_name ORDER BY g.group_name)
+        FROM user_groups ug
+        INNER JOIN groups g ON g.group_id = ug.group_id
+        WHERE ug.user_id = users.id
+    ), '{}')`;
+
 // Exportamos el repositorio de usuarios
 // El repositorio encpasula todas las consultas SQL relacionadas con users.
 export const userRepository = {
@@ -97,6 +106,59 @@ async createWithGroups(userData, groupNames) {
     }
 },
 
+// Actualiza los datos del usuario y reemplaza sus grupos en UNA transacción.
+// La contraseña no se toca aquí. Retorna undefined si el id no existe.
+async updateWithGroups(id, userData, groupNames) {
+    const {
+        userName,
+        userEmail,
+        userPhone,
+        userDocumentTypes,
+        userDocumentNumber,
+        isActive,
+        isSuperuser,
+    } = userData;
+
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const { rows } = await client.query(
+            `UPDATE users
+             SET user_name = $1, user_email = $2, user_phone = $3,
+                 user_document_types = $4, user_document_number = $5,
+                 is_active = $6, is_superuser = $7
+             WHERE id = $8
+             RETURNING id`,
+            [userName, userEmail, userPhone, userDocumentTypes, userDocumentNumber, isActive, isSuperuser, id]
+        );
+
+        if (!rows[0]) {
+            await client.query("ROLLBACK");
+            return undefined;
+        }
+
+        await client.query("DELETE FROM user_groups WHERE user_id = $1", [id]);
+        await client.query(
+            `INSERT INTO user_groups (user_id, group_id)
+             SELECT $1, g.group_id
+             FROM groups g
+             WHERE g.group_name = ANY($2::text[])
+               AND g.is_active = TRUE`,
+            [id, groupNames]
+        );
+
+        await client.query("COMMIT");
+        return rows[0];
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
+},
+
 // Permisos de un usuario: directos (user_permissions) y heredados de sus grupos.
 // Un permiso puede ser directo y heredado al mismo tiempo.
 async getPermissionsByUserId(userId) {
@@ -176,7 +238,8 @@ async getAll() {
         user_document_number AS "userDocument",
         is_superuser,
         is_staff,
-        is_active
+        is_active,
+        ${USER_GROUPS_SUBQUERY} AS groups
     FROM users
     ORDER BY id;
     `;
@@ -194,8 +257,14 @@ async getById(id) {
         user_name            AS "userName",
         user_email           AS "userEmail",
         user_phone           AS "userPhone",
+        user_document_types  AS "userDocumentTypes",
         user_document_number AS "userDocument",
-        is_active
+        user_avatar_url      AS "userAvatarUrl",
+        is_superuser,
+        is_staff,
+        is_active,
+        TO_CHAR(created_at, 'YYYY-MM-DD') AS "createdAt",
+        ${USER_GROUPS_SUBQUERY} AS groups
     FROM users
     WHERE id = $1;
     `;

@@ -30,3 +30,15 @@ export async function deleteProvider(id) {
   if (!res.ok) throw new Error(data.error || `Error ${res.status} al eliminar el proveedor`);
   return data;
 }
+
+// Actualiza el proveedor en la base de datos (PUT /api/providers/:id).
+export async function updateProvider(id, payload) {
+  const res = await fetch(`${API_URL}/providers/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Error ${res.status} al actualizar el proveedor`);
+  return data;
+}

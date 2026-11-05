@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { inventory as existingInventory } from "../data/inventory";
 
-export function createEditProvisionsSchema({ currentProvisionId = null } = {}) {
+export function createEditProvisionsSchema() {
   return z
     .object({
       provisionName: z
@@ -54,28 +53,10 @@ export function createEditProvisionsSchema({ currentProvisionId = null } = {}) {
       provisionImage: z.any().optional(),
     })
 
-    // Unicidad del lote
-    .refine(
-      (data) =>
-        !existingInventory.some((p) => {
-          const pBatch = (p.batch || p.provisionCode || "").toString().trim().toLowerCase();
-          const newBatch = data.batch.trim().toLowerCase();
-          const pId = String(p.id || p.provisionId);
-          return pBatch === newBatch && pId !== String(currentProvisionId);
-        }),
-      { message: "Este número de lote ya está registrado en otro suministro", path: ["batch"] }
-    )
-
     // Stock máximo >= Stock mínimo
     .refine((data) => Number(data.maxStock) >= Number(data.minStock), {
       message: "El stock máximo no puede ser inferior al stock mínimo",
       path: ["maxStock"],
-    })
-
-    // Stock actual >= Stock mínimo
-    .refine((data) => Number(data.stock) >= Number(data.minStock), {
-      message: "El stock actual no puede ser inferior al stock mínimo",
-      path: ["stock"],
     });
 }
 

@@ -37,6 +37,19 @@ export const productController = {
     }
   },
 
+  async update(req, res) {
+    try {
+      const updated = await productService.update(Number(req.params.id), req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Producto no encontrado" });
+      }
+      res.json({ message: "Producto actualizado correctamente", productId: updated.id });
+    } catch (err) {
+      console.log("ERROR BACKEND:", err);
+      res.status(err.statusCode || 500).json({ error: err.message });
+    }
+  },
+
   async remove(req, res) {
     try {
       const deleted = await productService.remove(Number(req.params.id));

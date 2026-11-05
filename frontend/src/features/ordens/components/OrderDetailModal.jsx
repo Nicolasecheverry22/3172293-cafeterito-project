@@ -1,14 +1,9 @@
-import React from "react";
 import { X } from "lucide-react";
 
 export default function OrderDetailModal({ isOpen, onClose, order }) {
   if (!isOpen || !order) return null;
 
-  const total =
-    order.items?.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    ) || 0;
+  const total = order.total ?? 0;
 
   // Formatear la fecha
   const formattedDate = order.createdAt
@@ -83,8 +78,8 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
-              {order.items?.map((item, index) => (
-                <tr key={index}>
+              {order.items?.map((item) => (
+                <tr key={item.id}>
                   <td className="py-2.5 px-3 font-medium">{item.dish}</td>
                   <td className="py-2.5 px-3 text-center">{item.quantity}</td>
                   <td className="py-2.5 px-3 text-right text-gray-500">

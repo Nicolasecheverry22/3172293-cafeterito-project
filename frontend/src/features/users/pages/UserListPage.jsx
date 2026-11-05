@@ -22,12 +22,8 @@ export default function UserListPage() {
         setUsers(
           data.map((u) => ({
             ...u,
-            // La BD no guarda un "rol" de texto: lo derivamos de los flags
-            userRole: u.is_superuser
-              ? "Administrador"
-              : u.is_staff
-              ? "Staff"
-              : "Usuario",
+            // El rol es el/los grupo(s) del usuario en la BD (user_groups)
+            userRole: u.groups?.length ? u.groups.join(", ") : "Sin rol",
           }))
         )
       )

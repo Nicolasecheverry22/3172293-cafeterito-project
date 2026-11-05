@@ -1,9 +1,9 @@
 // src/ordens/pages/OrdenListPage.js
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
 import { Link } from "react-router-dom";
 import { getOrdensColumns } from "../table/OrdensColumns";
-import { ordens as initialOrdens } from "../data/ordens";
+import { getOrders } from "@/services/orderApi";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function OrdenListPage() {
@@ -11,6 +11,23 @@ export default function OrdenListPage() {
 
   // Estado para controlar la columna y dirección del ordenamiento
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+
+  // Órdenes cargadas desde la base de datos (API del backend)
+  const [orders, setOrders] = useState([]);
+  const [loadError, setLoadError] = useState(null);
+
+  const loadOrders = useCallback(() => {
+    getOrders()
+      .then((data) => {
+        setOrders(data);
+        setLoadError(null);
+      })
+      .catch((err) => setLoadError(err.message));
+  }, []);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -21,7 +38,7 @@ export default function OrdenListPage() {
 
   // Reordena dinámicamente las órdenes
   const sortedOrdens = useMemo(() => {
-    return [...initialOrdens].sort((a, b) => {
+    return [...orders].sort((a, b) => {
       const { key, direction } = sortConfig;
 
       if (key === "id") {
@@ -36,18 +53,18 @@ export default function OrdenListPage() {
 
       if (key === "waiter") {
         return direction === "asc"
-          ? a.waiter.localeCompare(b.waiter, "es", { sensitivity: "base" })
-          : b.waiter.localeCompare(a.waiter, "es", { sensitivity: "base" });
+          ? (a.waiter ?? "").localeCompare(b.waiter ?? "", "es", { sensitivity: "base" })
+          : (b.waiter ?? "").localeCompare(a.waiter ?? "", "es", { sensitivity: "base" });
       }
 
       return 0;
     });
-  }, [sortConfig]);
+  }, [orders, sortConfig]);
 
   // Genera las columnas pasando la configuración y el handler de ordenamiento
   const columns = useMemo(
-    () => getOrdensColumns(sortConfig, handleSort),
-    [sortConfig]
+    () => getOrdensColumns(sortConfig, handleSort, loadOrders),
+    [sortConfig, loadOrders]
   );
 
   return (
@@ -74,6 +91,12 @@ export default function OrdenListPage() {
             </Link>
           </div>
         </div>
+
+        {loadError && (
+          <p className="text-error text-small mb-4">
+            No se pudieron cargar las órdenes: {loadError}
+          </p>
+        )}
 
         <div className="overflow-x-auto bg-surface/0 shadow-xs">
           <DataTable data={sortedOrdens} columns={columns} />
