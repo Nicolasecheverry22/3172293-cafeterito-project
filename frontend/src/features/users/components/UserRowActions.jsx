@@ -8,7 +8,7 @@ import {
   showSuccessAlert
 } from "@/shared/services/alertService";
 
-import { users as usersData } from "../data/users";
+import { deleteUser } from "@/services/userApi";
 
 
 export default function UserRowActions({ user, onDeleted }) {
@@ -37,16 +37,16 @@ export default function UserRowActions({ user, onDeleted }) {
     }
 
     try {
-      const index = usersData.findIndex((u) => u.id === user.id);
-      if (index !== -1) usersData.splice(index, 1);
-      
+      // Elimina el usuario en la base de datos (DELETE /api/users/:id)
+      await deleteUser(user.id);
 
-      const result = await showSuccessAlert({
+      await showSuccessAlert({
         title: "¡Usuario eliminado!",
         text: "El usuario fue eliminado correctamente."
       });
 
-      onDeleted?.(user.id); 
+      // Refresca el listado desde la BD
+      onDeleted?.(user.id);
     } catch (error) {
       console.error("Error al eliminar el usuario:", error);
       await showSystemErrorAlert({

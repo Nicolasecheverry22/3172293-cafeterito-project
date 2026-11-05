@@ -1,8 +1,8 @@
 // src/users/pages/UserListPage.js
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
 import { getUserColumns } from "../table/UserColumns";
-import { users as initialUsers } from "../data/users";
+import { getUsers } from "@/services/userApi";
 import { Link } from "react-router-dom";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
@@ -11,6 +11,32 @@ export default function UserListPage() {
 
   // Estado para controlar qué columna se ordena y en qué dirección
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+
+  // Usuarios cargados desde la base de datos (API del backend)
+  const [users, setUsers] = useState([]);
+  const [loadError, setLoadError] = useState(null);
+
+  const loadUsers = useCallback(() => {
+    getUsers()
+      .then((data) =>
+        setUsers(
+          data.map((u) => ({
+            ...u,
+            // La BD no guarda un "rol" de texto: lo derivamos de los flags
+            userRole: u.is_superuser
+              ? "Administrador"
+              : u.is_staff
+              ? "Staff"
+              : "Usuario",
+          }))
+        )
+      )
+      .catch((err) => setLoadError(err.message));
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -21,7 +47,7 @@ export default function UserListPage() {
 
   // 1. Reordena la lista de usuarios según el estado actual
   const sortedUsers = useMemo(() => {
-    return [...initialUsers].sort((a, b) => {
+    return [...users].sort((a, b) => {
       const { key, direction } = sortConfig;
 
       if (key === "id") {
@@ -36,12 +62,12 @@ export default function UserListPage() {
 
       return 0;
     });
-  }, [sortConfig]);
+  }, [users, sortConfig]);
 
   // 2. Genera las columnas pasando el estado y la función de click
   const columns = useMemo(
-    () => getUserColumns(sortConfig, handleSort),
-    [sortConfig]
+    () => getUserColumns(sortConfig, handleSort, loadUsers),
+    [sortConfig, loadUsers]
   );
 
   return (
@@ -69,6 +95,12 @@ export default function UserListPage() {
             </Link>
           </div>
         </div>
+
+        {loadError && (
+          <p className="text-red-500 text-sm mb-4">
+            No se pudieron cargar los usuarios desde el servidor: {loadError}
+          </p>
+        )}
 
         <div className="overflow-x-auto bg-surface/0 shadow-xs">
           <DataTable data={sortedUsers} columns={columns} />
