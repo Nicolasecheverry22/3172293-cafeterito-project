@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
-import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
-import { inventory as inventoryData } from "../../inventory/data/inventory";
+import { Input, Button, Select, FileInput } from "@/shared";
+import { getInventoryItem, updateInventoryItem } from "@/services/inventoryApi";
 import { createEditProvisionsSchema } from "../../inventory/schemas/editProvisionsSchema";
-import { getCategoryTypes } from "@/services/selectService";
 import {
   showSystemErrorAlert,
   showDeleteCancelAlert,
@@ -31,6 +30,9 @@ const UNIT_OPTIONS = [
   { value: "lt", label: "Litros (lt)" },
   { value: "ml", label: "Mililitros (ml)" },
   { value: "unid", label: "Unidades (unid)" },
+  // Valores que ya existen en la BD (seed 0025)
+  { value: "litros", label: "Litros" },
+  { value: "unidades", label: "Unidades" },
   { value: "lb", label: "Libras (lb)" },
 ];
 
@@ -44,49 +46,50 @@ const STATUS_OPTIONS = [
 export default function EditProvisions() {
   const navigate = useNavigate();
   const { id } = useParams();
+  // Categorías iguales a las de la BD. (categoryTypes.json usa otros nombres, p. ej. "Cárnicos",
+  // y con { id } en vez de { value }, por eso no se usa aquí.)
   const [categoriesOptions, setCategoriesOptions] = useState(DEFAULT_CATEGORIES);
   const [errors, setErrors] = useState({});
+  const [item, setItem] = useState(null);
+  const [formData, setFormData] = useState(null);
 
-  // Búsqueda del suministro por id o provisionId
-  const item = inventoryData.find(
-    (p) => String(p.id) === String(id) || String(p.provisionId) === String(id)
-  );
-
+  // Carga el suministro real desde la BD
   useEffect(() => {
-    if (getCategoryTypes) {
-      getCategoryTypes()
-        .then((res) => {
-          if (Array.isArray(res) && res.length > 0) {
-            setCategoriesOptions(res);
-          }
-        })
-        .catch(() => setCategoriesOptions(DEFAULT_CATEGORIES));
-    }
-  }, []);
+    getInventoryItem(id)
+      .then((data) => {
+        setItem(data);
+        // Si la categoría guardada no está en la lista, se agrega para no perderla
+        setCategoriesOptions((prev) =>
+          data.category && !prev.some((c) => c.value === data.category)
+            ? [...prev, { value: data.category, label: data.category }]
+            : prev
+        );
+        setFormData({
+          provisionName: data.provisionName ?? "",
+          category: data.category ?? "",
+          status: data.status ?? "Activo",
+          unit: data.unit ?? "",
+          batch: data.batch ?? "",
+          stock: data.stock ?? 0,
+          minStock: data.minStock ?? 0,
+          maxStock: data.maxStock ?? 0,
+          price: data.price ?? "",
+          provisionImage: [],
+        });
+      })
+      .catch(() =>
+        showSystemErrorAlert({ text: "El suministro que intentas editar no existe." })
+          .then(() => navigate("/inventoryList", { replace: true }))
+      );
+  }, [id, navigate]);
 
-  useEffect(() => {
-    if (!item) {
-      showSystemErrorAlert({
-        text: "El suministro que intentas editar no existe.",
-      }).then(() => navigate("/inventoryList", { replace: true }));
-    }
-  }, [item, navigate]);
-
-  const [formData, setFormData] = useState({
-    provisionName: item?.provisionName ?? item?.nameProvision ?? item?.name ?? "",
-    category: item?.category ?? "",
-    status: item?.status ?? item?.provisionStatus ?? "Activo",
-    unit: item?.unit ?? "",
-    batch: item?.batch ?? item?.provisionCode ?? "",
-    stock: item?.stock ?? item?.quantity ?? "",
-    minStock: item?.minStock ?? "",
-    maxStock: item?.maxStock ?? "",
-    price: item?.price ?? item?.priceProvision ?? item?.foodPrice ?? "",
-    isActive: item?.isActive ?? item?.is_active ?? true,
-    provisionImage: item?.provisionImage ?? item?.image ?? [],
-  });
-
-  if (!item) return null;
+  if (!formData) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando suministro...</p>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,8 +104,7 @@ export default function EditProvisions() {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    const currentId = item.id ?? item.provisionId;
-    const schema = createEditProvisionsSchema({ currentProvisionId: currentId });
+    const schema = createEditProvisionsSchema();
     const result = schema.safeParse(formData);
 
     if (!result.success) {
@@ -122,21 +124,17 @@ export default function EditProvisions() {
     setErrors({});
 
     try {
-      
-      Object.assign(item, {
-        ...result.data,
+      // PUT /api/inventory/:id
+      await updateInventoryItem(item.id, {
         provisionName: result.data.provisionName,
-        price: Number(result.data.price),
-        priceProvision: Number(result.data.price),
+        category: result.data.category,
+        unit: result.data.unit,
         stock: Number(result.data.stock),
+        price: Number(result.data.price),
+        batch: result.data.batch,
         minStock: Number(result.data.minStock),
         maxStock: Number(result.data.maxStock),
-        batch: result.data.batch,
-        provisionCode: result.data.batch,
-        status: formData.status,             
-        provisionStatus: formData.status,    
-        isActive: formData.isActive,
-        is_active: formData.isActive,
+        status: formData.status,
       });
 
       await showSuccessAlert({
@@ -148,7 +146,7 @@ export default function EditProvisions() {
     } catch (error) {
       console.error("Error al actualizar el suministro:", error);
       await showSystemErrorAlert({
-        text: "Los cambios no pudieron guardarse.",
+        text: error.message || "Los cambios no pudieron guardarse.",
       });
     }
   };
@@ -170,8 +168,6 @@ export default function EditProvisions() {
       setFormData((prev) => ({
         ...prev,
         status: newStatus,
-        provisionStatus: newStatus,
-        isActive: newStatus.toLowerCase() === "activo" || newStatus.toLowerCase() === "disponible",
       }));
     }
   };

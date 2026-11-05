@@ -37,6 +37,19 @@ export const providerController = {
     }
   },
 
+  async update(req, res) {
+    try {
+      const updated = await providerService.update(Number(req.params.id), req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Proveedor no encontrado" });
+      }
+      res.json({ message: "Proveedor actualizado correctamente", providerId: updated.id });
+    } catch (err) {
+      console.log("ERROR BACKEND:", err);
+      res.status(err.statusCode || 500).json({ error: err.message });
+    }
+  },
+
   async remove(req, res) {
     try {
       const deleted = await providerService.remove(Number(req.params.id));

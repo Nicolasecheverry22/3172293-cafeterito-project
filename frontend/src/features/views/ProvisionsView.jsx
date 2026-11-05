@@ -39,11 +39,13 @@ export default function ProvisionsView() {
     );
   }
 
-  const provisionName =
-    provision.provisionName || provision.provisionName || provision.nameprovision || "Suministro";
+  const provisionName = provision.provisionName || "Suministro";
 
-  // Lote del suministro
-  const batchNumber = provision.batch || provision.lot || provision.lote || "LOT-101A";
+  // Lote real del suministro (antes mostraba "LOT-101A" fijo si venía vacío)
+  const batchNumber = provision.batch || "Sin lote";
+
+  // La tabla inventory no tiene is_active: el estado vive en la columna status
+  const isActive = provision.status === "Activo";
 
   // Iniciales dinámicas para el avatar
   const getInitials = (name) => {
@@ -74,7 +76,7 @@ export default function ProvisionsView() {
             <p className="text-text-primary font-heading font-bold text-md">
               Estado
             </p>
-            <StatusSwitch checked={provision.isActive ?? true} disabled />
+            <StatusSwitch checked={isActive} disabled />
           </div>
 
           <div className="w-full flex flex-col gap-3">
@@ -138,7 +140,7 @@ export default function ProvisionsView() {
 
             <Input
               label="Estado del Suministro"
-              value={provision.status || "activo"}
+              value={provision.status || "Sin estado"}
               disabled
             />
 

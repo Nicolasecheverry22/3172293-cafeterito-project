@@ -77,6 +77,30 @@ export const userController = {
         }
     },
 
+    // Actualizar datos y roles de un usuario
+    async update(req, res){
+        try{
+            const id = Number(req.params.id);
+            const updated = await userService.updateUser(id, req.body);
+
+            if (!updated) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            res.json({ message: "Usuario actualizado correctamente", userId: updated.id });
+        } catch(err){
+            console.log("ERROR BACKEND:", err);
+
+            if (err.code === "23505") {
+                return res.status(409).json({
+                    error: "Ya existe otro usuario con ese correo o número de documento",
+                });
+            }
+
+            res.status(err.statusCode || 500).json({ error: err.message });
+        }
+    },
+
     // Eliminar un usuario por su id
     async remove(req, res){
         try{

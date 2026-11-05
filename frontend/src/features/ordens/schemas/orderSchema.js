@@ -1,8 +1,4 @@
 import { z } from "zod";
-import { ordens as existingOrders } from "../data/ordens";
-import { menuDishesData } from "../data/orderMockData";
-
-const VALID_DISH_VALUES = menuDishesData.map((d) => d.value);
 
 const orderItemSchema = z.object({
   id: z.string().optional(),
@@ -15,35 +11,40 @@ const orderItemSchema = z.object({
   price: z.coerce.number().positive().optional(),
 });
 
-// Campos base obligatorios para ordenes (incluyendo status y clientName)
-const baseOrderFields = {
-  clientName: z.string().min(2, "El nombre del cliente es obligatorio"),
-  tableNumber: z.coerce
-    .number()
-    .int("El número de mesa debe ser un entero")
-    .positive("Ingrese un número de mesa válido"),
-  waiterId: z.string().min(1, "Debe seleccionar un empleado encargado"),
-  status: z.string().min(1, "Debe seleccionar un estado para la orden"),
-  observations: z.string().max(300, "Las observaciones son demasiado largas").optional(),
-  items: z.array(orderItemSchema).min(1, "La orden debe tener al menos un platillo"),
-};
+const tableNumberSchema = z.coerce
+  .number()
+  .int("El número de mesa debe ser un entero")
+  .positive("Ingrese un número de mesa válido");
 
-// Esquema para CREAR
-export const createOrderSchema = () => {
-  return z
-    .object(baseOrderFields)
-    .refine(
-      (data) =>
-        !existingOrders.some(
-          (order) =>
-            order.tableNumber === Number(data.tableNumber) &&
-            order.status === "activa"
-        ),
-      { message: "Esta mesa ya tiene una orden activa", path: ["tableNumber"] }
-    );
-};
+const observationsSchema = z
+  .string()
+  .max(300, "Las observaciones son demasiado largas")
+  .optional();
 
-// Esquema para EDITAR (todos obligatorios excepto observaciones)
-export const updateOrderSchema = () => {
-  return z.object(baseOrderFields);
-};
+// Esquema para CREAR: solo los campos que tiene el formulario.
+// (Antes exigía clientName y status, que el formulario no envía -> siempre fallaba.)
+// "Una mesa = una orden activa" la valida la BD (índice uq_orders_active_table).
+export const createOrderSchema = () =>
+  z.object({
+    tableNumber: tableNumberSchema,
+    waiterId: z.string().min(1, "Debe seleccionar un empleado encargado"),
+    observations: observationsSchema,
+    items: z
+      .array(orderItemSchema)
+      .min(1, "La orden debe tener al menos un platillo")
+      .refine((items) => items.every((item) => item.dishId), {
+        message: "Seleccione un platillo en cada fila o elimine las vacías",
+      }),
+  });
+
+// Esquema para EDITAR: mismos campos que guarda la tabla orders
+export const updateOrderSchema = () =>
+  z.object({
+    tableNumber: tableNumberSchema,
+    waiterId: z.string().min(1, "Debe seleccionar un empleado encargado"),
+    status: z.enum(["activa", "pagada", "cancelada"], {
+      message: "Debe seleccionar un estado válido",
+    }),
+    observations: observationsSchema,
+    items: z.array(orderItemSchema).min(1, "La orden debe tener al menos un platillo"),
+  });

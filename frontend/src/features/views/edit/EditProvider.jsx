@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
 
-import { Input, StatusSwitch, Select, FileInput, Button } from "@/shared";
-import { providers } from "../../providers/data/providers";
+import { Input, StatusSwitch, FileInput, Button } from "@/shared";
+import { getProviderById, updateProvider } from "@/services/providerApi";
 import { createEditProviderSchema } from "../../providers/schemas/editProviderSchema";
 
 import {
@@ -14,40 +14,43 @@ import {
   showCreateErrorAlert
 } from "@/shared/services/alertService";
 
-const DOCUMENT_TYPES = [
-  { value: "NIT", label: "NIT" },
-  { value: "CC", label: "Cédula de Ciudadanía" },
-  { value: "CE", label: "Cédula de Extranjería" },
-];
-
 export default function EditProvider() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [errors, setErrors] = useState({});
 
-  const provider = providers.find((p) => String(p.id) === String(id));
+  const [provider, setProvider] = useState(null);
+  const [formData, setFormData] = useState(null);
 
+  // Carga el proveedor real desde la BD
   useEffect(() => {
-    if (!provider) {
-      showSystemErrorAlert({
-        text: "El proveedor que intentas editar no existe.",
-      }).then(() => navigate("/providerList", { replace: true }));
-    }
-  }, [provider, navigate]);
+    getProviderById(id)
+      .then((data) => {
+        setProvider(data);
+        setFormData({
+          nit: data.nit ?? "",
+          providerName: data.providerName ?? "",
+          providerAddress: data.providerAddress ?? "",
+          providerPhone: data.providerPhone ?? "",
+          providerEmail: data.providerEmail ?? "",
+          productService: data.productService ?? "",
+          isActive: Boolean(data.is_active),
+          file: [],
+        });
+      })
+      .catch(() =>
+        showSystemErrorAlert({ text: "El proveedor que intentas editar no existe." })
+          .then(() => navigate("/providerList", { replace: true }))
+      );
+  }, [id, navigate]);
 
-  const [formData, setFormData] = useState({
-    providerDocumentType: provider?.providerDocumentType ?? "NIT",
-    nit: provider?.nit ?? "",
-    providerName: provider?.providerName ?? "",
-    providerAddress: provider?.providerAddress ?? "",
-    providerPhone: provider?.providerPhone ?? "",
-    providerEmail: provider?.providerEmail ?? "",
-    productService: provider?.productService ?? "",
-    isActive: provider?.isActive ?? true,
-    file: provider?.file ?? [],
-  });
-
-  if (!provider) return null;
+  if (!formData) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando...</p>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,7 +72,7 @@ export default function EditProvider() {
     e.preventDefault();
 
     try {
-      const schema = createEditProviderSchema({ currentProviderId: provider.id });
+      const schema = createEditProviderSchema();
       const result = schema.safeParse(formData);
 
       if (!result.success) {
@@ -82,7 +85,7 @@ export default function EditProvider() {
         setErrors(fieldErrors);
 
         await showCreateErrorAlert({
-          entity: "producto",
+          entity: "proveedor",
           text: "Por favor revisa los errores indicados en el formulario antes de guardar.",
         });
       return;
@@ -90,10 +93,15 @@ export default function EditProvider() {
 
       setErrors({});
 
-      // Actualización directa del objeto de proveedor en el mock data
-      Object.assign(provider, {
-        ...result.data,
-        id: provider.id,
+      // PUT /api/providers/:id
+      await updateProvider(provider.id, {
+        nit: result.data.nit,
+        providerName: result.data.providerName,
+        providerEmail: result.data.providerEmail,
+        providerPhone: result.data.providerPhone,
+        providerAddress: result.data.providerAddress,
+        productService: result.data.productService,
+        isActive: formData.isActive,
       });
 
       await showSuccessAlert({
@@ -105,7 +113,7 @@ export default function EditProvider() {
     } catch (error) {
       console.error("Error al actualizar proveedor:", error);
       await showSystemErrorAlert({
-        text: "Los cambios no pudieron guardarse.",
+        text: error.message || "Los cambios no pudieron guardarse.",
       });
     }
   };
@@ -167,16 +175,8 @@ export default function EditProvider() {
 
           {/* Sub-tarjeta contenedora de los campos de texto */}
           <div className="w-full bg-[#a1a1a1]/70 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              label="Tipo de Documento"
-              name="providerDocumentType"
-              value={formData.providerDocumentType}
-              onChange={handleChange}
-              options={DOCUMENT_TYPES}
-              error={errors.providerDocumentType}
-            />
             <Input
-              label="NIT / Número de Documento"
+              label="NIT"
               name="nit"
               type="text"
               value={formData.nit}

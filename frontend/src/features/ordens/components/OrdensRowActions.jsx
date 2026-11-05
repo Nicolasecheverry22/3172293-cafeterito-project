@@ -9,7 +9,7 @@ import {
   showSuccessAlert,
   showConfirmDeleteAlert
   } from "@/shared/services/alertService";
-import { ordens as ordersData } from "../data/ordens";
+import { deleteOrder } from "@/services/orderApi";
 
 export default function OrdensRowActions({ order, onDeleted }) {
   const navigate = useNavigate();
@@ -47,13 +47,10 @@ export default function OrdensRowActions({ order, onDeleted }) {
     if (!result.isConfirmed) return;
 
     try {
-      const index = ordersData.findIndex((o) => o.id === order.id);
+      // Elimina la orden en la base de datos (DELETE /api/orders/:id)
+      await deleteOrder(order.id);
 
-      if (index !== -1) {
-        ordersData.splice(index, 1);
-      }
-
-      const result = await showSuccessAlert({
+      await showSuccessAlert({
         title: "¡Orden eliminada!",
         text: "La orden fue eliminada correctamente.",
       });
@@ -63,7 +60,7 @@ export default function OrdensRowActions({ order, onDeleted }) {
       console.error("Error al eliminar la orden:", error);
 
       await showSystemErrorAlert({
-        text: "La orden no pudo ser eliminada. Intenta nuevamente.",
+        text: error.message || "La orden no pudo ser eliminada. Intenta nuevamente.",
       });
     }
   };

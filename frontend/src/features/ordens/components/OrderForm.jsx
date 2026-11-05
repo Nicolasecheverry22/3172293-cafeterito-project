@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Input, Select, Button } from "@/shared";
 import { createOrderSchema } from "../schemas/orderSchema";
-import { waitersData, menuDishesData } from "../data/orderMockData";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 
 const DEFAULT_FORM_DATA = { tableNumber: "", waiterId: "", observations: "" };
@@ -12,9 +11,14 @@ export default function OrderForm({
   initialData = null,
   initialItems = null,
   currentOrderId = null,
+  // Opciones desde la BD: [{ value, label }] y [{ value, label, price }]
+  waiters = [],
+  dishes = [],
   onSubmit,
   onCancel,
 }) {
+  const menuDishesData = dishes;
+  const waitersData = waiters;
   const [formData, setFormData] = useState(initialData ?? DEFAULT_FORM_DATA);
   const [orderItems, setOrderItems] = useState(
     initialItems ?? [{ id: crypto.randomUUID(), dishId: "", quantity: 1 }]
@@ -49,7 +53,7 @@ export default function OrderForm({
         const price = dish?.price ?? 0;
         return { id: item.id, label: dish?.label ?? "—", quantity, subtotal: price * quantity };
       });
-  }, [orderItems]);
+  }, [orderItems, menuDishesData]);
 
   const total = summary.reduce((sum, row) => sum + row.subtotal, 0);
 

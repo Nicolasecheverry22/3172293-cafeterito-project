@@ -1,14 +1,9 @@
 import { z } from "zod";
-import { providers as existingProviders } from "../data/providers";
 
-export function createEditProviderSchema({ currentProviderId = null } = {}) {
+// Sin validación de duplicados contra el mock: los datos reales están en la BD.
+export function createEditProviderSchema() {
   return z
     .object({
-      providerDocumentType: z
-        .string({ required_error: "Debe seleccionar un tipo de documento" })
-        .trim()
-        .min(1, "Debe seleccionar un tipo de documento"),
-
       nit: z
         .string({ required_error: "El NIT o número de documento es requerido" })
         .trim()
@@ -44,29 +39,7 @@ export function createEditProviderSchema({ currentProviderId = null } = {}) {
 
       isActive: z.boolean().optional(),
       file: z.any().optional(),
-    })
-
-    // Validar que el NIT no pertenezca a otro proveedor registrado
-    .refine(
-      (data) =>
-        !existingProviders.some(
-          (p) =>
-            p.nit?.toString().trim() === data.nit?.toString().trim() &&
-            String(p.id) !== String(currentProviderId)
-        ),
-      { message: "Este NIT/Documento ya está registrado", path: ["nit"] }
-    )
-
-    // Validar que el correo no pertenezca a otro proveedor registrado
-    .refine(
-      (data) =>
-        !existingProviders.some(
-          (p) =>
-            p.providerEmail?.toLowerCase().trim() === data.providerEmail?.toLowerCase().trim() &&
-            String(p.id) !== String(currentProviderId)
-        ),
-      { message: "Este correo ya está registrado", path: ["providerEmail"] }
-    );
+    });
 }
 
 export const editProviderSchema = createEditProviderSchema();

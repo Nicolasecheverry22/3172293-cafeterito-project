@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
 import { Input, Button, Select } from "@/shared";
-import { ordens } from "../../ordens/data/ordens";
-import { waitersData, menuDishesData } from "../../ordens/data/orderMockData";
+import { getOrderById, updateOrder } from "@/services/orderApi";
+import { getUsers } from "@/services/userApi";
+import { getProducts } from "@/services/productApi";
 import { updateOrderSchema } from "../../ordens/schemas/orderSchema";
 import {
   showSystemErrorAlert,
@@ -13,39 +14,72 @@ import {
   showCreateErrorAlert
 } from "@/shared/services/alertService";
 
+// Deben coincidir con el CHECK chk_orders_status de la BD
 const ORDER_STATUS_OPTIONS = [
   { value: "activa", label: "Activa" },
   { value: "pagada", label: "Pagada" },
+  { value: "cancelada", label: "Cancelada" },
 ];
+
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+  }).format(amount ?? 0);
 
 export default function EditOrder() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const item = ordens.find((o) => String(o.id) === String(id));
+  const [item, setItem] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [waitersData, setWaitersData] = useState([]);
+  const [menuDishesData, setMenuDishesData] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
 
-  const initialWaiter = waitersData.find(
-    (w) => w.label === item?.waiter || w.value === item?.waiterId
-  )?.value || "";
-
-  const [formData, setFormData] = useState({
-    clientName: item?.clientName ?? "Cliente Ocasional",
-    tableNumber: item?.tableNumber ?? "",
-    waiterId: initialWaiter,
-    status: item?.status?.toLowerCase() ?? "activa",
-    items: item?.items ?? [],
-  });
-
+  // Carga la orden real + opciones de meseros y platillos desde la BD
   useEffect(() => {
-    if (!item) {
-      showSystemErrorAlert({
-        text: "La orden que intentas editar no existe.",
-      }).then(() => navigate("/ordensList", { replace: true }));
-    }
-  }, [item, navigate]);
+    Promise.all([getOrderById(id), getUsers(), getProducts()])
+      .then(([order, users, products]) => {
+        setItem(order);
+        setFormData({
+          tableNumber: order.tableNumber ?? "",
+          waiterId: order.waiterId ? String(order.waiterId) : "",
+          status: order.status ?? "activa",
+          observations: order.observations ?? "",
+          items: order.items.map((i) => ({
+            productId: i.productId,
+            dish: i.dish,
+            price: i.price, // precio de venta guardado en la orden
+            quantity: i.quantity,
+          })),
+        });
+        setWaitersData(
+          users
+            .filter((u) => u.is_active || u.id === order.waiterId)
+            .map((u) => ({ value: String(u.id), label: u.userName }))
+        );
+        setMenuDishesData(
+          products
+            .filter((p) => p.isAvailable)
+            .map((p) => ({ value: String(p.id), label: p.productName, price: p.price }))
+        );
+      })
+      .catch(() =>
+        showSystemErrorAlert({ text: "La orden que intentas editar no existe." })
+          .then(() => navigate("/ordensList", { replace: true }))
+      );
+  }, [id, navigate]);
 
-  if (!item) return null;
+  if (!formData) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando orden...</p>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,29 +92,25 @@ export default function EditOrder() {
   const handleAddItem = (dishValue) => {
     const dishObj = menuDishesData.find((d) => d.value === dishValue);
     if (!dishObj) return;
+    const productId = Number(dishObj.value);
 
     setFormData((prev) => {
-      const existingIndex = prev.items.findIndex(
-        (i) => (i.dish || i.productName) === dishObj.label
-      );
+      const existing = prev.items.find((i) => i.productId === productId);
 
-      if (existingIndex >= 0) {
-        const updatedItems = [...prev.items];
-        updatedItems[existingIndex].quantity += 1;
-        return { ...prev, items: updatedItems };
+      if (existing) {
+        return {
+          ...prev,
+          items: prev.items.map((i) =>
+            i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i
+          ),
+        };
       }
 
       return {
         ...prev,
         items: [
           ...prev.items,
-          { 
-            dishId: dishObj.value, 
-            dish: dishObj.label, 
-            price: dishObj.price, 
-            quantity: 1, 
-            dispatched: false 
-          },
+          { productId, dish: dishObj.label, price: dishObj.price, quantity: 1 },
         ],
       };
     });
@@ -89,24 +119,13 @@ export default function EditOrder() {
     }
   };
 
-  // Modificar cantidad de un platillo de forma segura
-    const handleQuantityChange = (index, delta) => {
+  // Modifica la cantidad sin bajar de 1
+  const handleQuantityChange = (index, delta) => {
     setFormData((prev) => {
+      const newQty = prev.items[index].quantity + delta;
+      if (newQty <= 0) return prev;
       const updated = [...prev.items];
-      const currentItem = updated[index];
-      
-      // Calculamos la nueva cantidad asegurando que no baje de 1
-      const newQty = currentItem.quantity + delta;
-      if (newQty <= 0) {
-        // Si llega a 0 o menos, puedes decidir si eliminarlo o dejarlo en 1
-        return prev; // O usar splice si deseas eliminarlo al llegar a 0
-      }
-
-      updated[index] = {
-        ...currentItem,
-        quantity: newQty,
-      };
-
+      updated[index] = { ...updated[index], quantity: newQty };
       return { ...prev, items: updated };
     });
   };
@@ -123,25 +142,15 @@ export default function EditOrder() {
     0
   );
 
-  const formatCurrency = (amount) =>
-    new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
-      minimumFractionDigits: 0,
-    }).format(amount);
-
   const handleSave = async (e) => {
     e.preventDefault();
 
-    // Usamos el esquema exclusivo para actualización
-    const schema = updateOrderSchema({ currentOrderId: item.id });
-    const result = schema.safeParse(formData);
+    const result = updateOrderSchema().safeParse(formData);
 
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach((issue) => {
-        const fieldName = issue.path[0];
-        fieldErrors[fieldName] = issue.message;
+        fieldErrors[issue.path[0]] = issue.message;
       });
       setErrors(fieldErrors);
 
@@ -153,17 +162,16 @@ export default function EditOrder() {
     }
 
     setErrors({});
+    setIsSaving(true);
 
     try {
-      const selectedWaiter = waitersData.find((w) => w.value === formData.waiterId);
-
-      Object.assign(item, {
-        clientName: formData.clientName,
+      // PUT /api/orders/:id — el backend conserva el precio de los platillos que ya estaban
+      await updateOrder(item.id, {
         tableNumber: Number(result.data.tableNumber),
-        waiterId: formData.waiterId,
-        waiter: selectedWaiter ? selectedWaiter.label : item.waiter,
-        status: formData.status,
-        items: formData.items,
+        waiterId: Number(result.data.waiterId),
+        status: result.data.status,
+        observations: result.data.observations ?? "",
+        items: formData.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
       });
 
       await showSuccessAlert({
@@ -175,8 +183,10 @@ export default function EditOrder() {
     } catch (error) {
       console.error("Error al actualizar la orden:", error);
       await showSystemErrorAlert({
-        text: "Los cambios no pudieron guardarse.",
+        text: error.message || "Los cambios no pudieron guardarse.",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -210,13 +220,13 @@ export default function EditOrder() {
         {/* Datos Principales de la Orden */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-surface p-6 rounded-2xl border border-border/40 shadow-sm">
           <Input
-            label="Nombre del cliente"
-            name="clientName"
+            label="Observaciones"
+            name="observations"
             type="text"
-            value={formData.clientName}
-            placeholder="Ingrese el cliente"
+            value={formData.observations}
+            placeholder="Ej: sin cebolla"
             onChange={handleChange}
-            error={errors.clientName}
+            error={errors.observations}
           />
 
           <Input
@@ -291,7 +301,7 @@ export default function EditOrder() {
               <tbody>
                 {formData.items.length > 0 ? (
                   formData.items.map((rowItem, index) => (
-                    <tr key={index} className="border-b border-border/20">
+                    <tr key={rowItem.productId} className="border-b border-border/20">
                       <td className="py-3 px-3 font-medium text-text-primary">
                         {rowItem.dish || rowItem.productName}
                       </td>
@@ -362,8 +372,8 @@ export default function EditOrder() {
           <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button variant="primary" size="md" type="submit">
-            Guardar Cambios
+          <Button variant="primary" size="md" type="submit" disabled={isSaving}>
+            {isSaving ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </div>
       </form>

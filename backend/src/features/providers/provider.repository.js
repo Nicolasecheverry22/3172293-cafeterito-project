@@ -65,6 +65,23 @@ export const providerRepository = {
     return result.rows[0];
   },
 
+  // Actualiza todos los campos editables. Retorna undefined si el id no existe.
+  async update(id, data) {
+    const {
+      nit, providerName, providerEmail, providerPhone,
+      providerAddress, productService, isActive,
+    } = data;
+    const result = await pool.query(
+      `UPDATE providers
+       SET nit = $1, provider_name = $2, provider_email = $3, provider_phone = $4,
+           provider_address = $5, product_service = $6, is_active = $7
+       WHERE id = $8
+       RETURNING id`,
+      [nit, providerName, providerEmail, providerPhone, providerAddress, productService, isActive, id]
+    );
+    return result.rows[0];
+  },
+
   async remove(id) {
     const result = await pool.query(
       "DELETE FROM providers WHERE id = $1 RETURNING id",

@@ -30,3 +30,15 @@ export async function deleteInventoryItem(id) {
   if (!res.ok) throw new Error(data.error || `Error ${res.status} al eliminar el suministro`);
   return data;
 }
+
+// Actualiza el suministro en la base de datos (PUT /api/inventory/:id).
+export async function updateInventoryItem(id, payload) {
+  const res = await fetch(`${API_URL}/inventory/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Error ${res.status} al actualizar el suministro`);
+  return data;
+}

@@ -43,6 +43,19 @@ export const productRepository = {
     return result.rows[0];
   },
 
+  // Actualiza todos los campos editables. Retorna undefined si el id no existe.
+  async update(id, data) {
+    const { productName, category, price, description, isAvailable } = data;
+    const result = await pool.query(
+      `UPDATE products
+       SET product_name = $1, category = $2, price = $3, description = $4, is_available = $5
+       WHERE id = $6
+       RETURNING id`,
+      [productName, category, price, description, isAvailable, id]
+    );
+    return result.rows[0];
+  },
+
   async remove(id) {
     const result = await pool.query(
       "DELETE FROM products WHERE id = $1 RETURNING id",

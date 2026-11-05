@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import OrdensRowActions from "../components/OrdensRowActions";
 
-export const getOrdensColumns = (sortConfig, onSort) => [
+export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
   // Columna Orden (ID)
   {
     accessorKey: "id",
@@ -79,10 +79,8 @@ export const getOrdensColumns = (sortConfig, onSort) => [
     id: "total",
     header: "Total",
     cell: ({ row }) => {
-      const total = row.original.items.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      );
+      // El total viene calculado desde la BD
+      const total = row.original.total ?? 0;
 
       return new Intl.NumberFormat("es-CO", {
         style: "currency",
@@ -130,6 +128,6 @@ export const getOrdensColumns = (sortConfig, onSort) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <OrdensRowActions order={row.original} />,
+    cell: ({ row }) => <OrdensRowActions order={row.original} onDeleted={onDeleted} />,
   },
 ];

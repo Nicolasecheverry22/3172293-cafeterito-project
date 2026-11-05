@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Utensils } from "lucide-react";
 
-
 import OrderForm from "../components/OrderForm";
-import { waitersData, menuDishesData } from "../data/orderMockData";
-import { ordens as ordersData } from "../data/ordens";
+import { createOrder } from "@/services/orderApi";
+import { getUsers } from "@/services/userApi";
+import { getProducts } from "@/services/productApi";
 
 import {
   showSuccessAlert,
@@ -16,43 +17,56 @@ import {
 export default function CreateOrderPage() {
   const navigate = useNavigate();
 
+  // Opciones reales: empleados activos y platillos disponibles
+  const [waiters, setWaiters] = useState([]);
+  const [dishes, setDishes] = useState([]);
+
+  useEffect(() => {
+    Promise.all([getUsers(), getProducts()])
+      .then(([users, products]) => {
+        setWaiters(
+          users
+            .filter((u) => u.is_active)
+            .map((u) => ({ value: String(u.id), label: u.userName }))
+        );
+        setDishes(
+          products
+            .filter((p) => p.isAvailable)
+            .map((p) => ({ value: String(p.id), label: p.productName, price: p.price }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error cargando empleados/platillos:", error);
+        showSystemErrorAlert({
+          text: "No se pudieron cargar los empleados o el menú. Verifica que el backend esté corriendo.",
+        });
+      });
+  }, []);
+
   const handleCreateOrder = async (validatedData) => {
     try {
-    const waiterName =
-    waitersData.find((w) => w.value === validatedData.waiterId)?.label ?? "";
+      // Solo se envían ids y cantidades: el precio lo pone el backend desde la BD
+      await createOrder({
+        tableNumber: validatedData.tableNumber,
+        waiterId: Number(validatedData.waiterId),
+        observations: validatedData.observations ?? "",
+        items: validatedData.items.map((item) => ({
+          productId: Number(item.dishId),
+          quantity: item.quantity,
+        })),
+      });
 
-    const newOrder = {
-    id: ordersData.length + 1,
-    tableNumber: validatedData.tableNumber,
-    waiter: waiterName,
-    status: "Activa",
-    createdAt: new Date().toISOString().slice(0, 10),
-    observations: validatedData.observations ?? "",
-    items: validatedData.items.map((item) => {
-      const dish = menuDishesData.find((d) => d.value === item.dishId);
+      await showSuccessAlert({
+        title: "¡Orden creada!",
+        text: "La orden fue registrada correctamente.",
+      });
 
-      return {
-        dish: dish?.label ?? "",
-        quantity: item.quantity,
-        price: dish?.price ?? 0,
-        dispatched: false,
-      };
-    }),
-  };
-
-  ordersData.push(newOrder);
-
-  await showSuccessAlert({
-    title: "¡Orden creada!",
-    text: "La orden fue registrada correctamente.",
-  });
-
-  navigate(-1);
-} catch (error) {
+      navigate(-1);
+    } catch (error) {
       console.error("Error al crear la orden:", error);
 
       await showSystemErrorAlert({
-        text: "La orden no pudo ser registrada correctamente.",
+        text: error.message || "La orden no pudo ser registrada correctamente.",
       });
     }
   };
@@ -89,6 +103,8 @@ export default function CreateOrderPage() {
         <div className="bg-surface/70 rounded-3xl p-8 shadow-sm">
           <OrderForm
             mode="create"
+            waiters={waiters}
+            dishes={dishes}
             onSubmit={handleCreateOrder}
             onCancel={handleCancel}
           />

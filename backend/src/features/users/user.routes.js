@@ -17,6 +17,9 @@ router.put("/:id/permissions", userController.updatePermissions);
 // Crear usuario (registro público desde el formulario del frontend)
 router.post("/", userController.create);
 
+// Actualizar usuario por id (datos + roles)
+router.put("/:id", userController.update);
+
 // Eliminar usuario por id
 router.delete("/:id", userController.remove);
 

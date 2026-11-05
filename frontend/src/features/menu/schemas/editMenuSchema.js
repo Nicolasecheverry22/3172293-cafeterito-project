@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { menu as existingMenu } from "../data/menu";
 import { menuCategories } from "../data/categories";
 
 const VALID_CATEGORY_VALUES = menuCategories.map((c) => c.value);
 
-export function createEditMenuSchema({ currentMenuItemId = null } = {}) {
+// Sin validación de duplicados contra el mock: los datos reales están en la BD.
+export function createEditMenuSchema() {
   return z
     .object({
       nombre: z
@@ -30,21 +30,7 @@ export function createEditMenuSchema({ currentMenuItemId = null } = {}) {
 
       estado: z.boolean(),
 
-    })
-    .refine(
-      (data) =>
-        !existingMenu.some(
-          (item) =>
-            item.productName.trim().toLowerCase() ===
-              data.nombre.trim().toLowerCase() &&
-            item.category === data.categoria &&
-            item.id !== currentMenuItemId
-        ),
-      {
-        message: "Ya existe un platillo con este nombre en la misma categoría",
-        path: ["nombre"],
-      }
-    );
+    });
 }
 
 export const createMenuSchema = createEditMenuSchema;

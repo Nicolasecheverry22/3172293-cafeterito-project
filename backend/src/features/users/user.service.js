@@ -41,6 +41,33 @@ export const userService = {
     return await userRepository.createWithGroups(userData, groupNames);
   },
 
+  async updateUser(id, data) {
+    const requireText = (value, field) => {
+      if (typeof value !== "string" || value.trim() === "") {
+        throw httpError(400, `El campo ${field} es obligatorio`);
+      }
+      return value.trim();
+    };
+
+    const groupNames = normalizeGroupNames(data.groupNames);
+    if (groupNames.length === 0) {
+      throw httpError(400, "Debe seleccionar al menos un tipo de usuario");
+    }
+
+    const userData = {
+      userName: requireText(data.userName, "nombre"),
+      userEmail: requireText(data.userEmail, "correo").toLowerCase(),
+      userPhone: requireText(data.userPhone, "teléfono"),
+      userDocumentTypes: requireText(data.userDocumentTypes, "tipo de documento"),
+      userDocumentNumber: requireText(data.userDocumentNumber, "número de documento"),
+      isActive: Boolean(data.isActive),
+      // Mismo criterio que en el registro: el rol Administrador = superusuario
+      isSuperuser: groupNames.includes("Administrador"),
+    };
+
+    return await userRepository.updateWithGroups(id, userData, groupNames);
+  },
+
   async getAll() {
     return await userRepository.getAll();
   },
