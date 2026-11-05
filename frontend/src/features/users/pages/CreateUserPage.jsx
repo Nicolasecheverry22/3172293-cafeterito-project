@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import UserForm from "../components/UserForm";
-import { Select } from "@/shared";
 import { getDocumentTypes } from "@/services/selectService";
 import { createUser } from "@/services/userApi";
-import { getGroups } from "@/services/groupApi";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -17,16 +15,9 @@ import {
 export default function CreateUserPage() {
   const navigate = useNavigate();
   const [documentTypes, setDocumentTypes] = useState([]);
-  const [groups, setGroups] = useState([]);
-  const [groupId, setGroupId] = useState("");
 
   useEffect(() => {
     getDocumentTypes().then(setDocumentTypes);
-    getGroups()
-      .then((data) =>
-        setGroups(data.map((g) => ({ value: g.group_id, label: g.group_name })))
-      )
-      .catch(() => setGroups([]));
   }, []);
 
   const handleCreateUser = async (validatedData) => {
@@ -52,7 +43,8 @@ export default function CreateUserPage() {
         isStaff: false,
         isActive: validatedData.isActive ?? true,
         isSuperuser: validatedData.isSuperUser ?? false,
-        groupId: groupId || null,
+        // Los checkboxes de "Tipo de Usuario" definen los grupos (y con ellos los permisos)
+        groupNames: validatedData.groupNames ?? [],
       };
 
       await createUser(payload);
@@ -101,16 +93,6 @@ export default function CreateUserPage() {
         </div>
 
         <div className="bg-surface rounded-3xl p-8 shadow-sm">
-          <div className="mb-6 max-w-sm">
-            <Select
-              label="Grupo (permisos)"
-              name="groupId"
-              value={groupId}
-              onChange={(e) => setGroupId(e.target.value)}
-              options={groups}
-            />
-          </div>
-
           <UserForm
             mode="create"
             documentTypes={documentTypes}
@@ -122,4 +104,3 @@ export default function CreateUserPage() {
     </div>
   );
 }
-

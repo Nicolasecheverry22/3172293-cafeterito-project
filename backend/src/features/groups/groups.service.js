@@ -1,6 +1,10 @@
 // backend/src/features/groups/groups.service.js
 
 import { groupsRepository } from "./groups.repository.js";
+import { normalizePermissionIds } from "../permissions/permissions.service.js";
+
+const httpError = (statusCode, message) =>
+  Object.assign(new Error(message), { statusCode });
 
 export const groupsService = {
   async getAll() {
@@ -12,6 +16,9 @@ export const groupsService = {
   },
 
   async updatePermissions(groupId, permissionIds) {
-    return await groupsRepository.updatePermissions(groupId, permissionIds);
+    const ids = normalizePermissionIds(permissionIds);
+    if (!ids) throw httpError(400, "permissionIds debe ser un arreglo de ids numéricos");
+
+    return await groupsRepository.updatePermissions(groupId, ids);
   },
 };

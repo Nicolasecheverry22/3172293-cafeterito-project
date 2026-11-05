@@ -9,13 +9,19 @@ import { Input,
 import { createUserSchema } from "../schemas/userSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 
+// Cada checkbox de "Tipo de Usuario" corresponde a un grupo de la BD (tabla groups).
+// `group` debe coincidir EXACTO con groups.group_name (ver migración 0028).
 const ROLE_CHECKBOXES = [
-  { name: "isSuperUser", label: "Administrador" },
-  { name: "isCook", label: "Cocinero" },
-  { name: "isWaiter", label: "Mesero" },
-  { name: "isCashier", label: "Caja" },
-  { name: "isGuest", label: "Invitado" },
+  { name: "isSuperUser", label: "Administrador", group: "Administrador" },
+  { name: "isCook", label: "Cocinero", group: "Cocinero" },
+  { name: "isWaiter", label: "Mesero", group: "Mesero" },
+  { name: "isCashier", label: "Caja", group: "Caja" },
+  { name: "isGuest", label: "Invitado", group: "Invitado" },
 ];
+
+// Grupos marcados en el formulario -> ["Mesero", "Caja", ...]
+const getSelectedGroups = (data) =>
+  ROLE_CHECKBOXES.filter(({ name }) => data[name]).map(({ group }) => group);
 
 const DEFAULT_FORM_DATA = {
   userName: "",
@@ -102,6 +108,7 @@ export default function UserForm({
         ...result.data,
         ...formData,
         userRole: getSelectedRole(formData),
+        groupNames: getSelectedGroups(formData),
         userDocument: formData.userDocumentNumber,
         is_active: formData.isActive,
         address: formData.address,

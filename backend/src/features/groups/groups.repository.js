@@ -51,16 +51,14 @@ export const groupsRepository = {
         [groupId],
       );
 
-      for (const permissionId of permissionIds) {
+      if (permissionIds.length > 0) {
+        // unnest inserta todos los ids en una sola consulta (evita N round-trips)
         await client.query(
           `
-          INSERT INTO group_permissions (
-            group_id,
-            permission_id
-          )
-          VALUES ($1, $2)
+          INSERT INTO group_permissions (group_id, permission_id)
+          SELECT $1, unnest($2::int[])
           `,
-          [groupId, permissionId],
+          [groupId, permissionIds],
         );
       }
 

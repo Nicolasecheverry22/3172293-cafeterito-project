@@ -22,8 +22,8 @@ export default function Checkbox({
         >
 
         {/* Input del checkbox */}
-        <input 
-            type="text"
+        <input
+            id={id}
             name={name}
             type="checkbox"
             checked={checked}

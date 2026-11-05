@@ -42,8 +42,8 @@ export const groupsController = {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({
-        error: "Error actualizando permisos del grupo",
+      res.status(error.statusCode || 500).json({
+        error: error.statusCode ? error.message : "Error actualizando permisos del grupo",
       });
     }
   },
