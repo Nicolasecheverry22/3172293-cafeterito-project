@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PackagePlus } from "lucide-react";
 import InventoryForm from "../components/InventoryForm";
 import { getCategoryTypes } from "@/services/selectService";
-import { inventory as inventoryData } from "../data/inventory";
+import { createInventoryItem } from "@/services/inventoryApi";
 
 import {
   showSuccessAlert,
@@ -31,12 +31,21 @@ export default function CreateInventoryPage() {
     }
 
     try {
-      const newProvision = { id: inventoryData.length + 1, ...validatedData };
-      inventoryData.push(newProvision);
+      await createInventoryItem({
+        provisionName: validatedData.provisionName,
+        category: validatedData.category,
+        unit: validatedData.unit,
+        stock: Number(validatedData.stock),
+        price: Number(validatedData.price),
+        batch: validatedData.batch,
+        minStock: Number(validatedData.minStock),
+        maxStock: Number(validatedData.maxStock),
+        status: validatedData.status,
+      });
 
       await showSuccessAlert({
         title: "¡Suministro creado!",
-        text: "El suministro fue registrado correctamente.",
+        text: "El suministro fue registrado correctamente en la base de datos.",
       });
 
       navigate(-1);

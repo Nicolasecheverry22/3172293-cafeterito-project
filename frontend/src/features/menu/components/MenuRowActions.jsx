@@ -1,8 +1,12 @@
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-
-import { showSystemErrorAlert } from "@/shared/services/alertService";
+import {
+  showConfirmDeleteAlert,
+  showSuccessAlert,
+  showSystemErrorAlert,
+} from "@/shared/services/alertService";
+import { deleteProduct } from "@/services/productApi";
 
 export default function MenuRowActions({ product, onDeleted }) {
   const navigate = useNavigate();
@@ -22,7 +26,9 @@ export default function MenuRowActions({ product, onDeleted }) {
     if (!result.isConfirmed) return;
 
     try {
-      const result = await showSuccessAlert({
+      await deleteProduct(product.id);
+
+      await showSuccessAlert({
         title: "¡Platillo eliminado!",
         text: "El platillo fue eliminado correctamente.",
       });

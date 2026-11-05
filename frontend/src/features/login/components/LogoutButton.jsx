@@ -1,6 +1,7 @@
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { showConfirmDeleteAlert } from "@/shared/services/alertService";
+import { logout } from "@/services/authApi";
 
 export default function LogoutButton({ className = "", showLabel = true }) {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ export default function LogoutButton({ className = "", showLabel = true }) {
 
     if (!result.isConfirmed) return;
 
+    // Limpia el token/usuario de la sesión y vuelve al login.
+    logout();
     navigate("/auth", { replace: true });
   };
 

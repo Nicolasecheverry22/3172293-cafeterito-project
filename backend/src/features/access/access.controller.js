@@ -1,0 +1,22 @@
+// backend/src/features/access/access.controller.js
+// Obtiene el usuario autenticado desde el JWT y verifica un permiso dinámico
+
+import { accessService } from "./access.service.js";
+
+export const accessController = {
+  async testPermission(req, res) {
+    const userId = req.user.id;
+    const permissionCode = req.params.permissionCode;
+
+    const hasPermission = await accessService.hasPermission(
+      userId,
+      permissionCode,
+    );
+
+    res.json({
+      userId,
+      permission: permissionCode,
+      granted: hasPermission,
+    });
+  },
+};

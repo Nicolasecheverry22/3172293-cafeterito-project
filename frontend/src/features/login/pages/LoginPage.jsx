@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
+import { login as loginRequest } from "@/services/authApi";
 import authBg from "@/assets/images/bg-1.png";
 import imageLogin from "@/assets/images/image-login.png";
 
@@ -7,11 +8,12 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLoginSubmit = async (credentials) => {
-    console.log("Datos de login validados:", credentials);
+    // Autenticación real contra el backend. El campo "usuario" es el correo.
+    const data = await loginRequest(credentials.username, credentials.password);
 
-    if (credentials.username !== "admin@gmail.com") {
-      throw new Error("Usuario o contraseña incorrectos.");
-    }
+    // Guardamos el token y el usuario para la sesión.
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
     navigate("/home");
   };

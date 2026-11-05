@@ -6,6 +6,7 @@ import {
   showSystemErrorAlert,
   showConfirmDeleteAlert
 } from "@/shared/services/alertService";
+import { deleteInventoryItem } from "@/services/inventoryApi";
 
 export default function InventoryRowActions({ provision, onDeleted }) {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function InventoryRowActions({ provision, onDeleted }) {
     }
 
     try {
-      console.log("Suministro eliminado:", targetId);
+      await deleteInventoryItem(targetId);
 
       await showSuccessAlert({
         title: "¡Suministro eliminado!",

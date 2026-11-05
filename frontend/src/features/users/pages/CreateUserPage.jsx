@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import UserForm from "../components/UserForm";
+import { Select } from "@/shared";
 import { getDocumentTypes } from "@/services/selectService";
-import { users as usersData } from "../data/users";
+import { createUser } from "@/services/userApi";
+import { getGroups } from "@/services/groupApi";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -15,9 +17,16 @@ import {
 export default function CreateUserPage() {
   const navigate = useNavigate();
   const [documentTypes, setDocumentTypes] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [groupId, setGroupId] = useState("");
 
   useEffect(() => {
     getDocumentTypes().then(setDocumentTypes);
+    getGroups()
+      .then((data) =>
+        setGroups(data.map((g) => ({ value: g.group_id, label: g.group_name })))
+      )
+      .catch(() => setGroups([]));
   }, []);
 
   const handleCreateUser = async (validatedData) => {
@@ -31,21 +40,35 @@ export default function CreateUserPage() {
     }
 
     try {
-      const newUser = { id: usersData.length + 1, ...validatedData };
-      usersData.push(newUser);
-      console.log("Usuario creado:", newUser);
+      // Mapeo de los campos del formulario al contrato del backend (POST /api/users)
+      const payload = {
+        userName: validatedData.userName,
+        userEmail: validatedData.userEmail,
+        userPhone: validatedData.userPhone,
+        userDocumentTypes: validatedData.userDocumentTypes,
+        userDocumentNumber: validatedData.userDocumentNumber,
+        userPassword: validatedData.userPassword,
+        userAvatarUrl: null,
+        isStaff: false,
+        isActive: validatedData.isActive ?? true,
+        isSuperuser: validatedData.isSuperUser ?? false,
+        groupId: groupId || null,
+      };
 
-      
+      await createUser(payload);
+
       await showSuccessAlert({
         title: "¡Usuario creado!",
-        text: "El usuario fue registrado correctamente.",
+        text: "El usuario fue registrado correctamente en la base de datos.",
       });
 
       navigate(-1);
     } catch (error) {
       console.error("Error al crear el usuario:", error);
       await showSystemErrorAlert({
-        text: "Ocurrió un error inesperado al intentar registrar el usuario.",
+        text:
+          error.message ||
+          "Ocurrió un error inesperado al intentar registrar el usuario.",
       });
     }
   };
@@ -78,6 +101,16 @@ export default function CreateUserPage() {
         </div>
 
         <div className="bg-surface rounded-3xl p-8 shadow-sm">
+          <div className="mb-6 max-w-sm">
+            <Select
+              label="Grupo (permisos)"
+              name="groupId"
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+              options={groups}
+            />
+          </div>
+
           <UserForm
             mode="create"
             documentTypes={documentTypes}

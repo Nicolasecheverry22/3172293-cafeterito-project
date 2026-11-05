@@ -1,17 +1,30 @@
 // src/menu/pages/MenuListPage.js
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
 import { Link } from "react-router-dom";
 
 import { getMenuColumns } from "../table/MenuColumns";
-import { menu as initialMenu } from "../data/menu";
+import { getProducts } from "@/services/productApi";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function MenuListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [menu, setMenu] = useState([]);
+  const [loadError, setLoadError] = useState(null);
 
   // Estado para la columna y dirección del ordenamiento
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+
+  // Carga los platillos desde la base de datos
+  const loadMenu = useCallback(() => {
+    getProducts()
+      .then(setMenu)
+      .catch((err) => setLoadError(err.message));
+  }, []);
+
+  useEffect(() => {
+    loadMenu();
+  }, [loadMenu]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -22,7 +35,7 @@ export default function MenuListPage() {
 
   // Reordena dinámicamente la lista de platillos
   const sortedMenu = useMemo(() => {
-    return [...initialMenu].sort((a, b) => {
+    return [...menu].sort((a, b) => {
       const { key, direction } = sortConfig;
 
       if (key === "id") {
@@ -47,12 +60,12 @@ export default function MenuListPage() {
 
       return 0;
     });
-  }, [sortConfig]);
+  }, [menu, sortConfig]);
 
   // Genera las columnas dinámicas según la configuración actual
   const columns = useMemo(
-    () => getMenuColumns(sortConfig, handleSort),
-    [sortConfig]
+    () => getMenuColumns(sortConfig, handleSort, loadMenu),
+    [sortConfig, loadMenu]
   );
 
   return (
@@ -79,6 +92,12 @@ export default function MenuListPage() {
             </Link>
           </div>
         </div>
+
+        {loadError && (
+          <p className="text-red-500 text-sm mb-4">
+            No se pudieron cargar los platillos: {loadError}
+          </p>
+        )}
 
         <div className="overflow-x-auto bg-surface/0 shadow-xs">
           <DataTable data={sortedMenu} columns={columns} />

@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import MenuRowActions from "../components/MenuRowActions";
 
-export const getMenuColumns = (sortConfig, onSort) => [
+export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
   // Columna ID (Ordenable)
   {
     accessorKey: "id",
@@ -117,7 +117,7 @@ export const getMenuColumns = (sortConfig, onSort) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <MenuRowActions product={row.original} />,
+    cell: ({ row }) => <MenuRowActions product={row.original} onDeleted={onDeleted} />,
   },
 ];
 

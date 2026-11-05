@@ -34,5 +34,59 @@ export const userController = {
                 error:err.message,
             });
         }
+    },
+
+   
+    async getAll(req, res){
+        try{
+            const users = await userService.getAll();
+            res.json(users);
+        } catch(err){
+            console.log("ERROR BACKEND:", err);
+
+            res.status(500).json({
+                error: err.message,
+            });
+        }
+    },
+
+    // Obtener un usuario por su id (vista de detalle)
+    async getById(req, res){
+        try{
+            const id = Number(req.params.id);
+            const user = await userService.getById(id);
+
+            if (!user) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            res.json(user);
+        } catch(err){
+            console.log("ERROR BACKEND:", err);
+
+            res.status(500).json({
+                error: err.message,
+            });
+        }
+    },
+
+    // Eliminar un usuario por su id
+    async remove(req, res){
+        try{
+            const id = Number(req.params.id);
+            const deleted = await userService.remove(id);
+
+            if (!deleted) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            res.json({
+                message: "Usuario eliminado correctamente",
+                userId: deleted.id,
+            });
+        } catch(err){
+            console.log("ERROR BACKEND:", err);
+            res.status(500).json({ error: err.message });
+        }
     }
 }

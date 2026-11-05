@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Truck } from "lucide-react";
 import ProviderForm from "../components/ProviderForm";
 import { getDocumentTypes } from "@/services/selectService";
-import { providers as providersData } from "../data/providers";
+import { createProvider } from "@/services/providerApi";
 
 import {
   showSuccessAlert,
@@ -22,13 +22,29 @@ export default function CreateProviderPage() {
 
   const handleCreateProvider = async (validatedData) => {
     try {
-      const newProvider = { id: providersData.length + 1, ...validatedData };
-      providersData.push(newProvider);
-      console.log("Proveedor guardado:", newProvider);
+      // El formulario maneja los productos como checkboxes; los unimos en un texto.
+      const productService = [
+        validatedData.productFood && "Alimentos",
+        validatedData.productSupplies && "Suministros",
+        validatedData.productFruits && "Frutas",
+        validatedData.productOthers && "Otros",
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      await createProvider({
+        nit: validatedData.providerDocumentNumber,
+        providerName: validatedData.providerName,
+        providerEmail: validatedData.providerEmail,
+        providerPhone: validatedData.providerPhone,
+        providerAddress: validatedData.providerAddress,
+        productService,
+        isActive: validatedData.isActive ?? true,
+      });
 
       await showSuccessAlert({
         title: "¡Proveedor creado!",
-        text: "El proveedor fue registrado correctamente.",
+        text: "El proveedor fue registrado correctamente en la base de datos.",
       });
 
       navigate(-1);

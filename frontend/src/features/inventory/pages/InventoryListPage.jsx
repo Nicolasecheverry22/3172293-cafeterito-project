@@ -1,17 +1,30 @@
 // src/inventory/pages/InventoryListPage.js
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
 import { Link } from "react-router-dom";
 
 import { getInventoryColumns } from "../table/InventoryColumns";
-import { inventory as initialInventory } from "../data/inventory";
+import { getInventory } from "@/services/inventoryApi";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function InventoryListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inventory, setInventory] = useState([]);
+  const [loadError, setLoadError] = useState(null);
 
   // Estado para la columna y dirección del ordenamiento
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+
+  // Carga los suministros desde la base de datos
+  const loadInventory = useCallback(() => {
+    getInventory()
+      .then(setInventory)
+      .catch((err) => setLoadError(err.message));
+  }, []);
+
+  useEffect(() => {
+    loadInventory();
+  }, [loadInventory]);
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
@@ -22,7 +35,7 @@ export default function InventoryListPage() {
 
   // Reordena dinámicamente el arreglo de inventario
   const sortedInventory = useMemo(() => {
-    return [...initialInventory].sort((a, b) => {
+    return [...inventory].sort((a, b) => {
       const { key, direction } = sortConfig;
 
       if (key === "id") {
@@ -37,12 +50,12 @@ export default function InventoryListPage() {
 
       return 0;
     });
-  }, [sortConfig]);
+  }, [inventory, sortConfig]);
 
   // Genera las columnas dinámicas según la configuración actual
   const columns = useMemo(
-    () => getInventoryColumns(sortConfig, handleSort),
-    [sortConfig]
+    () => getInventoryColumns(sortConfig, handleSort, loadInventory),
+    [sortConfig, loadInventory]
   );
 
   return (
@@ -69,6 +82,12 @@ export default function InventoryListPage() {
             </Link>
           </div>
         </div>
+
+        {loadError && (
+          <p className="text-red-500 text-sm mb-4">
+            No se pudo cargar el inventario: {loadError}
+          </p>
+        )}
 
         <div className="overflow-x-auto bg-surface/0 shadow-xs">
           <DataTable data={sortedInventory} columns={columns} />

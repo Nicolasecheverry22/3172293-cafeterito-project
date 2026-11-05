@@ -1,15 +1,23 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Input, Button, StatusSwitch } from "@/shared";
 import { SquarePen, UtensilsCrossed } from "lucide-react";
-import { inventory } from "../inventory/data/inventory";
+import { getInventoryItem } from "@/services/inventoryApi";
 
 export default function ProvisionsView() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const provision = inventory.find((p) => String(p.id) === String(id));
+  const [provision, setProvision] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!provision) {
+  useEffect(() => {
+    getInventoryItem(id)
+      .then((data) => setProvision(data))
+      .catch(() => setNotFound(true));
+  }, [id]);
+
+  if (notFound) {
     return (
       <div className="min-h-screen w-full flex flex-col">
         <div className="flex items-center gap-3 mt-10 ml-12">
@@ -19,6 +27,14 @@ export default function ProvisionsView() {
           </h1>
         </div>
         <p className="ml-12 mt-8 text-red-500">Suministro no encontrado.</p>
+      </div>
+    );
+  }
+
+  if (!provision) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <p className="text-text-secondary">Cargando suministro...</p>
       </div>
     );
   }
