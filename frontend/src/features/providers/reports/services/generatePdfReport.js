@@ -4,7 +4,7 @@ import autoTable from "jspdf-autotable";
 export function generatePdfReport({
   headers,
   rows,
-  fileName = "providers-report.pdf"
+  fileName = "reporte-proveedores.pdf"
 }) {
 
   const doc = new jsPDF();

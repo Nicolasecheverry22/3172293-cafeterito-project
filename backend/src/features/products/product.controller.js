@@ -37,6 +37,17 @@ export const productController = {
     }
   },
 
+  async getReportData(req, res) {
+    try {
+      const { category } = req.query;
+      const products = await productService.getReportData(category);
+      res.json(products);
+    } catch (err) {
+      console.log("ERROR BACKEND REPORT:", err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   async update(req, res) {
     try {
       const updated = await productService.update(Number(req.params.id), req.body);
@@ -62,6 +73,25 @@ export const productController = {
       });
     } catch (err) {
       console.log("ERROR BACKEND:", err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  async getTopSelling(req, res) {
+    try {
+      const topProducts = await productService.getTopSelling();
+      // Mapeamos para que coincida exactamente con lo que el componente Card espera
+      const formatted = topProducts.map(p => ({
+        id: p.id,
+        title: p.productName,
+        category: p.category,
+        price: p.price,
+        description: p.description,
+        totalSold: p.totalSold
+      }));
+      res.json(formatted);
+    } catch (err) {
+      console.log("ERROR BACKEND TOP SELLING:", err);
       res.status(500).json({ error: err.message });
     }
   },

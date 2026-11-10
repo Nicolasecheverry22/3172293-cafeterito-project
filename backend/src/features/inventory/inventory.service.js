@@ -48,4 +48,8 @@ export const inventoryService = {
   async remove(id) {
     return await inventoryRepository.remove(id);
   },
+
+  async getReportData(category, status) {
+    return await inventoryRepository.getReportData(category, status);
+  }
 };

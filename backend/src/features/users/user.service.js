@@ -87,6 +87,8 @@ export const userService = {
     return await userRepository.getPermissionsByUserId(userId);
   },
 
+  async getReportData(documentNumber) { return await userRepository.getByDocument(documentNumber); },
+  
   async updatePermissions(userId, permissionIds) {
     const ids = normalizePermissionIds(permissionIds);
     if (!ids) throw httpError(400, "permissionIds debe ser un arreglo de ids numéricos");

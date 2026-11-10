@@ -66,8 +66,8 @@ export const getUserColumns = (sortConfig, onSort, onDeleted) => [
       const isActive = Boolean(activeValue);
 
       const statusStyles = isActive
-        ? "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold"
-        : "bg-rose-100 text-rose-800 border-rose-300 font-semibold";
+        ? "bg-green-100 text-green-800 border-green-300 font-semibold"
+        : "bg-red-100 text-red-800 border-red-300 font-semibold";
 
       return (
         <span

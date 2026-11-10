@@ -10,9 +10,9 @@ const requireText = (value, field) => {
   return value.trim();
 };
 
-const requireNumber = (value, field, { min = 0, integer = false } = {}) => {
+const requireNumber = (value, field, { min = 0 } = {}) => {
   const n = Number(value);
-  if (!Number.isFinite(n) || n < min || (integer && !Number.isInteger(n))) {
+  if (!Number.isFinite(n) || n < min) {
     throw httpError(400, `El campo ${field} no es válido`);
   }
   return n;
@@ -28,6 +28,9 @@ export const productService = {
   async getById(id) {
     return await productRepository.getById(id);
   },
+  async getReportData(category) {
+    return await productRepository.getReportData(category);
+  },
   async update(id, data) {
     const payload = {
       productName: requireText(data.productName, "nombre"),
@@ -40,5 +43,8 @@ export const productService = {
   },
   async remove(id) {
     return await productRepository.remove(id);
+  },
+  async getTopSelling() {
+    return await productRepository.getTopSelling();
   },
 };

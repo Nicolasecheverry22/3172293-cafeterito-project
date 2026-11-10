@@ -7,21 +7,19 @@ export const buildOrdersReportDataset = ({ data, selectedFields }) => {
 
       switch (field.key) {
         case "total":
-          value = order.items.reduce(
-            (acc, item) => acc + item.price * item.quantity,
-            0
-          );
-
+          const orderTotal = order.total !== undefined ? order.total : 0;
           value = new Intl.NumberFormat("es-CO", {
             style: "currency",
             currency: "COP",
             minimumFractionDigits: 0,
-          }).format(value);
+          }).format(orderTotal);
           break;
 
         case "status":
-          if (order.status === "pending") value = "Pendiente";
-          else if (order.status === "completed") value = "Completado";
+          const st = String(order.status || "").toLowerCase();
+          if (st === "activa") value = "Activa";
+          else if (st === "pagada") value = "Pagada";
+          else if (st === "cancelada") value = "Cancelada";
           else value = order.status;
           break;
 
@@ -29,7 +27,7 @@ export const buildOrdersReportDataset = ({ data, selectedFields }) => {
           value = order[field.key];
       }
 
-      return value;
+      return value ?? "";
     });
   });
 

@@ -20,6 +20,7 @@ export const productRepository = {
              product_name AS "productName",
              category,
              price::float AS price,
+             description,
              is_available AS "isAvailable"
       FROM products
       ORDER BY id;
@@ -43,7 +44,23 @@ export const productRepository = {
     return result.rows[0];
   },
 
-  // Actualiza todos los campos editables. Retorna undefined si el id no existe.
+  // Obtener platillos para reporte con filtro opcional de categoría
+  async getReportData(category) {
+    const query = `
+      SELECT id,
+             product_name AS "productName",
+             category,
+             price::float AS price,
+             description,
+             is_available AS "isAvailable"
+      FROM products
+      WHERE ($1::text IS NULL OR category = $1)
+      ORDER BY id;
+    `;
+    const result = await pool.query(query, [category || null]);
+    return result.rows;
+  },
+
   async update(id, data) {
     const { productName, category, price, description, isAvailable } = data;
     const result = await pool.query(
@@ -62,5 +79,26 @@ export const productRepository = {
       [id]
     );
     return result.rows[0];
+  },
+
+  async getTopSelling() {
+    const query = `
+      SELECT 
+        p.id,
+        p.product_name AS "productName",
+        p.category,
+        p.price::float AS price,
+        p.description,
+        p.is_available AS "isAvailable",
+        COALESCE(SUM(CASE WHEN o.status != 'cancelada' THEN oi.quantity ELSE 0 END), 0)::int AS "totalSold"
+      FROM products p
+      LEFT JOIN order_items oi ON oi.product_id = p.id
+      LEFT JOIN orders o ON o.id = oi.order_id
+      GROUP BY p.id, p.product_name, p.category, p.price, p.description, p.is_available
+      ORDER BY "totalSold" DESC, p.id ASC
+      LIMIT 4;
+    `;
+    const result = await pool.query(query);
+    return result.rows;
   },
 };

@@ -1,3 +1,5 @@
+
+
 // backend/src/middlewares/auth.middleware.js
 // Middleware de autenticación: verifica la identidad mediante el JWT
 

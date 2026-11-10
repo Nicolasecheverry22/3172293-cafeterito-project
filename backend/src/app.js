@@ -38,3 +38,4 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/providers", providerRoutes);
 app.use("/api/orders", orderRoutes);
 export default app;
+

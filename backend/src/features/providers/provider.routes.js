@@ -4,6 +4,9 @@ import { providerController } from "./provider.controller.js";
 const router = Router();
 
 router.get("/", providerController.getAll);
+
+router.get("/report-data", providerController.getReportData);
+
 router.get("/:id", providerController.getById);
 router.post("/", providerController.create);
 router.put("/:id", providerController.update);

@@ -73,6 +73,28 @@ async create(userData, db = pool) {
     return result.rows[0];
 },
 
+async getByDocument(documentNumber) {
+    const query = `
+    SELECT
+        id,
+        user_name            AS "userName",
+        user_email           AS "userEmail",
+        user_phone           AS "userPhone",
+        user_document_number AS "userDocument",
+        CASE 
+            WHEN is_active = TRUE THEN 'Activo' 
+            ELSE 'Inactivo' 
+        END                  AS "is_active",
+        ${USER_GROUPS_SUBQUERY} AS groups
+    FROM users
+    WHERE ($1::text IS NULL OR user_document_number = $1)
+    ORDER BY id;
+    `;
+
+    const result = await pool.query(query, [documentNumber || null]);
+    return result.rows;
+},
+
 // Crea el usuario y lo asocia a sus grupos (roles) en UNA transacción:
 // si falla la asignación de grupos, el usuario tampoco queda creado.
 async createWithGroups(userData, groupNames) {

@@ -59,6 +59,27 @@ export const inventoryRepository = {
     return result.rows[0];
   },
 
+  async getReportData(category, status) {
+    const query = `
+      SELECT id,
+             provision_name AS "provisionName",
+             category,
+             unit,
+             stock,
+             price::float AS price,
+             batch,
+             min_stock AS "minStock",
+             max_stock AS "maxStock",
+             status
+      FROM inventory
+      WHERE ($1::text IS NULL OR category = $1)
+        AND ($2::text IS NULL OR status = $2)
+      ORDER BY id;
+    `;
+    const result = await pool.query(query, [category || null, status || null]);
+    return result.rows;
+  },
+
   // Actualiza todos los campos editables. Retorna undefined si el id no existe.
   async update(id, data) {
     const {

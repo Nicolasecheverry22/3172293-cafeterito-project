@@ -17,7 +17,7 @@ export function generatePdfReport({
 
   // Configuración del título
   doc.setFontSize(16);
-  doc.text("Reporte de Usuarios", 14, 20); // Posición (x, y)
+  doc.text("Reporte de Suministros", 14, 20); // Posición (x, y)
 
   // Generación de tabla automática
   autoTable(doc, {

@@ -1,10 +1,8 @@
 import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { showConfirmDeleteAlert } from "@/shared/services/alertService";
-import { logout } from "@/services/authApi";
+import { logout } from "@/features/login/services/logoutService";
 
 export default function LogoutButton({ className = "", showLabel = true }) {
-  const navigate = useNavigate();
 
   const handleLogout = async () => {
     const result = await showConfirmDeleteAlert({
@@ -16,16 +14,14 @@ export default function LogoutButton({ className = "", showLabel = true }) {
 
     if (!result.isConfirmed) return;
 
-    // Limpia el token/usuario de la sesión y vuelve al login.
     logout();
-    navigate("/auth", { replace: true });
   };
 
   return (
     <button
       type="button"
       onClick={handleLogout}
-      className={`flex items-center gap-3 text-error hover:bg-error/10 transition-colors ${className}`}
+      className={`flex items-center gap-3 text-error hover:bg-error/10 transition-colors cursor-pointer ${className}`}
     >
       <LogOut className="w-5 h-5" />
       {showLabel && <span className="font-medium font-body text-body">Cerrar Sesión</span>}

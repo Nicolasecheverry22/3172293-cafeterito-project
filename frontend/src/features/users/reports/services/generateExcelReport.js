@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 export function generateExcelReport({
   headers,                    // Array de encabezados (columnas)
   rows,                       // Array de filas (array de arrays)
-  fileName = "user-report.xlsx" // Nombre del archivo de salida
+  fileName = "reporte-usuarios.xlsx" // Nombre del archivo de salida
 }) {
 
   // Estructura final de la hoja:

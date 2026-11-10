@@ -7,7 +7,7 @@ const MAX_LOGIN_ATTEMPTS = 3;
 
 export default function LoginForm({ onSubmit }) {
   const [formData, setFormData] = useState({
-    username: "",
+    email: "", // 👈 Cambiado de username a email
     password: "",
     rememberMe: false,
   });
@@ -62,12 +62,12 @@ export default function LoginForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <Input
-        name="username"
-        type="text"
-        placeholder="Ingrese su usuario"
-        value={formData.username}
+        name="email" // 👈 Cambiado a email
+        type="email" // 👈 Tipo email para validación nativa
+        placeholder="Ingrese su correo electrónico" // 👈 Texto actualizado
+        value={formData.email}
         onChange={handleChange}
-        error={errors.username}
+        error={errors.email}
         disabled={isLocked}
       />
 

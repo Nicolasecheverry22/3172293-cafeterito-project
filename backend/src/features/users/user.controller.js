@@ -5,7 +5,7 @@ import { userService } from "./user.service.js";
 
 // Exportamos un objeto controlador agrupar handlers en un objeto permite escalibilidad 
 export const userController = {
-    // Metodo encargado de manejar la ccreacion de un usuario se asume que este metodo sera usado como handlerenuna ruta de express
+    // Metodo encargado de manejar la creacion de un usuario se asume que este metodo sera usado como handlerenuna ruta de express
 
     async create(req, res){
 
@@ -74,6 +74,18 @@ export const userController = {
             res.status(500).json({
                 error: err.message,
             });
+        }
+    },
+
+    // Obtener datos para el reporte de usuarios
+    async getReportData(req, res) {
+        try {
+            const { document } = req.query;
+            const users = await userService.getReportData(document);
+            res.json(users);
+        } catch(err){
+            console.log("ERROR BACKEND REPORT:", err);
+            res.status(500).json({ error: err.message });
         }
     },
 

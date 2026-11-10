@@ -1,21 +1,23 @@
-import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
-import { login as loginRequest } from "@/services/authApi";
+import { login as loginRequest } from "@/features/login/services/authService";
 import authBg from "@/assets/images/bg-1.png";
 import imageLogin from "@/assets/images/image-login.png";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-
   const handleLoginSubmit = async (credentials) => {
-    // Autenticación real contra el backend. El campo "usuario" es el correo.
-    const data = await loginRequest(credentials.username, credentials.password);
+    const data = await loginRequest({
+      userEmail: credentials.email,
+      userPassword: credentials.password,
+    });
 
-    // Guardamos el token y el usuario para la sesión.
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    if (data.token) {
+      sessionStorage.setItem("token", data.token);
+    }
+    if (data.user) {
+      sessionStorage.setItem("user", JSON.stringify(data.user));
+    }
 
-    navigate("/home");
+    window.location.replace("/home");
   };
 
   return (

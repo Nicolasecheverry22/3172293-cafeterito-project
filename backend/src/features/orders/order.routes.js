@@ -4,6 +4,7 @@ import { orderController } from "./order.controller.js";
 const router = Router();
 
 router.get("/", orderController.getAll);
+router.get("/report-data", orderController.getReportData);
 router.get("/:id", orderController.getById);
 router.post("/", orderController.create);
 router.put("/:id", orderController.update);

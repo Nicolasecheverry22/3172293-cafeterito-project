@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 
-
 // Componentes UI reutilizables
 import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
 
-// Caso de uso
+// Caso de uso conectado al backend
 import { generateInventoryReport } from "../services/generateInventoryReport";
-import { inventory } from "../../data/inventory";
 
 // Alertas del servicio
 import {
@@ -22,6 +20,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const [format, setFormat] = useState("pdf");
   const [scope, setScope] = useState("all");
   const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("Activo");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const inventoryReportFields = [
@@ -30,6 +29,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     { key: "stock", label: "Stock", default: true },
     { key: "unit", label: "Unidad", default: true },
     { key: "price", label: "Precio", default: true },
+    { key: "status", label: "Estado", default: true },
   ];
 
   const [selectedFields, setSelectedFields] = useState(() =>
@@ -37,19 +37,15 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   );
 
   useEffect(() => {
-    if (scope !== "category") {
-      setCategory("");
-    }
+    if (scope !== "category") setCategory("");
+    if (scope !== "status") setStatus("");
   }, [scope]);
 
   if (!isOpen) return null;
 
-  const categories = [...new Set(inventory.map((i) => i.category))];
-
   const handleFieldToggle = (field) => {
     setSelectedFields((prev) => {
       const exists = prev.find((f) => f.key === field.key);
-
       if (exists) {
         return prev.filter((f) => f.key !== field.key);
       } else {
@@ -70,7 +66,15 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     if (scope === "category" && !category) {
       showCreateErrorAlert({
         entity: "categoría",
-        text: "Debes seleccionar una categoría para filtrar el reporte.",
+        text: "Debes ingresar o seleccionar una categoría para filtrar el reporte.",
+      });
+      return;
+    }
+
+    if (scope === "status" && !status) {
+      showCreateErrorAlert({
+        entity: "estado",
+        text: "Debes seleccionar un estado para filtrar el reporte.",
       });
       return;
     }
@@ -83,6 +87,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         selectedFields,
         scope,
         selectedCategory: category,
+        selectedStatus: status,
       });
 
       await showSuccessAlert({
@@ -93,7 +98,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte de inventario:", error);
-
       await showSystemErrorAlert({
         text: "No fue posible generar el reporte de inventario. Intenta nuevamente.",
       });
@@ -144,7 +148,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         {/* Campos */}
         <div className="mb-4">
           <p className="mb-2 font-medium">Campos del reporte</p>
-
           <div className="grid grid-cols-2 gap-2">
             {inventoryReportFields.map((field) => {
               const checked = selectedFields.some(
@@ -174,11 +177,12 @@ export default function ReportConfigModal({ isOpen, onClose }) {
             options={[
               { label: "Todo el inventario", value: "all" },
               { label: "Filtrar por categoría", value: "category" },
+              { label: "Filtrar por estado", value: "status" },
             ]}
           />
         </div>
 
-        {/* Filtro */}
+        {/* Filtro por Categoría */}
         {scope === "category" && (
           <div className="mb-4">
             <Select
@@ -187,10 +191,25 @@ export default function ReportConfigModal({ isOpen, onClose }) {
               onChange={(e) => setCategory(e.target.value)}
               options={[
                 { label: "Seleccione una categoría", value: "" },
-                ...categories.map((cat) => ({
-                  label: cat,
-                  value: cat,
-                })),
+                { label: "Carnes", value: "Carnes" },
+                { label: "Lácteos", value: "Lácteos" },
+                { label: "Bebidas", value: "Bebidas" },
+              ]}
+            />
+          </div>
+        )}
+
+        {/* Filtro por Estado */}
+        {scope === "status" && (
+          <div className="mb-4">
+            <Select
+              label="Estado"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              options={[
+                { label: "Activo", value: "Activo" },
+                { label: "Vencido", value: "Vencido" },
+                { label: "Averia", value: "Averia" },
               ]}
             />
           </div>

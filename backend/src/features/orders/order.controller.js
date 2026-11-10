@@ -1,18 +1,13 @@
 import { orderService } from "./order.service.js";
 
-// Traduce errores de PostgreSQL / de negocio a respuestas HTTP claras.
 const handleError = (res, err) => {
   console.log("ERROR BACKEND:", err);
-
-  // 23505 = unique_violation -> índice uq_orders_active_table
   if (err.code === "23505") {
     return res.status(409).json({ error: "Esta mesa ya tiene una orden activa" });
   }
-  // 23503 = foreign_key_violation -> mesero inexistente
   if (err.code === "23503") {
     return res.status(400).json({ error: "El empleado encargado no existe" });
   }
-
   res.status(err.statusCode || 500).json({ error: err.message });
 };
 
@@ -32,6 +27,16 @@ export const orderController = {
         return res.status(404).json({ error: "Orden no encontrada" });
       }
       res.json(order);
+    } catch (err) {
+      handleError(res, err);
+    }
+  },
+
+  async getReportData(req, res) {
+    try {
+      const { tableNumber } = req.query;
+      const orders = await orderService.getReportData(tableNumber);
+      res.json(orders);
     } catch (err) {
       handleError(res, err);
     }

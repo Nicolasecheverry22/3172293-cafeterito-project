@@ -9,10 +9,8 @@ import ReportConfigModal from "../reports/components/ReportConfigModal";
 export default function UserListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Estado para controlar qué columna se ordena y en qué dirección
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
 
-  // Usuarios cargados desde la base de datos (API del backend)
   const [users, setUsers] = useState([]);
   const [loadError, setLoadError] = useState(null);
 
@@ -22,7 +20,6 @@ export default function UserListPage() {
         setUsers(
           data.map((u) => ({
             ...u,
-            // El rol es el/los grupo(s) del usuario en la BD (user_groups)
             userRole: u.groups?.length ? u.groups.join(", ") : "Sin rol",
           }))
         )
@@ -81,7 +78,7 @@ export default function UserListPage() {
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
             >
-              Reportar usuario
+              Reportar usuarios
             </Button>
 
             <Link to="/userCreate">
@@ -93,12 +90,12 @@ export default function UserListPage() {
         </div>
 
         {loadError && (
-          <p className="text-red-500 text-sm mb-4">
+          <p className="text-error text-sm mb-4">
             No se pudieron cargar los usuarios desde el servidor: {loadError}
           </p>
         )}
 
-        <div className="overflow-x-auto bg-surface/0 shadow-xs">
+        <div className="">
           <DataTable data={sortedUsers} columns={columns} />
         </div>
 

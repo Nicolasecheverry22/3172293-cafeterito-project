@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, DashboardLayout, MainLayout } from "@/shared";
+import ProtectedRoute from "@/shared/components/auth/ProtectedRoute";
 
 // Auth
 import LoginPage from "@/features/login/pages/LoginPage";
@@ -26,8 +27,8 @@ import EditProvider from "@/features/views/edit/EditProvider";
 
 // Inventory
 import { InventoryListPage, CreateInventoryPage } from "@/features/inventory";
-import ProvisionsView from "../features/views/ProvisionsView";
-import EditProvisions from "../features/views/edit/EditProvisions";
+import ProvisionsView from "@/features/views/ProvisionsView";
+import EditProvisions from "@/features/views/edit/EditProvisions";
 
 // Menu
 import { MenuListPage, CreateMenuPage } from "@/features/menu";
@@ -57,9 +58,13 @@ const router = createBrowserRouter([
     ],
   },
 
-  /* ==================== RUTAS PRINCIPALES / TABLAS (DASHBOARD) ==================== */
+  /* ==================== RUTAS PRIVADAS (DASHBOARD) ==================== */
   {
-    element: <DashboardLayout />,
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "/home", element: <HomePage /> },
       { path: "/userList", element: <UserListPage /> },
@@ -70,36 +75,40 @@ const router = createBrowserRouter([
     ],
   },
 
-  /* ==================== RUTAS FORMULARIOS / DETALLES (MAIN LAYOUT) ==================== */
+  /* ==================== RUTAS PRIVADAS (FORMULARIOS / DETALLES) ==================== */
   {
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
-      
       { path: "/userCreate", element: <CreateUserPage /> },
       { path: "/UserView/:id", element: <UserView /> },
       { path: "/EditUser/:id", element: <EditUser /> },
       { path: "/permits", element: <PermissionsManagementPage /> },
 
-      
       { path: "/providerCreate", element: <CreateProviderPage /> },
       { path: "/ProviderView/:id", element: <ProviderView /> },
       { path: "/EditProvider/:id", element: <EditProvider /> },
-    
 
       { path: "/inventoryCreate", element: <CreateInventoryPage /> },
       { path: "/InventoryView/:id", element: <ProvisionsView /> },
       { path: "/editInventory/:id", element: <EditProvisions /> },
 
-
       { path: "/menuCreate", element: <CreateMenuPage /> },
       { path: "/ProductView/:id", element: <ProductView /> },
       { path: "/EditProduct/:id", element: <EditProduct /> },
-
 
       { path: "/ordensCreate", element: <CreateOrderPage /> },
       { path: "/OrderView/:id", element: <OrderView /> },
       { path: "/EditOrder/:id", element: <EditOrder /> },
     ],
+  },
+
+  {
+    path: "*",
+    element: <Navigate to="/auth" replace />,
   },
 ]);
 

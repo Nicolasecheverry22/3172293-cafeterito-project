@@ -1,12 +1,10 @@
 import { pool } from "../../config/db.js";
 
-// SELECT base de una orden con su mesero, total calculado y platillos (JSON).
-// Los alias en camelCase coinciden con lo que esperan las tablas/vistas del frontend.
 const ORDER_SELECT = `
   SELECT
     o.id,
-    o.table_number                       AS "tableNumber",
-    o.waiter_id                          AS "waiterId",
+    o.table_number                      AS "tableNumber",
+    o.waiter_id                         AS "waiterId",
     COALESCE(u.user_name, 'Sin asignar') AS waiter,
     o.status,
     o.observations,
@@ -15,9 +13,9 @@ const ORDER_SELECT = `
     COALESCE(
       JSON_AGG(
         JSON_BUILD_OBJECT(
-          'id',         oi.id,
+          'id',        oi.id,
           'productId',  oi.product_id,
-          'dish',       p.product_name,
+          'dish',      p.product_name,
           'quantity',   oi.quantity,
           'price',      oi.unit_price::float,
           'dispatched', oi.is_dispatched
@@ -44,7 +42,17 @@ export const orderRepository = {
     return result.rows[0];
   },
 
-  // Precio y disponibilidad actuales de los productos pedidos (fuente de verdad del precio).
+  async getReportData(tableNumber) {
+    const query = `
+      ${ORDER_SELECT}
+      WHERE ($1::int IS NULL OR o.table_number = $1)
+      GROUP BY o.id, u.user_name
+      ORDER BY o.id;
+    `;
+    const result = await pool.query(query, [tableNumber || null]);
+    return result.rows;
+  },
+
   async getProductsByIds(productIds) {
     const result = await pool.query(
       `SELECT id, product_name, price, is_available
@@ -55,14 +63,10 @@ export const orderRepository = {
     return result.rows;
   },
 
-  // Crea encabezado + detalle en una sola transacción.
-  // items: [{ productId, quantity, unitPrice }]
   async create({ tableNumber, waiterId, observations }, items) {
     const client = await pool.connect();
-
     try {
       await client.query("BEGIN");
-
       const { rows } = await client.query(
         `INSERT INTO orders (table_number, waiter_id, observations)
          VALUES ($1, $2, $3)
@@ -71,7 +75,6 @@ export const orderRepository = {
       );
       const orderId = rows[0].id;
 
-      // unnest de 3 arreglos paralelos = un solo INSERT para todos los platillos
       await client.query(
         `INSERT INTO order_items (order_id, product_id, quantity, unit_price)
          SELECT $1, t.product_id, t.quantity, t.unit_price
@@ -95,14 +98,10 @@ export const orderRepository = {
     }
   },
 
-  // Actualiza encabezado y reemplaza el detalle en una sola transacción.
-  // Retorna undefined si la orden no existe.
   async update(id, { tableNumber, waiterId, status, observations }, items) {
     const client = await pool.connect();
-
     try {
       await client.query("BEGIN");
-
       const { rows } = await client.query(
         `UPDATE orders
          SET table_number = $1, waiter_id = $2, status = $3,
@@ -142,7 +141,6 @@ export const orderRepository = {
     }
   },
 
-  // order_items se borra en cascada (ON DELETE CASCADE).
   async remove(id) {
     const result = await pool.query(
       "DELETE FROM orders WHERE id = $1 RETURNING id",

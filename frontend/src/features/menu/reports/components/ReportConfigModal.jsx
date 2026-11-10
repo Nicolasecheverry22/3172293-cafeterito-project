@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
-
-
 import { Button, Select } from "@/shared";
 import Checkbox from "@/shared/components/Checkbox";
-
 import { generateMenuReport } from "../services/generateMenuReport";
-import { menu } from "../../data/menu";
-
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -32,7 +27,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     menuReportFields.filter((f) => f.default)
   );
 
-  // Limpia la categoría cuando el reporte no está filtrado por categoría
   useEffect(() => {
     if (scope !== "category") {
       setCategory("");
@@ -41,17 +35,12 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // Categorías dinámicas a partir de los datos del menú
-  const categories = [...new Set(menu.map((item) => item.category))];
-
   const handleFieldToggle = (field) => {
     setSelectedFields((prev) => {
       const exists = prev.find((f) => f.key === field.key);
-
       if (exists) {
         return prev.filter((f) => f.key !== field.key);
       }
-
       return [...prev, field];
     });
   };
@@ -62,7 +51,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         entity: "reporte",
         text: "Debes elegir al menos un campo para generar el reporte.",
       });
-
       return;
     }
 
@@ -71,7 +59,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         entity: "categoría",
         text: "Debes seleccionar una categoría para filtrar el reporte.",
       });
-
       return;
     }
 
@@ -93,7 +80,6 @@ export default function ReportConfigModal({ isOpen, onClose }) {
       onClose();
     } catch (error) {
       console.error("Error al generar el reporte del menú:", error);
-
       await showSystemErrorAlert({
         text: "No fue posible generar el reporte del menú. Intenta nuevamente.",
       });
@@ -144,13 +130,9 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         {/* Campos */}
         <div className="mb-4">
           <p className="mb-2 font-medium">Campos del reporte</p>
-
           <div className="grid grid-cols-2 gap-2">
             {menuReportFields.map((field) => {
-              const checked = selectedFields.some(
-                (f) => f.key === field.key
-              );
-
+              const checked = selectedFields.some((f) => f.key === field.key);
               return (
                 <Checkbox
                   key={field.key}
@@ -186,14 +168,10 @@ export default function ReportConfigModal({ isOpen, onClose }) {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               options={[
-                {
-                  label: "Seleccione una categoría",
-                  value: "",
-                },
-                ...categories.map((cat) => ({
-                  label: cat,
-                  value: cat,
-                })),
+                { label: "Seleccione una categoría", value: "" },
+                { label: "Bebidas", value: "Bebidas" },
+                { label: "Comida rápida", value: "Comida rápida" },
+                { label: "Postres", value: "Postres" },
               ]}
             />
           </div>
@@ -201,19 +179,10 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
         {/* Acciones */}
         <div className="flex justify-end gap-2 mt-6">
-          <Button
-            variant="secondary"
-            onClick={handleCancel}
-            disabled={isGenerating}
-          >
+          <Button variant="secondary" onClick={handleCancel} disabled={isGenerating}>
             Cancelar
           </Button>
-
-          <Button
-            variant="primary"
-            onClick={handleGenerateReport}
-            disabled={isGenerating}
-          >
+          <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating}>
             {isGenerating ? "Generando..." : "Generar reporte"}
           </Button>
         </div>

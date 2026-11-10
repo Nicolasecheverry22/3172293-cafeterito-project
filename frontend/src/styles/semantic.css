@@ -36,7 +36,7 @@
     
     /* ============ STATE ================== */
 
-    --semantic-success: var(--color-primary-950);
+    --semantic-success: var(--color-green-700);
     --semantic-warning: var(--color-secondary-950);
     --semantic-error: var(--color-tertiary-700);
     

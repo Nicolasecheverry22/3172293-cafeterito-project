@@ -37,6 +37,17 @@ export const providerController = {
     }
   },
 
+  async getReportData(req, res) {
+    try {
+      const { nit } = req.query;
+      const providers = await providerService.getReportData(nit);
+      res.json(providers);
+    } catch (err) {
+      console.log("ERROR BACKEND REPORT:", err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   async update(req, res) {
     try {
       const updated = await providerService.update(Number(req.params.id), req.body);
@@ -66,3 +77,5 @@ export const providerController = {
     }
   },
 };
+
+

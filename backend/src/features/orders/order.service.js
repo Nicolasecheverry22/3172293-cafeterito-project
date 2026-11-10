@@ -8,11 +8,8 @@ const toPositiveInt = (value) => {
   return Number.isInteger(n) && n > 0 ? n : null;
 };
 
-// Une filas repetidas del mismo platillo sumando cantidades
-// (la tabla order_items tiene UNIQUE (order_id, product_id)).
 const mergeItems = (items) => {
   const byProduct = new Map();
-
   for (const item of items) {
     const productId = toPositiveInt(item.productId);
     const quantity = toPositiveInt(item.quantity);
@@ -21,13 +18,10 @@ const mergeItems = (items) => {
     }
     byProduct.set(productId, (byProduct.get(productId) ?? 0) + quantity);
   }
-
   return [...byProduct].map(([productId, quantity]) => ({ productId, quantity }));
 };
 
-// Deben coincidir con el CHECK chk_orders_status de la migración 0029
 const VALID_STATUSES = ["activa", "pagada", "cancelada"];
-
 const normalizeObservations = (value) =>
   typeof value === "string" ? value.trim().slice(0, 300) || null : null;
 
@@ -38,6 +32,11 @@ export const orderService = {
 
   async getById(id) {
     return await orderRepository.getById(id);
+  },
+
+  async getReportData(tableNumber) {
+    const tableNum = tableNumber ? toPositiveInt(tableNumber) : null;
+    return await orderRepository.getReportData(tableNum);
   },
 
   async create(data) {
@@ -52,8 +51,6 @@ export const orderService = {
     }
 
     const items = mergeItems(data.items);
-
-    // El precio SIEMPRE se toma de la BD, nunca del cliente (evita manipular el total).
     const products = await orderRepository.getProductsByIds(items.map((i) => i.productId));
     const productsById = new Map(products.map((p) => [p.id, p]));
 
@@ -67,7 +64,6 @@ export const orderService = {
     });
 
     const observations = normalizeObservations(data.observations);
-
     return await orderRepository.create({ tableNumber, waiterId, observations }, pricedItems);
   },
 
@@ -91,9 +87,6 @@ export const orderService = {
     }
 
     const items = mergeItems(data.items);
-
-    // Los platillos que ya estaban conservan su precio de venta y su estado de despacho;
-    // los nuevos toman el precio actual del menú y deben estar disponibles.
     const previousByProduct = new Map(current.items.map((i) => [i.productId, i]));
     const newIds = items.map((i) => i.productId).filter((pid) => !previousByProduct.has(pid));
     const products = newIds.length ? await orderRepository.getProductsByIds(newIds) : [];
@@ -104,7 +97,6 @@ export const orderService = {
       if (previous) {
         return { ...item, unitPrice: previous.price, dispatched: previous.dispatched };
       }
-
       const product = productsById.get(item.productId);
       if (!product) throw httpError(400, `El producto ${item.productId} no existe`);
       if (!product.is_available) {
@@ -123,11 +115,9 @@ export const orderService = {
   async remove(id) {
     const order = await orderRepository.getById(id);
     if (!order) return null;
-
     if (order.status === "pagada") {
       throw httpError(409, "No se puede eliminar una orden que ya está pagada");
     }
-
     return await orderRepository.remove(id);
   },
 };

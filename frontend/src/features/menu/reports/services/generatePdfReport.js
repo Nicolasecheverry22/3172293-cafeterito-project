@@ -1,22 +1,39 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const generatePdfReport = ({
+export function generatePdfReport({
   headers,
   rows,
   fileName = "reporte",
-}) => {
-  if (!rows || rows.length === 0) {
-    console.error("No hay datos para PDF");
-    return;
-  }
-
+}) {
   const doc = new jsPDF();
-
-  autoTable(doc, {
-    head: [headers],
-    body: rows,
-  });
-
-  doc.save(fileName);
-};
+  
+    
+    doc.setFontSize(16);
+    doc.text("Reporte de Platillos", 14, 20);
+  
+    autoTable(doc, {
+      startY: 30,
+      head: [headers],
+      body: rows,
+      theme: "grid",
+  
+      headStyles: {
+        fillColor: [33, 150, 243],
+        textColor: 255,
+        fontSize: 11
+      },
+  
+      styles: {
+        fontSize: 10,
+        cellPadding: 3
+      },
+  
+      margin: {
+        left: 14,
+        right: 14
+      }
+    });
+  
+    doc.save(fileName);
+  }

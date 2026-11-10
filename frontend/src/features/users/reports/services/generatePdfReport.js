@@ -9,7 +9,7 @@ import autoTable from "jspdf-autotable";
 export function generatePdfReport({
   headers,                      // Encabezados de la tabla (columnas)
   rows,                         // Datos (array de filas)
-  fileName = "user-report.pdf"  // Nombre del archivo de salida
+  fileName = "reporte-usuarios.pdf"  // Nombre del archivo de salida
 }) {
 
   // Inicializa el documento PDF

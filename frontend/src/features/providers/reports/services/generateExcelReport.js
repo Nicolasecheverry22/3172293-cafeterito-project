@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 export function generateExcelReport({
   headers,
   rows,
-  fileName = "providers-report.xlsx"
+  fileName = "reporte-proveedores.xlsx"
 }) {
 
   const worksheetData = [
@@ -15,7 +15,6 @@ export function generateExcelReport({
 
   const workbook = XLSX.utils.book_new();
 
-  // ⚠️ Nombre de hoja coherente con el dominio
   XLSX.utils.book_append_sheet(workbook, worksheet, "Proveedores");
 
   XLSX.writeFile(workbook, fileName);

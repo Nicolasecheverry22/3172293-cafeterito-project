@@ -1,37 +1,34 @@
-export function buildReportDataset({
-  providers,
-  selectedFields,
-  scope,
-  documentNumber
-}) {
+export function buildReportDataset({ providers, selectedFields, scope, documentNumber }) {
+  let filteredProviders = [...providers];
 
-  let filteredData = [...providers];
-
-  // ✅ CORREGIDO: usar "nit"
   if (scope === "document" && documentNumber) {
-    filteredData = filteredData.filter(
-      (item) => item.nit === documentNumber
+    filteredProviders = filteredProviders.filter(
+      (provider) => String(provider.nit) === String(documentNumber).trim()
     );
   }
 
   const headers = selectedFields.map((field) => field.label);
 
-  const rows = filteredData.map((item) =>
+  const rows = filteredProviders.map((provider) =>
     selectedFields.map((field) => {
-      let value = item[field.key];
-
-      if (value === null || value === undefined) return "";
+      const value = provider[field.key];
 
       if (field.key === "is_active") {
-        return value ? "Activo" : "Inactivo";
+        if (
+          value === false || 
+          value === "false" || 
+          value === 0 || 
+          value === "Inactivo" ||
+          value === "INACTIVO"
+        ) {
+          return "Inactivo";
+        }
+        return "Activo";
       }
 
-      return value;
+      return value ?? "";
     })
   );
 
-  return {
-    headers,
-    rows
-  };
+  return { headers, rows };
 }

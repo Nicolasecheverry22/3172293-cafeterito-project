@@ -1,28 +1,21 @@
 import * as XLSX from "xlsx";
 
-export const generateExcelReport = ({
+export function generateExcelReport({
   headers,
   rows,
-  fileName = "reporte",
-}) => {
-  if (!rows || rows.length === 0) {
-    console.error("No hay datos para Excel");
-    return;
-  }
+  fileName = "reporte-ordenes.xlsx"
+}) {
 
-  // 🔴 Convertimos a formato objeto (xlsx lo necesita)
-  const dataset = rows.map((row) => {
-    const obj = {};
-    headers.forEach((header, index) => {
-      obj[header] = row[index];
-    });
-    return obj;
-  });
+  const worksheetData = [
+    headers,
+    ...rows
+  ];
 
-  const worksheet = XLSX.utils.json_to_sheet(dataset);
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
   const workbook = XLSX.utils.book_new();
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Órdenes");
 
   XLSX.writeFile(workbook, fileName);
-};
+}

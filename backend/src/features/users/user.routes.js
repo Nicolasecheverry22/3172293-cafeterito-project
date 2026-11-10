@@ -1,26 +1,24 @@
 import { Router } from "express";
-
 import { userController } from "./user.controller.js";
 
 const router = Router();
 
-// Listar usuarios (lectura pública)
+// Listar usuarios
 router.get("/", userController.getAll);
 
-// Obtener un usuario por id (para la vista de detalle)
-router.get("/:id", userController.getById);
+// RUTA DE REPORTE (Debe ir antes de /:id para evitar conflictos)
+router.get("/report-data", userController.getReportData);
 
-// Permisos individuales del usuario (pantalla Gestión de Permisos)
+// Permisos individuales del usuario
 router.get("/:id/permissions", userController.getPermissions);
 router.put("/:id/permissions", userController.updatePermissions);
 
-// Crear usuario (registro público desde el formulario del frontend)
+// Obtener un usuario por id (Ruta dinámica)
+router.get("/:id", userController.getById);
+
+// Crear, actualizar y eliminar
 router.post("/", userController.create);
-
-// Actualizar usuario por id (datos + roles)
 router.put("/:id", userController.update);
-
-// Eliminar usuario por id
 router.delete("/:id", userController.remove);
 
 export default router;

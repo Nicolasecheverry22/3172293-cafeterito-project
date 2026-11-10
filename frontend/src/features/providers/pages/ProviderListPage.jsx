@@ -73,7 +73,7 @@ export default function ProviderListPage() {
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
             >
-              Reportar proveedor
+              Reportar proveedores
             </Button>
 
             <Link to="/providerCreate">

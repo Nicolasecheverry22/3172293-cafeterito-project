@@ -1,5 +1,10 @@
 export const providerReportFields = [
   {
+    key: "nit",
+    label: "NIT",
+    default: true
+  },
+  {
     key: "providerName",
     label: "Nombre",
     default: true
@@ -12,11 +17,6 @@ export const providerReportFields = [
   {
     key: "providerPhone",
     label: "Teléfono",
-    default: true
-  },
-  {
-    key: "nit",
-    label: "NIT",
     default: true
   },
   {

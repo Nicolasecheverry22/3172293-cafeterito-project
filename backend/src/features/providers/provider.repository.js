@@ -65,6 +65,25 @@ export const providerRepository = {
     return result.rows[0];
   },
 
+  // Obtener proveedores para reporte (todos o filtrados por NIT)
+  async getReportData(nit) {
+    const query = `
+      SELECT id,
+             nit,
+             provider_name AS "providerName",
+             provider_email AS "providerEmail",
+             provider_phone AS "providerPhone",
+             provider_address AS "providerAddress",
+             product_service AS "productService",
+             is_active
+      FROM providers
+      WHERE ($1::text IS NULL OR nit = $1)
+      ORDER BY id;
+    `;
+    const result = await pool.query(query, [nit || null]);
+    return result.rows;
+  },
+
   // Actualiza todos los campos editables. Retorna undefined si el id no existe.
   async update(id, data) {
     const {
@@ -90,3 +109,4 @@ export const providerRepository = {
     return result.rows[0];
   },
 };
+

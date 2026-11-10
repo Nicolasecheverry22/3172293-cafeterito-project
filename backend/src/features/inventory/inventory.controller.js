@@ -37,6 +37,17 @@ export const inventoryController = {
     }
   },
 
+  async getReportData(req, res) {
+    try {
+      const { category, status } = req.query;
+      const items = await inventoryService.getReportData(category, status);
+      res.json(items);
+    } catch (err) {
+      console.log("ERROR BACKEND REPORT:", err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   async update(req, res) {
     try {
       const updated = await inventoryService.update(Number(req.params.id), req.body);

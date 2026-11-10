@@ -33,7 +33,7 @@ const DEFAULT_FORM_DATA = {
   userDocumentNumber: "",
   userPassword: "",
   userImage: [],
-  isActive: true, // Habilitado por defecto
+  isActive: true, 
   isSuperUser: false,
   isCook: false,
   isWaiter: false,

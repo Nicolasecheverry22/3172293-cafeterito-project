@@ -43,4 +43,9 @@ export const providerService = {
   async remove(id) {
     return await providerRepository.remove(id);
   },
+
+  async getReportData(nit) {
+    return await providerRepository.getReportData(nit);
+  },
 };
+
