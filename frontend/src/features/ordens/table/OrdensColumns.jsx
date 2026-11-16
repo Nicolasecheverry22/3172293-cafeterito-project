@@ -16,7 +16,7 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "id" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -41,7 +41,7 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "createdAt" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -68,7 +68,7 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "waiter" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -99,10 +99,10 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
 
       // Mapeo de colores y estilos según el estado de la orden
       const statusStyles = {
-        activa: "bg-amber-100 text-amber-800 border-amber-200",
-        pagada: "bg-green-100 text-green-800 border-green-200",
-        cancelada: "bg-red-100 text-red-800 border-red-200",
-        pendiente: "bg-blue-100 text-blue-800 border-blue-200",
+        activa: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700",
+        pagada: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700",
+        cancelada: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700",
+        pendiente: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700",
       };
 
       const statusLabels = {
@@ -115,7 +115,7 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
       return (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${
-            statusStyles[status] || "bg-gray-100 text-gray-800 border-gray-200"
+            statusStyles[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700"
           }`}
         >
           {statusLabels[status] || status}

@@ -14,7 +14,8 @@ import {
   Dropdown, 
   DropdownTrigger, 
   DropdownContent, 
-  DropdownItem 
+  DropdownItem,
+  ThemeSwitch
 } from "@/shared"; 
 
 import LogoutButton from "@/features/login/components/LogoutButton";
@@ -31,7 +32,7 @@ export default function Navbar() {
           
           <button 
             onClick={() => navigate("/home")}
-            className="flex items-center text-text-primary hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+            className="flex items-center text-text-on-brand hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
             aria-label="Ir al home"
           >
             <Coffee className="w-8 h-8 stroke-[2.5]" />
@@ -44,8 +45,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
                     isActive 
-                      ? "text-black font-bold border-b-2 border-black" 
-                      : "text-text-primary hover:text-black/70"
+                      ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
+                      : "text-text-on-brand hover:text-text-on-brand/70"
                   }`
                 }
               >
@@ -60,8 +61,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
                     isActive 
-                      ? "text-black font-bold border-b-2 border-black" 
-                      : "text-text-primary hover:text-black/70"
+                      ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
+                      : "text-text-on-brand hover:text-text-on-brand/70"
                   }`
                 }
               >
@@ -76,8 +77,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
                     isActive 
-                      ? "text-black font-bold border-b-2 border-black" 
-                      : "text-text-primary hover:text-black/70"
+                      ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
+                      : "text-text-on-brand hover:text-text-on-brand/70"
                   }`
                 }
               >
@@ -92,8 +93,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
                     isActive 
-                      ? "text-black font-bold border-b-2 border-black" 
-                      : "text-text-primary hover:text-black/70"
+                      ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
+                      : "text-text-on-brand hover:text-text-on-brand/70"
                   }`
                 }
               >
@@ -108,8 +109,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
                     isActive 
-                      ? "text-black font-bold border-b-2 border-black" 
-                      : "text-text-primary hover:text-black/70"
+                      ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
+                      : "text-text-on-brand hover:text-text-on-brand/70"
                   }`
                 }
               >
@@ -123,7 +124,7 @@ export default function Navbar() {
             <Dropdown>
               <DropdownTrigger>
                 <button
-                  className="p-2 rounded-md text-text-primary hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none cursor-pointer"
+                  className="p-2 rounded-md text-text-on-brand hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none cursor-pointer"
                   aria-label="Abrir Menú"
                 >
                   <Menu className="w-7 h-7" />
@@ -138,6 +139,9 @@ export default function Navbar() {
                     <span className="font-medium font-body text-base">Permisos</span>
                   </div>
                 </DropdownItem>
+
+                {/* Fuera de DropdownItem a propósito: activar el switch no cierra el menú */}
+                <ThemeSwitch />
 
                 <DropdownItem className="p-0">
                   <LogoutButton className="w-full px-3 py-2" />

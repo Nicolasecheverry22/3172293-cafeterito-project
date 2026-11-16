@@ -74,7 +74,7 @@ export default function CreateProviderPage() {
   };
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       <div className="w-full max-w-6xl mx-auto p-4">
         <div className="flex items-center gap-3 mb-6">
           <Truck className="w-8 h-8 text-text-primary/" />

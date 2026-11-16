@@ -120,7 +120,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-surface/90 p-6 shadow-lg">
+      <div className="w-full max-w-lg rounded-xl bg-surface/90 text-text-primary p-6 shadow-lg dark:bg-surface/95">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de usuarios
         </h2>

@@ -63,7 +63,7 @@ export default function InventoryRowActions({ provision, onDeleted }) {
     <div className="flex gap-2 items-center">
       <button
         onClick={handleView}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Ver detalles"
       >
         <Eye size={18} />
@@ -71,7 +71,7 @@ export default function InventoryRowActions({ provision, onDeleted }) {
 
       <button
         onClick={handleEdit}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar suministro"
       >
         <Pencil size={18} />
@@ -79,7 +79,7 @@ export default function InventoryRowActions({ provision, onDeleted }) {
 
       <button
         onClick={handleDelete}
-        className="p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-800 transition-colors cursor-pointer"
+        className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors cursor-pointer"
         title="Eliminar suministro"
       >
         <Trash2 size={18} />

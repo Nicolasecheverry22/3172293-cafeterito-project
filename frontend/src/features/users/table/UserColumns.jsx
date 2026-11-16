@@ -15,7 +15,7 @@ export const getUserColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "id" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -32,7 +32,7 @@ export const getUserColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "userName" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -56,6 +56,9 @@ export const getUserColumns = (sortConfig, onSort, onDeleted) => [
   {
     accessorKey: "is_active",
     header: "Estado",
+    meta: {
+      searchValue: (row) => ((row.is_active ?? row.isActive ?? true) ? "Activo" : "Inactivo"),
+    },
     cell: ({ row }) => {
       // 1. Verificamos tanto is_active como isActive de forma flexible
       const activeValue = 
@@ -66,8 +69,8 @@ export const getUserColumns = (sortConfig, onSort, onDeleted) => [
       const isActive = Boolean(activeValue);
 
       const statusStyles = isActive
-        ? "bg-green-100 text-green-800 border-green-300 font-semibold"
-        : "bg-red-100 text-red-800 border-red-300 font-semibold";
+        ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700 font-semibold"
+        : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700 font-semibold";
 
       return (
         <span

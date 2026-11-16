@@ -8,7 +8,8 @@ export default function DashboardLayout() {
       className="relative min-h-screen w-full flex flex-col bg-cover bg-center bg-no-repeat [image-rendering:-webkit-optimize-contrast]"
       style={{ backgroundImage: `url(${dashBg})` }}
     >
-      <div className="absolute inset-0 z-0" />
+      {/* Overlay: transparente en claro, oscurece la imagen de fondo en modo oscuro */}
+      <div className="absolute inset-0 z-0 dark:bg-black/60" aria-hidden="true" />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />

@@ -126,7 +126,7 @@ export function showSystemErrorAlert({
       title: "!text-red-600 font-bold",
       confirmButton:
         "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
-      footer: "text-sm text-gray-500",
+      footer: "text-sm text-text-secondary",
     },
     buttonsStyling: false,
   });

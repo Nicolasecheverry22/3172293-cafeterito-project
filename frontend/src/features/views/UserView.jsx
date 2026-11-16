@@ -55,7 +55,7 @@ export default function UserView() {
   const bgColor = AVATAR_COLORS[user.id % AVATAR_COLORS.length];
 
   return (
-    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
 
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-12 flex items-center gap-3">
         <UserRoundSearch className="w-9 h-9 text-text-primary/" />

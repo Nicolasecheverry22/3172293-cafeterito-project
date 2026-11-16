@@ -32,7 +32,7 @@ export default function Home() {
     <div className="space-y-6 p-6">
       {/* Accesos rápidos */}
       <div className="flex flex-col gap-10">
-        <div className="bg-surface/40 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-border">
+        <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-border">
           <h2 className="text-title font-heading font-bold mb-4 text-text-primary">
             Accesos rápidos
           </h2>
@@ -78,7 +78,7 @@ export default function Home() {
       </div>
 
       {/* Platillos más vendidos */}
-      <div className="rounded-xl bg-surface/40 backdrop-blur-md p-6 shadow-lg border border-border">
+      <div className="rounded-xl bg-surface/40 dark:bg-surface/80 backdrop-blur-md p-6 shadow-lg border border-border">
         <h2 className="text-title font-heading font-bold mb-4 text-text-primary">Platillos más vendidos</h2>
 
         {loading ? (

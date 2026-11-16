@@ -72,7 +72,7 @@ const handleSubmit = (e) => {
                                 className="text-center tracking-widest" 
                             />
                             {errors.token && (
-                                <span className="text-xs text-red-500 font-medium ml-1 text-center">
+                                <span className="text-xs text-error font-medium ml-1 text-center">
                                     {errors.token}
                                 </span>
                             )}

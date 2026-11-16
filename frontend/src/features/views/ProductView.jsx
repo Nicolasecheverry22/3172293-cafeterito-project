@@ -26,7 +26,7 @@ export default function ProductView() {
             Visualizar Producto
           </h1>
         </div>
-        <p className="ml-12 mt-8 text-red-500">Producto no encontrado.</p>
+        <p className="ml-12 mt-8 text-error">Producto no encontrado.</p>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function ProductView() {
   const bgColor = colors[product.id % colors.length];
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <UtensilsCrossed className="w-9 h-9 text-text-primary" />
@@ -120,7 +120,7 @@ export default function ProductView() {
             </div>
 
             <p className="text-xs font-bold text-text-primary/90 tracking-wide uppercase mt-1">
-              id: <span className="font-extrabold text-black">{product.id || "General"}</span>
+              id: <span className="font-extrabold text-text-primary">{product.id || "General"}</span>
             </p>
           </div>
 

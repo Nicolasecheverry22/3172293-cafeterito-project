@@ -26,7 +26,7 @@ export default function ProviderView() {
             Visualizar Proveedor
           </h1>
         </div>
-        <p className="ml-12 mt-8 text-red-500">Proveedor no encontrado.</p>
+        <p className="ml-12 mt-8 text-error">Proveedor no encontrado.</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function ProviderView() {
   const bgColor = colors[Number(provider.id) % colors.length] || colors[0];
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <Ambulance className="w-9 h-9 text-text-primary/" />

@@ -58,7 +58,7 @@ export default function ProviderRowActions({ provider, onDeleted }) {
     <div className="flex gap-2">
       <button
         onClick={() => navigate(`/ProviderView/${provider.id}`)}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Visualizar proveedor"
       >
         <Eye size={16} />
@@ -66,7 +66,7 @@ export default function ProviderRowActions({ provider, onDeleted }) {
 
       <button
         onClick={handleEdit}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar proveedor"
       >
         <Pencil size={16} />
@@ -74,7 +74,7 @@ export default function ProviderRowActions({ provider, onDeleted }) {
 
       <button
         onClick={handleDelete}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer text-red-600 hover:text-red-800"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
         title="Eliminar proveedor"
       >
         <Trash2 size={16} />

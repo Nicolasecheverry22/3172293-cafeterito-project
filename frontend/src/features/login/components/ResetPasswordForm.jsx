@@ -48,7 +48,7 @@ export default function ResetPasswordForm({ onSubmit }) {
           disabled={isSubmitting}
         />
         {errors.newPassword && (
-          <span className="text-xs text-red-500 font-medium ml-1">
+          <span className="text-xs text-error font-medium ml-1">
             {errors.newPassword}
           </span>
         )}
@@ -64,7 +64,7 @@ export default function ResetPasswordForm({ onSubmit }) {
           disabled={isSubmitting}
         />
         {errors.confirmPassword && (
-          <span className="text-xs text-red-500 font-medium ml-1">
+          <span className="text-xs text-error font-medium ml-1">
             {errors.confirmPassword}
           </span>
         )}

@@ -48,7 +48,7 @@ export default function MenuRowActions({ product, onDeleted }) {
       {/* Visualizar Platillo */}
       <button
         onClick={() => navigate(`/ProductView/${product.id}`)}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Visualizar platillo"
       >
         <Eye size={16} />
@@ -57,7 +57,7 @@ export default function MenuRowActions({ product, onDeleted }) {
       {/* Editar Platillo */}
       <button
         onClick={handleEdit}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar platillo"
       >
         <Pencil size={16} />
@@ -66,7 +66,7 @@ export default function MenuRowActions({ product, onDeleted }) {
       {/* Eliminar Platillo */}
       <button
         onClick={handleDelete}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer text-red-600 hover:text-red-800"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
         title="Eliminar platillo"
       >
         <Trash2 size={16} />

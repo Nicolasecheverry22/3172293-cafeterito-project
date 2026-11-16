@@ -71,7 +71,7 @@ export default function OrdensRowActions({ order, onDeleted }) {
       <button
         onClick={handleView}
         title="Visualizar orden"
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
       >
         <Eye size={16} />
       </button>
@@ -80,7 +80,7 @@ export default function OrdensRowActions({ order, onDeleted }) {
       <button
         onClick={handleEdit}
         title="Editar orden"
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
       >
         <Pencil size={16} />
       </button>
@@ -89,7 +89,7 @@ export default function OrdensRowActions({ order, onDeleted }) {
       <button
         onClick={() => setOpen(true)}
         title="Ver detalles completos"
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
       >
         <FileText size={16} />
       </button>
@@ -98,7 +98,7 @@ export default function OrdensRowActions({ order, onDeleted }) {
       <button
         onClick={handleDelete}
         title="Eliminar orden"
-        className="p-1 rounded hover:bg-red-50 text-red-600 hover:text-red-800 cursor-pointer transition-colors"
+        className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer transition-colors"
       >
         <Trash2 size={16} />
       </button>

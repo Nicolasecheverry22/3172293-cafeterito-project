@@ -82,7 +82,7 @@ export default function LoginForm({ onSubmit }) {
       />
 
       {errors.form && (
-        <p className="text-small text-red-500" role="alert">
+        <p className="text-small text-error" role="alert">
           {errors.form}
         </p>
       )}

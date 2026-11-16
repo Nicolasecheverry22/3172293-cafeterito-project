@@ -61,7 +61,7 @@ export default function UserRowActions({ user, onDeleted }) {
       {/* Botón visualizar */}
       <button
         onClick={() => navigate(`/UserView/${user.id}`)}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Visualizar usuario"
       >
         <Eye size={16} />
@@ -70,7 +70,7 @@ export default function UserRowActions({ user, onDeleted }) {
       {/* Botón editar */}
       <button
         onClick={handleEdit}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar usuario"
       >
         <Pencil size={16} />
@@ -79,7 +79,7 @@ export default function UserRowActions({ user, onDeleted }) {
       {/* Botón eliminar */}
       <button
         onClick={handleDelete}
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer text-red-600 hover:text-red-800"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
         title="Eliminar usuario"
       >
         <Trash2 size={16} />

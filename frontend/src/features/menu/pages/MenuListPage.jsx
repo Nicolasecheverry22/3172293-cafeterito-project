@@ -70,7 +70,7 @@ export default function MenuListPage() {
 
   return (
     <div className="w-full">
-      <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+      <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl font-bold font-heading text-text-primary">
             Listado de Menú
@@ -94,7 +94,7 @@ export default function MenuListPage() {
         </div>
 
         {loadError && (
-          <p className="text-red-500 text-sm mb-4">
+          <p className="text-error text-sm mb-4">
             No se pudieron cargar los platillos: {loadError}
           </p>
         )}

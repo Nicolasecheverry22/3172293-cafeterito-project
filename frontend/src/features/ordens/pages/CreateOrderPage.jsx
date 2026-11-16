@@ -89,7 +89,7 @@ export default function CreateOrderPage() {
   };
 
   return (
-    <div className="bg-surface/60 rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/60 dark:bg-surface/90 rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
 
       <div className="max-w-3xl mx-auto space-y-8 p-4">
         <div className="flex items-center gap-3">

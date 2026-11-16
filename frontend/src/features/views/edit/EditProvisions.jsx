@@ -190,7 +190,7 @@ export default function EditProvisions() {
   };
 
   return (
-    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
         <Pencil className="w-8 h-8 text-text-primary" />
         <h1 className="text-2xl font-heading font-bold text-text-primary">

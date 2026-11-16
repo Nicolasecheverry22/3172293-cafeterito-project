@@ -9,9 +9,9 @@ export default function Button ({
     ...props
 }){
     const variants = {
-        primary: "bg-brand text-text-primary font-semibold hover:bg-brand-hover",
+        primary: "bg-brand text-text-on-brand font-semibold hover:bg-brand-hover",
         secondary: "bg-brand-soft text-text-primary hover:bg-brand-soft-hover",
-        tertiary: "bg-brand-soft-two font-semibold hover:bg-brand-soft-two-hover"
+        tertiary: "bg-brand-soft-two text-text-primary font-semibold hover:bg-brand-soft-two-hover"
     };
 
     const sizes = {

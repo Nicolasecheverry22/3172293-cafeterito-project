@@ -5,9 +5,9 @@ import { ClipboardList, SquarePen } from "lucide-react";
 import { getOrderById } from "@/services/orderApi";
 
 const STATUS_STYLES = {
-  activa: "bg-amber-100 text-amber-800 border-amber-200",
-  pagada: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  cancelada: "bg-red-100 text-red-800 border-red-200",
+  activa: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700",
+  pagada: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700",
+  cancelada: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700",
 };
 
 const formatCurrency = (amount) =>
@@ -41,7 +41,7 @@ export default function OrderView() {
             Visualizar Orden
           </h1>
         </div>
-        <p className="ml-12 mt-8 text-red-500">La orden solicitada no existe.</p>
+        <p className="ml-12 mt-8 text-error">La orden solicitada no existe.</p>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function OrderView() {
   const status = order.status?.toLowerCase() ?? "";
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-4 mt-4 mb-6 flex items-center gap-3">
         <ClipboardList className="w-9 h-9 text-text-primary" />
@@ -74,7 +74,7 @@ export default function OrderView() {
             <p className="text-text-primary font-heading font-bold text-md">Estado</p>
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border capitalize ${
-                STATUS_STYLES[status] || "bg-gray-100 text-gray-800 border-gray-200"
+                STATUS_STYLES[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700"
               }`}
             >
               {order.status}

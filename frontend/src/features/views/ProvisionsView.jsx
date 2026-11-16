@@ -26,7 +26,7 @@ export default function ProvisionsView() {
             Visualizar Suministro
           </h1>
         </div>
-        <p className="ml-12 mt-8 text-red-500">Suministro no encontrado.</p>
+        <p className="ml-12 mt-8 text-error">Suministro no encontrado.</p>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function ProvisionsView() {
   };
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <UtensilsCrossed className="w-9 h-9 text-text-primary" />
@@ -120,7 +120,7 @@ export default function ProvisionsView() {
 
             {/* Lote con alto contraste y visibilidad */}
             <p className="text-xs font-bold text-text-primary/90 tracking-wide uppercase mt-1">
-              LOTE: <span className="font-extrabold text-black">{batchNumber}</span>
+              LOTE: <span className="font-extrabold text-text-primary">{batchNumber}</span>
             </p>
           </div>
 

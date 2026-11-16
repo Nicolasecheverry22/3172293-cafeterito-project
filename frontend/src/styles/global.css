@@ -2,9 +2,30 @@
 @import url(semantic.css);
 @import "tailwindcss";
 
+/* Variante dark: basada en el atributo data-theme del <html> (lo gestiona ThemeProvider) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 html, body {
   margin: 0;
   padding: 0;
+}
+
+body {
+  background-color: var(--semantic-background);
+  color: var(--semantic-text-primary);
+}
+
+/* SweetAlert2 (alertService) en modo oscuro: sus estilos se inyectan desde JS */
+[data-theme="dark"] .swal2-popup {
+  --swal2-background: var(--semantic-surface);
+  --swal2-color: var(--semantic-text-primary);
+  background: var(--semantic-surface);
+  color: var(--semantic-text-primary);
+}
+
+[data-theme="dark"] .swal2-title,
+[data-theme="dark"] .swal2-html-container {
+  color: var(--semantic-text-primary);
 }
 
 #root {
@@ -33,6 +54,7 @@ html, body {
     --color-text-secondary: var(--semantic-text-secondary);
     --color-text-muted: var(--semantic-text-muted);
     --color-text-inverse: var(--semantic-text-inverse);
+    --color-text-on-brand: var(--semantic-text-on-brand);
 
     /* ============== BORDER ==================== */
 

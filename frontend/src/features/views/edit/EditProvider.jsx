@@ -136,18 +136,18 @@ export default function EditProvider() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-[#a1a1a1]/80 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
+    <div className="w-full max-w-6xl mx-auto bg-surface/80 backdrop-blur-md rounded-3xl p-8 border border-border/40 dark:bg-surface/90 shadow-2xl">
       <div className="flex items-center gap-3 mb-6">
-        <Pencil className="w-8 h-8 text-black" />
-        <h1 className="text-3xl font-heading font-black text-black">
+        <Pencil className="w-8 h-8 text-text-primary" />
+        <h1 className="text-3xl font-heading font-black text-text-primary">
           Editar Proveedor
         </h1>
       </div>
 
       <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Bloque Izquierdo: Estado */}
-        <div className="lg:col-span-3 bg-[#d4d4d4] rounded-3xl p-6 flex flex-col items-center justify-center gap-4 text-center shadow-md">
-          <span className="text-black font-heading font-bold text-lg">
+        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 flex flex-col items-center justify-center gap-4 text-center shadow-md">
+          <span className="text-text-primary font-heading font-bold text-lg">
             Estado
           </span>
           <StatusSwitch
@@ -160,7 +160,7 @@ export default function EditProvider() {
         </div>
 
         {/* Bloque Derecho: FileInput + Inputs del Formulario */}
-        <div className="lg:col-span-9 bg-[#d4d4d4] rounded-3xl p-8 flex flex-col items-center gap-6 shadow-md">
+        <div className="lg:col-span-9 bg-surface-muted rounded-3xl p-8 flex flex-col items-center gap-6 shadow-md">
           {/* Subir imagen / FileInput centrado */}
           <div className="w-full flex justify-center">
             <FileInput
@@ -169,12 +169,12 @@ export default function EditProvider() {
               accept="image/*,.pdf"
             />
             {errors.file && (
-              <span className="text-red-600 text-xs mt-1 block">{errors.file}</span>
+              <span className="text-error text-xs mt-1 block">{errors.file}</span>
             )}
           </div>
 
           {/* Sub-tarjeta contenedora de los campos de texto */}
-          <div className="w-full bg-[#a1a1a1]/70 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="w-full bg-surface/70 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="NIT"
               name="nit"

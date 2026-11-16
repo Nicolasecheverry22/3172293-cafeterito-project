@@ -9,11 +9,11 @@ return (
     <button
         type="button"
         onClick={() => navigate(-1)}
-        className="p-2 rounded-md text-text-primary hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none cursor-pointer"
+        className="p-2 rounded-md text-text-on-brand hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none cursor-pointer"
         aria-label="Volver a la página anterior"
     >
         <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
-        <span className="font-medium text-text-primary">Volver</span>
+        <span className="font-medium text-text-on-brand">Volver</span>
     </button>
 
     </header>
