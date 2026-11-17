@@ -1,6 +1,7 @@
 // Configuración principal de Express: middlewares, rutas y manejo de errores.
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 
 import userRoutes from "./features/users/user.routes.js";
 import authRoutes from "./features/auth/auth.routes.js";
@@ -20,6 +21,9 @@ const app = express();
 
 // No anunciar la tecnología del servidor
 app.disable("x-powered-by");
+
+// Cabeceras de seguridad HTTP (H09)
+app.use(helmet());
 
 // Solo el frontend en desarrollo (Vite) puede consumir la API
 app.use(cors({ origin: "http://localhost:5173" }));

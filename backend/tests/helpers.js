@@ -17,7 +17,11 @@ dotenv.config({ quiet: true });
 // JWT_SECRET / JWT_EXPIRES se toman de .env (se prueba la configuración real);
 // solo se usan estos valores si .env no los define.
 process.env.JWT_SECRET ||= "test_only_secret";
-process.env.JWT_EXPIRES ||= "1h";
+process.env.JWT_EXPIRES ||= "10m";
+// La suite hace muchos logins desde la misma IP: límites altos por defecto.
+// tests/ratelimit.test.js fija límites bajos ANTES de importar este archivo.
+process.env.RATE_LIMIT_LOGIN_MAX ||= "1000";
+process.env.RATE_LIMIT_RESET_MAX ||= "1000";
 
 const { default: app } = await import("../src/app.js");
 const { pool } = await import("../src/config/db.js");
