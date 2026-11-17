@@ -1,3 +1,4 @@
+import { api } from "@/services/apiClient";
 import { generateExcelReport } from "./generateExcelReport";
 import { generatePdfReport } from "./generatePdfReport";
 import { buildReportDataset } from "../utils/buildReportDataset";
@@ -9,18 +10,8 @@ export async function generateMenuReport({
   selectedCategory,
 }) {
   try {
-    let url = "http://localhost:4000/api/products/report-data";
-
-    if (scope === "category" && selectedCategory) {
-      url += `?category=${encodeURIComponent(selectedCategory)}`;
-    }
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Error al obtener los datos del menú desde el servidor.");
-    }
-
-    const products = await response.json();
+    const query = scope === "category" && selectedCategory ? { category: selectedCategory } : {};
+    const products = await api.get("/products/report-data", { query });
 
     if (!products || !products.length) {
       alert("No hay datos para generar el reporte con los criterios seleccionados.");

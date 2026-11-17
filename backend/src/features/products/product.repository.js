@@ -1,4 +1,6 @@
 import { pool } from "../../config/db.js";
+import { OPEN_ORDER_STATUSES } from "../orders/order.constants.js";
+import { createFilters, runList, likePattern, alpha } from "../../utils/listQuery.js";
 
 // Consultas SQL del recurso products (platillos del menú).
 export const productRepository = {
@@ -14,19 +16,26 @@ export const productRepository = {
     return result.rows[0];
   },
 
-  async getAll() {
-    const query = `
-      SELECT id,
-             product_name AS "productName",
-             category,
-             price::float AS price,
-             description,
-             is_available AS "isAvailable"
-      FROM products
-      ORDER BY id;
-    `;
-    const result = await pool.query(query);
-    return result.rows;
+  // Filtros opcionales: ?search (nombre/descripción), ?category, ?isAvailable, ?page&limit.
+  // Orden alfabético por nombre.
+  async list({ search, category, isAvailable, page, limit } = {}) {
+    const filters = createFilters();
+    if (search) filters.add("(product_name ILIKE $? OR description ILIKE $?)", likePattern(search));
+    if (category) filters.add("lower(category) = lower($?)", category);
+    if (isAvailable !== undefined) filters.add("is_available = $?", isAvailable);
+    return runList({
+      select: `id,
+               product_name AS "productName",
+               category,
+               price::float AS price,
+               description,
+               is_available AS "isAvailable"`,
+      from: "FROM products",
+      filters,
+      orderBy: `${alpha("product_name")}, id`,
+      page,
+      limit,
+    });
   },
 
   async getById(id) {
@@ -73,12 +82,26 @@ export const productRepository = {
     return result.rows[0];
   },
 
-  async remove(id) {
+  async setAvailability(id, isAvailable) {
     const result = await pool.query(
-      "DELETE FROM products WHERE id = $1 RETURNING id",
-      [id]
+      `UPDATE products SET is_available = $2 WHERE id = $1
+       RETURNING id, is_available AS "isAvailable"`,
+      [id, isAvailable]
     );
     return result.rows[0];
+  },
+
+  // ¿El platillo está en alguna orden abierta (activa o lista para entrega)?
+  async isInOpenOrder(id) {
+    const result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM order_items oi
+         JOIN orders o ON o.id = oi.order_id
+         WHERE oi.product_id = $1 AND o.status = ANY($2::text[])
+       ) AS "inUse"`,
+      [id, OPEN_ORDER_STATUSES]
+    );
+    return result.rows[0].inUse;
   },
 
   async getTopSelling() {

@@ -151,7 +151,7 @@ export default function OrderForm({
           size= "md"
           type="button"
           onClick={addDishRow}
-          className="flex items-center justify-center gap-2 w-full md:w-auto bg-brand/50 hover:bg-brand/80 text-text-primary font-medium"
+          className="flex items-center justify-center gap-2 w-full md:w-auto bg-brand/50 hover:bg-brand/80 text-text-primary dark:text-text-on-brand dark:bg-brand dark:hover:bg-brand-hover font-medium"
         >
           Agregar producto <Plus className="w-4 h-4" />
         </Button>

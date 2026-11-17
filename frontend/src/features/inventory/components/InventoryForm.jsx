@@ -9,6 +9,7 @@ import {
 } from "@/shared";
 import { createInventorySchema } from "../schemas/inventorySchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
+import { INVENTORY_STATUSES } from "@/services/inventoryApi";
 
 const DEFAULT_FORM_DATA = {
   provisionName: "",
@@ -17,6 +18,8 @@ const DEFAULT_FORM_DATA = {
   stock: "",
   price: "",
   batch: "",
+  barcode: "",
+  expirationDate: "",
   minStock: "",
   maxStock: "",
   provisionImage: [],
@@ -25,12 +28,8 @@ const DEFAULT_FORM_DATA = {
   provisionStatus: "",
 };
 
-const STATUS_OPTIONS = [
-  { value: "Activo", label: "Activo" },
-  { value: "Vencido", label: "Vencido" },
-  { value: "Agotado", label: "Agotado" },
-  { value: "Averia", label: "Avería" },
-];
+// Estados del backend (RFADMIN08): Disponible / Vencido / Avería / Agotado
+const STATUS_OPTIONS = INVENTORY_STATUSES.map((s) => ({ value: s, label: s }));
 
 const UNIT_OPTIONS = [
   { value: "kg", label: "Kilogramos (kg)" },
@@ -182,6 +181,25 @@ export default function InventoryForm({
           placeholder="Ingrese el lote (Ej. LOT-101A)"
           onChange={handleChange}
           error={errors.batch}
+        />
+
+        <Input
+          label="Código de barras"
+          name="barcode"
+          type="text"
+          value={formData.barcode}
+          placeholder="Ingrese el código de barras (Ej. 7701234567890)"
+          onChange={handleChange}
+          error={errors.barcode}
+        />
+
+        <Input
+          label="Fecha de vencimiento (opcional)"
+          name="expirationDate"
+          type="date"
+          value={formData.expirationDate}
+          onChange={handleChange}
+          error={errors.expirationDate}
         />
 
         <Input

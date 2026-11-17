@@ -1,29 +1,24 @@
 import { productRepository } from "./product.repository.js";
+import { httpError } from "../../utils/httpError.js";
 
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
-
-const requireText = (value, field) => {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw httpError(400, `El campo ${field} es obligatorio`);
+// RFADMIN24: no se puede inhabilitar un platillo que está en una orden abierta.
+async function assertCanDisable(id) {
+  if (await productRepository.isInOpenOrder(id)) {
+    throw httpError(
+      409,
+      "No se puede inhabilitar el platillo: está incluido en una orden abierta (activa o lista para entrega)"
+    );
   }
-  return value.trim();
-};
+}
 
-const requireNumber = (value, field, { min = 0 } = {}) => {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < min) {
-    throw httpError(400, `El campo ${field} no es válido`);
-  }
-  return n;
-};
-
+// La entrada llega validada y normalizada por product.schema.js (validate middleware).
 export const productService = {
   async create(data) {
     return await productRepository.create(data);
   },
-  async getAll() {
-    return await productRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await productRepository.list(query);
   },
   async getById(id) {
     return await productRepository.getById(id);
@@ -32,17 +27,19 @@ export const productService = {
     return await productRepository.getReportData(category);
   },
   async update(id, data) {
-    const payload = {
-      productName: requireText(data.productName, "nombre"),
-      category: requireText(data.category, "categoría"),
-      price: requireNumber(data.price, "precio", { min: 0.01 }),
-      description: typeof data.description === "string" ? data.description.trim() : null,
-      isAvailable: Boolean(data.isAvailable),
-    };
-    return await productRepository.update(id, payload);
+    if (data.isAvailable === false) {
+      const current = await productRepository.getById(id);
+      if (!current) return undefined;
+      if (current.isAvailable) await assertCanDisable(id);
+    }
+    return await productRepository.update(id, data);
   },
-  async remove(id) {
-    return await productRepository.remove(id);
+  // Habilitar/inhabilitar (no hay borrado físico)
+  async setAvailability(id, isAvailable) {
+    const current = await productRepository.getById(id);
+    if (!current) return undefined;
+    if (!isAvailable && current.isAvailable) await assertCanDisable(id);
+    return await productRepository.setAvailability(id, isAvailable);
   },
   async getTopSelling() {
     return await productRepository.getTopSelling();

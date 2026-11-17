@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import MenuRowActions from "../components/MenuRowActions";
 
-export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
+export const getMenuColumns = (sortConfig, onSort, onChanged) => [
   // Columna ID (Ordenable)
   {
     accessorKey: "id",
@@ -16,7 +16,7 @@ export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "id" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -35,7 +35,7 @@ export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "productName" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -54,7 +54,7 @@ export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "category" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -73,7 +73,7 @@ export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "price" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -96,12 +96,15 @@ export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
   {
     accessorKey: "isAvailable",
     header: "Estado",
+    meta: {
+      searchValue: (row) => (row.isAvailable ? "Disponible" : "No disponible"),
+    },
     cell: ({ row }) => {
       const isAvailable = row.original.isAvailable;
 
       const statusStyles = isAvailable
-        ? "bg-green-100 text-green-800 border-green-200"
-        : "bg-red-100 text-red-800 border-red-200";
+        ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700"
+        : "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700";
 
       return (
         <span
@@ -117,7 +120,7 @@ export const getMenuColumns = (sortConfig, onSort, onDeleted) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <MenuRowActions product={row.original} onDeleted={onDeleted} />,
+    cell: ({ row }) => <MenuRowActions product={row.original} onChanged={onChanged} />,
   },
 ];
 

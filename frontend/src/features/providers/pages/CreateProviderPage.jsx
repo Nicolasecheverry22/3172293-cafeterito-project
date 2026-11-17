@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Truck } from "lucide-react";
 import ProviderForm from "../components/ProviderForm";
-import { getDocumentTypes } from "@/services/selectService";
+import { getProviderDocumentTypes } from "@/services/selectService";
 import { createProvider } from "@/services/providerApi";
 
 import {
@@ -17,7 +17,7 @@ export default function CreateProviderPage() {
   const [documentTypes, setDocumentTypes] = useState([]);
 
   useEffect(() => {
-    getDocumentTypes().then(setDocumentTypes).catch(() => setDocumentTypes([]));
+    getProviderDocumentTypes().then(setDocumentTypes).catch(() => setDocumentTypes([]));
   }, []);
 
   const handleCreateProvider = async (validatedData) => {
@@ -33,6 +33,7 @@ export default function CreateProviderPage() {
         .join(", ");
 
       await createProvider({
+        documentType: validatedData.providerDocumentType,
         nit: validatedData.providerDocumentNumber,
         providerName: validatedData.providerName,
         providerEmail: validatedData.providerEmail,
@@ -74,7 +75,7 @@ export default function CreateProviderPage() {
   };
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       <div className="w-full max-w-6xl mx-auto p-4">
         <div className="flex items-center gap-3 mb-6">
           <Truck className="w-8 h-8 text-text-primary/" />

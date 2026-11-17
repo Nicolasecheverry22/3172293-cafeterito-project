@@ -4,12 +4,15 @@ import { providers as existingProviders } from "../data/providers";
 export function createProviderSchema({ currentProviderId = null } = {}) {
   return z
     .object({
-      providerDocumentType: z.string().min(1, "Debe seleccionar un tipo de documento"),
+      // Alineado con el backend (provider.schema.js): sin Tarjeta de Identidad
+      providerDocumentType: z.enum(["NIT", "CC", "CE", "PEP", "PPT"], {
+        message: "Debe seleccionar un tipo de documento válido",
+      }),
 
       providerDocumentNumber: z
         .string()
-        .min(5, "Número de documento inválido")
-        .max(20, "Número de documento demasiado largo"),
+        .trim()
+        .regex(/^\d{6,15}(-\d)?$/, "Documento inválido: 6 a 15 dígitos (el NIT puede llevar dígito de verificación, ej. 900123456-7)"),
 
       providerName: z
         .string()
@@ -33,7 +36,7 @@ export function createProviderSchema({ currentProviderId = null } = {}) {
         .min(5, "La dirección es muy corta")
         .max(100, "La dirección es demasiado larga"),
 
-      providerPhone: z.string().regex(/^[0-9]{10}$/, "El teléfono debe tener exactamente 10 dígitos"),
+      providerPhone: z.string().regex(/^\d{7,15}$/, "El teléfono debe tener entre 7 y 15 dígitos"),
 
       productFood: z.boolean(),
       productSupplies: z.boolean(),
@@ -42,6 +45,11 @@ export function createProviderSchema({ currentProviderId = null } = {}) {
 
       images: z.array(z.instanceof(File)).optional(),
     })
+    // Solo el NIT admite dígito de verificación
+    .refine(
+      (data) => data.providerDocumentType === "NIT" || /^\d{6,15}$/.test(data.providerDocumentNumber),
+      { message: "El documento debe ser numérico (6 a 15 dígitos)", path: ["providerDocumentNumber"] }
+    )
     .refine((data) => data.providerEmail === data.providerEmailConfirm, {
       message: "Los correos electrónicos no coinciden",
       path: ["providerEmailConfirm"],

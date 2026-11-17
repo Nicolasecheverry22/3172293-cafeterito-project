@@ -1,83 +1,66 @@
 import { userRepository } from "./user.repository.js";
 import { normalizePermissionIds } from "../permissions/permissions.service.js";
+import { httpError } from "../../utils/httpError.js";
 import bcrypt from "bcrypt";
 
-// Error con código HTTP para que el controller responda 400/404 en lugar de 500.
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
+const ADMIN_GROUP = "Administrador";
 
-// Limpia la lista de grupos que llega del frontend: solo strings no vacíos, sin duplicados.
-const normalizeGroupNames = (groupNames) => {
-  if (!Array.isArray(groupNames)) return [];
-  return [
-    ...new Set(
-      groupNames
-        .filter((name) => typeof name === "string")
-        .map((name) => name.trim())
-        .filter(Boolean)
-    ),
-  ];
-};
-
+// La entrada llega validada y normalizada por user.schema.js
+// (correo en minúsculas, documento/teléfono numéricos, contraseña RNF10, ≥ 1 grupo).
 export const userService = {
   async createUser(data) {
-    if (typeof data.userPassword !== "string" || data.userPassword.length === 0) {
-      throw httpError(400, "La contraseña es obligatoria");
-    }
-
-    const groupNames = normalizeGroupNames(data.groupNames);
-
-    if (groupNames.length === 0) {
-      throw httpError(400, "Debe seleccionar al menos un tipo de usuario");
-    }
-
-    const hashedPassword = await bcrypt.hash(data.userPassword, 10);
-
+    // userData se arma campo por campo: los flags de privilegios NUNCA vienen del cliente.
     const userData = {
-      ...data,
-      userPassword: hashedPassword,
+      userName: data.userName,
+      userEmail: data.userEmail,
+      userPersonalEmail: data.userPersonalEmail ?? null,
+      userPhone: data.userPhone,
+      userDocumentTypes: data.userDocumentTypes,
+      userDocumentNumber: data.userDocumentNumber,
+      userAddress: data.userAddress ?? null,
+      userPassword: await bcrypt.hash(data.userPassword, 10),
+      userAvatarUrl: data.userAvatarUrl ?? null,
+      isStaff: false,
+      isActive: true,
+      // El rol Administrador = superusuario (mismo criterio que al editar)
+      isSuperuser: data.groupNames.includes(ADMIN_GROUP),
     };
 
-    return await userRepository.createWithGroups(userData, groupNames);
+    return await userRepository.createWithGroups(userData, data.groupNames);
   },
 
   async updateUser(id, data) {
-    const requireText = (value, field) => {
-      if (typeof value !== "string" || value.trim() === "") {
-        throw httpError(400, `El campo ${field} es obligatorio`);
-      }
-      return value.trim();
-    };
-
-    const groupNames = normalizeGroupNames(data.groupNames);
-    if (groupNames.length === 0) {
-      throw httpError(400, "Debe seleccionar al menos un tipo de usuario");
-    }
-
     const userData = {
-      userName: requireText(data.userName, "nombre"),
-      userEmail: requireText(data.userEmail, "correo").toLowerCase(),
-      userPhone: requireText(data.userPhone, "teléfono"),
-      userDocumentTypes: requireText(data.userDocumentTypes, "tipo de documento"),
-      userDocumentNumber: requireText(data.userDocumentNumber, "número de documento"),
-      isActive: Boolean(data.isActive),
-      // Mismo criterio que en el registro: el rol Administrador = superusuario
-      isSuperuser: groupNames.includes("Administrador"),
+      userName: data.userName,
+      userEmail: data.userEmail,
+      userPersonalEmail: data.userPersonalEmail ?? null,
+      userPhone: data.userPhone,
+      userDocumentTypes: data.userDocumentTypes,
+      userDocumentNumber: data.userDocumentNumber,
+      userAddress: data.userAddress ?? null,
+      // undefined → se conserva el estado actual
+      isActive: data.isActive,
+      isSuperuser: data.groupNames.includes(ADMIN_GROUP),
     };
 
-    return await userRepository.updateWithGroups(id, userData, groupNames);
+    return await userRepository.updateWithGroups(id, userData, data.groupNames);
   },
 
-  async getAll() {
-    return await userRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await userRepository.list(query);
   },
 
   async getById(id) {
     return await userRepository.getById(id);
   },
 
-  async remove(id) {
-    return await userRepository.remove(id);
+  // Habilitar/deshabilitar (no hay borrado físico). Un usuario no puede desactivarse a sí mismo.
+  async setStatus(id, isActive, currentUserId) {
+    if (!isActive && id === currentUserId) {
+      throw httpError(400, "No puede desactivar su propia cuenta");
+    }
+    return await userRepository.setStatus(id, isActive);
   },
 
   async getPermissions(userId) {
@@ -87,8 +70,10 @@ export const userService = {
     return await userRepository.getPermissionsByUserId(userId);
   },
 
-  async getReportData(documentNumber) { return await userRepository.getByDocument(documentNumber); },
-  
+  async getReportData(documentNumber) {
+    return await userRepository.getByDocument(documentNumber);
+  },
+
   async updatePermissions(userId, permissionIds) {
     const ids = normalizePermissionIds(permissionIds);
     if (!ids) throw httpError(400, "permissionIds debe ser un arreglo de ids numéricos");

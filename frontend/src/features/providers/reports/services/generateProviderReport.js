@@ -1,3 +1,4 @@
+import { api } from "@/services/apiClient";
 import { generateExcelReport } from "./generateExcelReport";
 import { generatePdfReport } from "./generatePdfReport";
 import { buildReportDataset } from "../utils/buildReportDataset";
@@ -9,19 +10,13 @@ export async function generateProviderReport({
   documentNumber, // NIT ingresado en el modal
 }) {
   try {
-    let url = "http://localhost:4000/api/providers/report-data";
-
     // Si el alcance es por documento (NIT), se envía como query parameter
-    if (scope === "document" && documentNumber && documentNumber.trim() !== "") {
-      url += `?nit=${encodeURIComponent(documentNumber.trim())}`;
-    }
+    const query =
+      scope === "document" && documentNumber && documentNumber.trim() !== ""
+        ? { nit: documentNumber.trim() }
+        : {};
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Error al obtener los datos de los proveedores desde el servidor.");
-    }
-
-    const providers = await response.json();
+    const providers = await api.get("/providers/report-data", { query });
 
     if (!providers || !providers.length) {
       alert("No hay datos para generar el reporte con los criterios seleccionados.");

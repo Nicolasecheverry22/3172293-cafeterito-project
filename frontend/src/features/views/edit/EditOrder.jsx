@@ -17,6 +17,7 @@ import {
 // Deben coincidir con el CHECK chk_orders_status de la BD
 const ORDER_STATUS_OPTIONS = [
   { value: "activa", label: "Activa" },
+  { value: "lista para entrega", label: "Lista para entrega" },
   { value: "pagada", label: "Pagada" },
   { value: "cancelada", label: "Cancelada" },
 ];
@@ -208,7 +209,7 @@ export default function EditOrder() {
   };
 
   return (
-    <div className="bg-surface/70 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
       <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
         <Pencil className="w-8 h-8 text-text-primary" />
         <h1 className="text-2xl font-heading font-bold text-text-primary">
@@ -342,7 +343,7 @@ export default function EditOrder() {
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(index)}
-                          className="text-red-500 hover:text-red-700 p-1 rounded-md transition-colors"
+                          className="text-error hover:opacity-80 p-1 rounded-md transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

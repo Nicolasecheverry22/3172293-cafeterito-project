@@ -1,55 +1,43 @@
 import { inventoryRepository } from "./inventory.repository.js";
+import { providerRepository } from "../providers/provider.repository.js";
+import { httpError } from "../../utils/httpError.js";
 
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
-
-const requireText = (value, field) => {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw httpError(400, `El campo ${field} es obligatorio`);
+// RFADMIN18: no se puede asignar un proveedor inactivo a un insumo.
+// En una edición solo se valida si el proveedor CAMBIA, para no bloquear la edición
+// de un insumo cuyo proveedor fue inhabilitado después de asignarlo.
+async function assertProviderAssignable(providerId, currentProviderId = null) {
+  if (providerId == null || providerId === currentProviderId) return;
+  const provider = await providerRepository.getById(providerId);
+  if (!provider) throw httpError(400, "El proveedor seleccionado no existe");
+  if (!provider.is_active) {
+    throw httpError(400, "No se puede asignar un proveedor inactivo al insumo");
   }
-  return value.trim();
-};
+}
 
-const requireNumber = (value, field, { min = 0, integer = false } = {}) => {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < min || (integer && !Number.isInteger(n))) {
-    throw httpError(400, `El campo ${field} no es válido`);
-  }
-  return n;
-};
-
+// La entrada llega validada y normalizada por inventory.schema.js (validate middleware).
 export const inventoryService = {
   async create(data) {
+    await assertProviderAssignable(data.providerId);
     return await inventoryRepository.create(data);
   },
-  async getAll() {
-    return await inventoryRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await inventoryRepository.list(query);
   },
   async getById(id) {
     return await inventoryRepository.getById(id);
   },
   async update(id, data) {
-    const payload = {
-      provisionName: requireText(data.provisionName, "nombre"),
-      category: requireText(data.category, "categoría"),
-      unit: requireText(data.unit, "unidad"),
-      stock: requireNumber(data.stock, "stock", { integer: true }),
-      price: requireNumber(data.price, "precio", { min: 0.01 }),
-      batch: requireText(data.batch, "lote"),
-      minStock: requireNumber(data.minStock, "stock mínimo", { integer: true }),
-      maxStock: requireNumber(data.maxStock, "stock máximo", { integer: true }),
-      status: requireText(data.status, "estado"),
-    };
-    if (payload.maxStock < payload.minStock) {
-      throw httpError(400, "El stock máximo no puede ser inferior al stock mínimo");
-    }
-    return await inventoryRepository.update(id, payload);
+    const current = await inventoryRepository.getById(id);
+    if (!current) return undefined;
+    await assertProviderAssignable(data.providerId, current.providerId);
+    return await inventoryRepository.update(id, data);
   },
-  async remove(id) {
-    return await inventoryRepository.remove(id);
+  // Cambio de estado (no hay borrado físico)
+  async setStatus(id, status) {
+    return await inventoryRepository.setStatus(id, status);
   },
-
   async getReportData(category, status) {
     return await inventoryRepository.getReportData(category, status);
-  }
+  },
 };

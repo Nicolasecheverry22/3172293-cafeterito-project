@@ -1,7 +1,8 @@
 import { pool } from "../../config/db.js";
+import { OPEN_ORDER_STATUSES, FINAL_ORDER_STATUSES } from "./order.constants.js";
+import { createFilters, runList } from "../../utils/listQuery.js";
 
-const ORDER_SELECT = `
-  SELECT
+const ORDER_COLUMNS = `
     o.id,
     o.table_number                      AS "tableNumber",
     o.waiter_id                         AS "waiterId",
@@ -23,17 +24,33 @@ const ORDER_SELECT = `
       ) FILTER (WHERE oi.id IS NOT NULL),
       '[]'
     ) AS items
+`;
+const ORDER_FROM = `
   FROM orders o
   LEFT JOIN users u        ON u.id = o.waiter_id
   LEFT JOIN order_items oi ON oi.order_id = o.id
   LEFT JOIN products p     ON p.id = oi.product_id
 `;
+const ORDER_SELECT = `SELECT ${ORDER_COLUMNS} ${ORDER_FROM}`;
 
 export const orderRepository = {
-  async getAll() {
-    const query = `${ORDER_SELECT} GROUP BY o.id, u.user_name ORDER BY o.id;`;
-    const result = await pool.query(query);
-    return result.rows;
+  // Filtros opcionales: ?status, ?tableNumber, ?from, ?to (AAAA-MM-DD), ?page&limit.
+  // Orden: más recientes primero.
+  async list({ status, tableNumber, from, to, page, limit } = {}) {
+    const filters = createFilters();
+    if (status) filters.add("o.status = $?", status);
+    if (tableNumber) filters.add("o.table_number = $?", tableNumber);
+    if (from) filters.add("o.created_at >= $?::date", from);
+    if (to) filters.add("o.created_at < ($?::date + 1)", to);
+    return runList({
+      select: ORDER_COLUMNS,
+      from: ORDER_FROM,
+      filters,
+      groupBy: "GROUP BY o.id, u.user_name",
+      orderBy: "o.created_at DESC, o.id DESC",
+      page,
+      limit,
+    });
   },
 
   async getById(id) {
@@ -106,9 +123,9 @@ export const orderRepository = {
         `UPDATE orders
          SET table_number = $1, waiter_id = $2, status = $3,
              observations = $4, updated_at = NOW()
-         WHERE id = $5
+         WHERE id = $5 AND status <> ALL($6::text[])
          RETURNING id`,
-        [tableNumber, waiterId, status, observations, id]
+        [tableNumber, waiterId, status, observations, id, FINAL_ORDER_STATUSES]
       );
 
       if (!rows[0]) {
@@ -141,10 +158,13 @@ export const orderRepository = {
     }
   },
 
-  async remove(id) {
+  // Anula la orden solo si sigue abierta (la condición en el WHERE evita carreras).
+  async cancel(id) {
     const result = await pool.query(
-      "DELETE FROM orders WHERE id = $1 RETURNING id",
-      [id]
+      `UPDATE orders SET status = 'cancelada', updated_at = NOW()
+       WHERE id = $1 AND status = ANY($2::text[])
+       RETURNING id, status`,
+      [id, OPEN_ORDER_STATUSES]
     );
     return result.rows[0];
   },

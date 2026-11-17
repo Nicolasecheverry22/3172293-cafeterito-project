@@ -46,7 +46,7 @@ export default function ForgotPasswordForm({ onSubmit }) {
           disabled={isSubmitting}
         />
         {errors.email && (
-          <span className="text-xs text-red-500 font-medium ml-1">
+          <span className="text-xs text-error font-medium ml-1">
             {errors.email}
           </span>
         )}

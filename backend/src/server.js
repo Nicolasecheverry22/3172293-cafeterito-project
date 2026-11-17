@@ -1,22 +1,27 @@
-// Importamos la instancia de la aplicacion express ya configurada.
-// App.js debe encargarse de middlewarse, rutas y configuarcion general
-import app from "./app.js"
+// Debe ser la primera importación: carga .env antes que cualquier otro módulo.
+import "dotenv/config";
+import app from "./app.js";
 
-// Importamos dotenv para cargar variables de entorno desde el archivo .env
-import dotenv from "dotenv"
+// Variables obligatorias. DB_PASSWORD puede estar vacía (autenticación local "trust"),
+// pero debe estar definida.
+const REQUIRED_NON_EMPTY = ["JWT_SECRET", "DB_HOST", "DB_PORT", "DB_USER", "DB_NAME"];
+const REQUIRED_DEFINED = ["DB_PASSWORD"];
 
-// Ejecutamos la carga de variables de entorno
-// sto debe hacerse antes de usar process.env
+const missing = [
+  ...REQUIRED_NON_EMPTY.filter((key) => !process.env[key]),
+  ...REQUIRED_DEFINED.filter((key) => process.env[key] === undefined),
+];
 
-dotenv.config();
+if (missing.length > 0) {
+  console.error(
+    `No se puede iniciar el servidor. Faltan variables de entorno: ${missing.join(", ")}.\n` +
+      "Copia backend/.env.example a backend/.env y completa los valores."
+  );
+  process.exit(1);
+}
 
-// Definimos el puerto del servidos
-// Se prioriza el valor definido en el entorno
-//  Y se usa 4000 como valor por defecto en desarrollo 
 const PORT = process.env.PORT || 4000;
 
-// Iniciamos el servidor http usando la app EXPRESS
-// listen levantan el servidor y queda a la espera de peticiones
 app.listen(PORT, () => {
-    console.log(`Servidor backend corriendo en http://localhost:${PORT}`)
-})
+  console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
+});

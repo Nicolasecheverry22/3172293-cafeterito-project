@@ -1,114 +1,68 @@
-import { Eye, Pencil, FileText, Trash2 } from "lucide-react";
+import { Eye, Pencil, FileText, Ban } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 import OrderDetailModal from "./OrderDetailModal";
-import { 
-  showSystemErrorAlert,
-  showSuccessAlert,
-  showConfirmDeleteAlert
-  } from "@/shared/services/alertService";
-import { deleteOrder } from "@/services/orderApi";
+import { confirmAction } from "@/shared/services/confirmAction";
+import { cancelOrder, OPEN_ORDER_STATUSES } from "@/services/orderApi";
 
-export default function OrdensRowActions({ order, onDeleted }) {
+// Acciones por fila. No existe "Eliminar": la orden se ANULA (estado "cancelada").
+// Solo se pueden anular o editar órdenes abiertas (activa / lista para entrega).
+export default function OrdensRowActions({ order, onChanged }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const isOpen = OPEN_ORDER_STATUSES.includes(order.status?.toLowerCase());
 
-  // 1. Ir a la vista de visualizar
-  const handleView = () => {
-    navigate(`/OrderView/${order.id}`);
-  };
-
-  // 2. Ir a la vista de editar
-  const handleEdit = () => {
-    navigate(`/EditOrder/${order.id}`);
-  };
-
-  // 4. Lógica de eliminación
-  const handleDelete = async () => {
-    // Restricción: Si la orden está pagada, se bloquea la eliminación
-    if (order.status?.toLowerCase() === "pagada") {
-      await showSystemErrorAlert({
-        title: "Acción no permitida",
-        text: "Esta orden no puede ser eliminada porque ya se encuentra pagada."
-      });
-      return;
-    }
-
-    // Confirmación para órdenes activas
-    const result = await showConfirmDeleteAlert({
-      title: "¿Eliminar orden?",
-      text: `Esta acción eliminará la orden #${order.id} y no se puede revertir.`,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+  const handleCancel = () =>
+    confirmAction({
+      title: "¿Anular orden?",
+      text: `La orden #${order.id} (mesa ${order.tableNumber}) quedará cancelada. Esta acción no se puede deshacer.`,
+      confirmText: "Sí, anular",
+      action: () => cancelOrder(order.id),
+      successTitle: "Orden anulada",
+      successText: "La orden fue anulada correctamente.",
+      onDone: onChanged,
     });
-
-    if (!result.isConfirmed) return;
-
-    try {
-      // Elimina la orden en la base de datos (DELETE /api/orders/:id)
-      await deleteOrder(order.id);
-
-      await showSuccessAlert({
-        title: "¡Orden eliminada!",
-        text: "La orden fue eliminada correctamente.",
-      });
-
-      onDeleted?.(order.id);
-    } catch (error) {
-      console.error("Error al eliminar la orden:", error);
-
-      await showSystemErrorAlert({
-        text: error.message || "La orden no pudo ser eliminada. Intenta nuevamente.",
-      });
-    }
-  };
 
   return (
     <div className="flex gap-1.5 items-center">
-      {/* 1. Ojo: Vista de visualizar */}
       <button
-        onClick={handleView}
+        onClick={() => navigate(`/OrderView/${order.id}`)}
         title="Visualizar orden"
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
       >
         <Eye size={16} />
       </button>
 
-      {/* 2. Lápiz: Vista de editar */}
-      <button
-        onClick={handleEdit}
-        title="Editar orden"
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
-      >
-        <Pencil size={16} />
-      </button>
+      {isOpen && (
+        <button
+          onClick={() => navigate(`/EditOrder/${order.id}`)}
+          title="Editar orden"
+          className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        >
+          <Pencil size={16} />
+        </button>
+      )}
 
-      {/* 3. Ícono de documento: Modal de detalles */}
       <button
         onClick={() => setOpen(true)}
         title="Ver detalles completos"
-        className="p-1 rounded hover:bg-gray-100 cursor-pointer"
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
       >
         <FileText size={16} />
       </button>
 
-      {/* 4. Caneca: Eliminar */}
-      <button
-        onClick={handleDelete}
-        title="Eliminar orden"
-        className="p-1 rounded hover:bg-red-50 text-red-600 hover:text-red-800 cursor-pointer transition-colors"
-      >
-        <Trash2 size={16} />
-      </button>
+      {isOpen && (
+        <button
+          onClick={handleCancel}
+          title="Anular orden"
+          className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer transition-colors"
+        >
+          <Ban size={16} />
+        </button>
+      )}
 
-      {/* Modal de detalles */}
-      <OrderDetailModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        order={order}
-      />
+      <OrderDetailModal isOpen={open} onClose={() => setOpen(false)} order={order} />
     </div>
   );
 }

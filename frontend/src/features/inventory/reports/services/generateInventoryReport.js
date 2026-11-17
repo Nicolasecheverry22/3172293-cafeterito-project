@@ -1,3 +1,4 @@
+import { api } from "@/services/apiClient";
 import { generateExcelReport } from "./generateExcelReport";
 import { generatePdfReport } from "./generatePdfReport";
 import { buildReportDataset } from "../utils/buildReportDataset";
@@ -10,27 +11,15 @@ export async function generateInventoryReport({
   selectedStatus,
 }) {
   try {
-    // URL del endpoint del backend para reportes de inventario
-    let url = "http://localhost:4000/api/inventory/report-data";
-
-    const params = new URLSearchParams();
+    // Petición autenticada al backend (GET /api/inventory/report-data)
+    const query = {};
     if (scope === "category" && selectedCategory) {
-      params.append("category", selectedCategory);
+      query.category = selectedCategory;
     } else if (scope === "status" && selectedStatus) {
-      params.append("status", selectedStatus);
+      query.status = selectedStatus;
     }
 
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-
-    // Petición al backend
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Error al obtener los datos del inventario desde el servidor.");
-    }
-
-    const items = await response.json();
+    const items = await api.get("/inventory/report-data", { query });
 
     if (!items || !items.length) {
       alert("No hay datos para generar el reporte con los criterios seleccionados.");

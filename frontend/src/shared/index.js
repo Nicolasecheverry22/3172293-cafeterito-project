@@ -11,6 +11,7 @@ export {default as Checkbox } from "./components/Checkbox";
 export {default as SearchField } from "./components/SearchField";
 export {default as IconButton } from "./components/IconButton";
 export {default as StatusSwitch } from "./components/StatusSwitch";
+export {default as ThemeSwitch } from "./components/ThemeSwitch";
 export {default as DataTable } from "./components/DataTable";
 export {default as FileInput } from "./components/FileInput";
 export {default as FormNavbar } from "./components/FormNavbar";

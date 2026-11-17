@@ -1,44 +1,18 @@
 // Llamadas al API del backend para productos del menú (platillos).
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { api } from "./apiClient";
 
-export async function getProducts() {
-  const res = await fetch(`${API_URL}/products`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar productos`);
-  return res.json();
-}
+export const getProducts = (query) => api.get("/products", { query });
 
-export async function getProductById(id) {
-  const res = await fetch(`${API_URL}/products/${id}`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar el producto`);
-  return res.json();
-}
+export const getProductById = (id) => api.get(`/products/${id}`);
 
-export async function createProduct(payload) {
-  const res = await fetch(`${API_URL}/products`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al crear el producto`);
-  return data;
-}
+export const createProduct = (payload) => api.post("/products", payload);
 
-export async function deleteProduct(id) {
-  const res = await fetch(`${API_URL}/products/${id}`, { method: "DELETE" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al eliminar el producto`);
-  return data;
-}
+export const updateProduct = (id, payload) => api.put(`/products/${id}`, payload);
 
-// Actualiza el producto en la base de datos (PUT /api/products/:id).
-export async function updateProduct(id, payload) {
-  const res = await fetch(`${API_URL}/products/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al actualizar el producto`);
-  return data;
-}
+// PATCH /api/products/:id/status — habilitar/inhabilitar (no existe borrado físico).
+// 409 si el platillo está en una orden abierta.
+export const setProductStatus = (id, isAvailable) =>
+  api.patch(`/products/${id}/status`, { isAvailable });
+
+// Público (Home): no envía token
+export const getTopSellingProducts = () => api.get("/products/top-selling", { auth: false });

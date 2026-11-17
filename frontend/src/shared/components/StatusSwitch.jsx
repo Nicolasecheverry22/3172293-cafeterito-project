@@ -74,7 +74,7 @@ export default function StatusSwitch({
             ${sizes[size]}
             
             // Color dependiendo del estado
-            ${isActive ? "bg-green-500" : "bg-gray-300"}
+            ${isActive ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}
             
             // Estilo cuando está deshabilitado
             ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}

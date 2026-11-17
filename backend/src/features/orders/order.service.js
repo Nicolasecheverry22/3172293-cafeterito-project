@@ -1,33 +1,42 @@
 import { orderRepository } from "./order.repository.js";
+import { userRepository } from "../users/user.repository.js";
+import { httpError } from "../../utils/httpError.js";
+import { OPEN_ORDER_STATUSES, FINAL_ORDER_STATUSES, ORDER_TRANSITIONS } from "./order.constants.js";
 
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
+// La entrada llega validada por order.schema.js (mesa, items y cantidades enteras > 0,
+// estado válido). Aquí solo quedan las reglas de negocio que requieren la BD.
 
-const toPositiveInt = (value) => {
-  const n = Number(value);
-  return Number.isInteger(n) && n > 0 ? n : null;
-};
-
+// Un mismo platillo repetido en varias filas se consolida sumando cantidades.
 const mergeItems = (items) => {
   const byProduct = new Map();
-  for (const item of items) {
-    const productId = toPositiveInt(item.productId);
-    const quantity = toPositiveInt(item.quantity);
-    if (!productId || !quantity) {
-      throw httpError(400, "Cada platillo necesita un producto y una cantidad mayor a 0");
-    }
+  for (const { productId, quantity } of items) {
     byProduct.set(productId, (byProduct.get(productId) ?? 0) + quantity);
   }
   return [...byProduct].map(([productId, quantity]) => ({ productId, quantity }));
 };
 
-const VALID_STATUSES = ["activa", "pagada", "cancelada"];
-const normalizeObservations = (value) =>
-  typeof value === "string" ? value.trim().slice(0, 300) || null : null;
+// Precio vigente desde la BD (nunca el enviado por el cliente) y solo platillos habilitados.
+const priceNewItem = (item, productsById) => {
+  const product = productsById.get(item.productId);
+  if (!product) throw httpError(400, `El producto ${item.productId} no existe`);
+  if (!product.is_available) {
+    throw httpError(400, `El producto "${product.product_name}" no está disponible`);
+  }
+  return { ...item, unitPrice: product.price, dispatched: false };
+};
+
+// El mesero indicado debe existir y estar activo (H51).
+async function assertActiveWaiter(waiterId) {
+  const user = await userRepository.getById(waiterId);
+  if (!user || !user.is_active) {
+    throw httpError(400, "El empleado encargado no existe o está inactivo");
+  }
+}
 
 export const orderService = {
-  async getAll() {
-    return await orderRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await orderRepository.list(query);
   },
 
   async getById(id) {
@@ -35,89 +44,78 @@ export const orderService = {
   },
 
   async getReportData(tableNumber) {
-    const tableNum = tableNumber ? toPositiveInt(tableNumber) : null;
-    return await orderRepository.getReportData(tableNum);
+    return await orderRepository.getReportData(tableNumber ?? null);
   },
 
-  async create(data) {
-    const tableNumber = toPositiveInt(data.tableNumber);
-    if (!tableNumber) throw httpError(400, "Número de mesa inválido");
-
-    const waiterId = data.waiterId ? toPositiveInt(data.waiterId) : null;
-    if (data.waiterId && !waiterId) throw httpError(400, "Empleado encargado inválido");
-
-    if (!Array.isArray(data.items) || data.items.length === 0) {
-      throw httpError(400, "La orden debe tener al menos un platillo");
+  // currentUserId: usuario autenticado (req.user.id). Si no se indica mesero, es él.
+  async create({ tableNumber, waiterId, observations, items }, currentUserId) {
+    if (waiterId != null) {
+      await assertActiveWaiter(waiterId);
     }
 
-    const items = mergeItems(data.items);
-    const products = await orderRepository.getProductsByIds(items.map((i) => i.productId));
+    const merged = mergeItems(items);
+    const products = await orderRepository.getProductsByIds(merged.map((i) => i.productId));
     const productsById = new Map(products.map((p) => [p.id, p]));
+    const pricedItems = merged.map((item) => priceNewItem(item, productsById));
 
-    const pricedItems = items.map((item) => {
-      const product = productsById.get(item.productId);
-      if (!product) throw httpError(400, `El producto ${item.productId} no existe`);
-      if (!product.is_available) {
-        throw httpError(400, `El producto "${product.product_name}" no está disponible`);
-      }
-      return { ...item, unitPrice: product.price };
-    });
-
-    const observations = normalizeObservations(data.observations);
-    return await orderRepository.create({ tableNumber, waiterId, observations }, pricedItems);
-  },
-
-  async update(id, data) {
-    const current = await orderRepository.getById(id);
-    if (!current) return undefined;
-
-    const tableNumber = toPositiveInt(data.tableNumber);
-    if (!tableNumber) throw httpError(400, "Número de mesa inválido");
-
-    const waiterId = data.waiterId ? toPositiveInt(data.waiterId) : null;
-    if (data.waiterId && !waiterId) throw httpError(400, "Empleado encargado inválido");
-
-    const status = String(data.status ?? "").toLowerCase();
-    if (!VALID_STATUSES.includes(status)) {
-      throw httpError(400, `Estado inválido. Use: ${VALID_STATUSES.join(", ")}`);
-    }
-
-    if (!Array.isArray(data.items) || data.items.length === 0) {
-      throw httpError(400, "La orden debe tener al menos un platillo");
-    }
-
-    const items = mergeItems(data.items);
-    const previousByProduct = new Map(current.items.map((i) => [i.productId, i]));
-    const newIds = items.map((i) => i.productId).filter((pid) => !previousByProduct.has(pid));
-    const products = newIds.length ? await orderRepository.getProductsByIds(newIds) : [];
-    const productsById = new Map(products.map((p) => [p.id, p]));
-
-    const pricedItems = items.map((item) => {
-      const previous = previousByProduct.get(item.productId);
-      if (previous) {
-        return { ...item, unitPrice: previous.price, dispatched: previous.dispatched };
-      }
-      const product = productsById.get(item.productId);
-      if (!product) throw httpError(400, `El producto ${item.productId} no existe`);
-      if (!product.is_available) {
-        throw httpError(400, `El producto "${product.product_name}" no está disponible`);
-      }
-      return { ...item, unitPrice: product.price, dispatched: false };
-    });
-
-    return await orderRepository.update(
-      id,
-      { tableNumber, waiterId, status, observations: normalizeObservations(data.observations) },
+    return await orderRepository.create(
+      { tableNumber, waiterId: waiterId ?? currentUserId, observations: observations ?? null },
       pricedItems
     );
   },
 
-  async remove(id) {
+  async update(id, { tableNumber, waiterId, status, observations, items }, currentUserId) {
+    const current = await orderRepository.getById(id);
+    if (!current) return undefined;
+
+    // RFADMIN28: pagada y cancelada son estados finales
+    if (FINAL_ORDER_STATUSES.includes(current.status)) {
+      throw httpError(409, `No se puede modificar una orden en estado "${current.status}"`);
+    }
+    if (!ORDER_TRANSITIONS[current.status]?.includes(status)) {
+      throw httpError(409, `No se puede pasar una orden de "${current.status}" a "${status}"`);
+    }
+
+    // Si no se envía mesero se conserva el actual (o el usuario autenticado si no tenía).
+    // No se reasigna al usuario que edita: editar no debe cambiar quién atendió la mesa.
+    if (waiterId != null && waiterId !== current.waiterId) {
+      await assertActiveWaiter(waiterId);
+    }
+    const finalWaiterId = waiterId ?? current.waiterId ?? currentUserId;
+
+    const merged = mergeItems(items);
+    // Los platillos que ya estaban en la orden conservan su precio y estado de despacho
+    const previousByProduct = new Map(current.items.map((i) => [i.productId, i]));
+    const newIds = merged.map((i) => i.productId).filter((pid) => !previousByProduct.has(pid));
+    const products = newIds.length ? await orderRepository.getProductsByIds(newIds) : [];
+    const productsById = new Map(products.map((p) => [p.id, p]));
+
+    const pricedItems = merged.map((item) => {
+      const previous = previousByProduct.get(item.productId);
+      return previous
+        ? { ...item, unitPrice: previous.price, dispatched: previous.dispatched }
+        : priceNewItem(item, productsById);
+    });
+
+    const updated = await orderRepository.update(
+      id,
+      { tableNumber, waiterId: finalWaiterId, status, observations: observations ?? null },
+      pricedItems
+    );
+    // La orden existía pero pasó a un estado final mientras se editaba
+    if (!updated) throw httpError(409, "La orden cambió de estado; recargue e intente de nuevo");
+    return updated;
+  },
+
+  // Anular = pasar a "cancelada" (no hay borrado físico). Solo órdenes abiertas.
+  async cancel(id) {
     const order = await orderRepository.getById(id);
     if (!order) return null;
-    if (order.status === "pagada") {
-      throw httpError(409, "No se puede eliminar una orden que ya está pagada");
+    if (!OPEN_ORDER_STATUSES.includes(order.status)) {
+      throw httpError(409, `No se puede anular una orden en estado "${order.status}"`);
     }
-    return await orderRepository.remove(id);
+    const cancelled = await orderRepository.cancel(id);
+    if (!cancelled) throw httpError(409, "La orden cambió de estado; recargue e intente de nuevo");
+    return cancelled;
   },
 };

@@ -7,8 +7,7 @@ export function createEditProviderSchema() {
       nit: z
         .string({ required_error: "El NIT o número de documento es requerido" })
         .trim()
-        .min(5, "El NIT o documento debe tener mínimo 5 caracteres")
-        .max(20, "El NIT o documento es demasiado largo"),
+        .regex(/^\d{6,15}(-\d)?$/, "Documento inválido: 6 a 15 dígitos (el NIT puede llevar dígito de verificación, ej. 900123456-7)"),
 
       providerName: z
         .string({ required_error: "El nombre es requerido" })
@@ -24,7 +23,7 @@ export function createEditProviderSchema() {
       providerPhone: z
         .string({ required_error: "El teléfono es requerido" })
         .trim()
-        .regex(/^[0-9]{10}$/, "El teléfono debe tener exactamente 10 dígitos numéricos"),
+        .regex(/^\d{7,15}$/, "El teléfono debe tener entre 7 y 15 dígitos"),
 
       providerEmail: z
         .string({ required_error: "El correo es requerido" })

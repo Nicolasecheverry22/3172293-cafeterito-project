@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import InventoryRowActions from "../components/InventoryRowActions";
 
-export const getInventoryColumns = (sortConfig, onSort, onDeleted) => [
+export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "id",
     header: () => (
@@ -15,7 +15,7 @@ export const getInventoryColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "id" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -33,7 +33,7 @@ export const getInventoryColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "provisionName" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -102,17 +102,17 @@ export const getInventoryColumns = (sortConfig, onSort, onDeleted) => [
 
       // 3. Mapeo de clases de Tailwind según estado
       const statusStyles = {
-        activo: "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold",
-        disponible: "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold",
-        vencido: "bg-rose-100 text-rose-800 border-rose-300 font-semibold",
-        averia: "bg-amber-100 text-amber-800 border-amber-300 font-semibold",
-        agotado: "bg-gray-100 text-gray-800 border-gray-300 font-semibold",
+        activo: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700 font-semibold",
+        disponible: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700 font-semibold",
+        vencido: "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-700 font-semibold",
+        averia: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700 font-semibold",
+        agotado: "bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700 font-semibold",
       };
 
       return (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border capitalize ${
-            statusStyles[normalizedKey] || "bg-gray-100 text-gray-800 border-gray-200"
+            statusStyles[normalizedKey] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700"
           }`}
         >
           {rawStatus}
@@ -125,6 +125,6 @@ export const getInventoryColumns = (sortConfig, onSort, onDeleted) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <InventoryRowActions provision={row.original} onDeleted={onDeleted} />,
+    cell: ({ row }) => <InventoryRowActions provision={row.original} onChanged={onChanged} />,
   },
 ];

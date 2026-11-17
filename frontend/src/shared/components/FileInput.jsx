@@ -59,7 +59,7 @@ export default function FileInput({
       {value.length === 0 ? (
         <div
           onClick={() => !isLoading && inputRef.current?.click()}
-          className={`w-48 h-48 rounded-2xl bg-[#9E9E9E]/40 border-2 border-dashed border-border-strong flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-[#9E9E9E]/60 transition-all ${
+          className={`w-48 h-48 rounded-2xl bg-surface/40 border-2 border-dashed border-border-strong flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-surface/60 transition-all ${
             isLoading ? "opacity-70 pointer-events-none" : ""
           }`}
         >

@@ -3,7 +3,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { StatusSwitch } from "@/shared";
 import ProviderRowActions from "../components/ProviderRowActions";
 
-export const getProviderColumns = (sortConfig, onSort, onDeleted) => [
+export const getProviderColumns = (sortConfig, onSort, onChanged) => [
   // Columna NIT (Ordenable)
   {
     accessorKey: "nit",
@@ -17,7 +17,7 @@ export const getProviderColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "nit" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -36,7 +36,7 @@ export const getProviderColumns = (sortConfig, onSort, onDeleted) => [
         {sortConfig.key === "providerName" ? (
           sortConfig.direction === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />
         ) : (
-          <ArrowUpDown size={16} className="text-gray-400" />
+          <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
     ),
@@ -58,6 +58,9 @@ export const getProviderColumns = (sortConfig, onSort, onDeleted) => [
   {
     accessorKey: "is_active",
     header: "Estado",
+    meta: {
+      searchValue: (row) => ((row.is_active ?? row.isActive ?? true) ? "Activo" : "Inactivo"),
+    },
     cell: ({ row }) => {
       const provider = row.original;
 
@@ -85,7 +88,7 @@ export const getProviderColumns = (sortConfig, onSort, onDeleted) => [
     id: "actions",
     header: "Acciones",
     cell: ({ row }) => (
-      <ProviderRowActions provider={row.original} onDeleted={onDeleted} />
+      <ProviderRowActions provider={row.original} onChanged={onChanged} />
     ),
   },
 ];

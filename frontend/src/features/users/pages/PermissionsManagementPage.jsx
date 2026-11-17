@@ -22,7 +22,7 @@ import {
 } from "@/shared/services/alertService";
 
 const SELECT_CLASSES =
-  "w-full appearance-none bg-brand text-text-primary h-12 px-6 rounded-full font-bold outline-none cursor-pointer shadow-md hover:brightness-95 transition-all";
+  "w-full appearance-none bg-brand text-text-on-brand h-12 px-6 rounded-full font-bold outline-none cursor-pointer shadow-md hover:brightness-95 transition-all";
 
 // Agrupa el catálogo plano de permisos por módulo (content_type).
 const groupByModule = (permissions) => {
@@ -219,7 +219,7 @@ export default function PermissionsManagementPage() {
   };
 
   return (
-    <div className="bg-surface/40 backdrop-blur-md rounded-3xl p-6 md:p-4 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-4 border border-border/40 shadow-2xl">
       <div className="w-full px-6 md:px-12 pt-8">
         <div className="mx-auto">
           <div className="flex items-center gap-4 mb-8">

@@ -3,8 +3,6 @@ import { Input, Checkbox, Button } from "@/shared";
 import { Link } from "react-router-dom";
 import { loginSchema } from "../schemas/loginSchema";
 
-const MAX_LOGIN_ATTEMPTS = 3;
-
 export default function LoginForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     email: "", // 👈 Cambiado de username a email
@@ -12,7 +10,6 @@ export default function LoginForm({ onSubmit }) {
     rememberMe: false,
   });
   const [errors, setErrors] = useState({});
-  const [failedAttempts, setFailedAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,17 +40,10 @@ export default function LoginForm({ onSubmit }) {
 
     try {
       await onSubmit(result.data);
-      setFailedAttempts(0); 
     } catch (error) {
-      const attempts = failedAttempts + 1;
-      setFailedAttempts(attempts);
-
-      if (attempts >= MAX_LOGIN_ATTEMPTS) {
-        setIsLocked(true);
-        setErrors({ form: "Cuenta bloqueada por 3 intentos fallidos consecutivos." });
-      } else {
-        setErrors({ form: error.message || "Usuario o contraseña incorrectos." });
-      }
+      // El bloqueo lo decide el servidor (RNF11): 423 tras 3 intentos fallidos consecutivos.
+      if (error.status === 423) setIsLocked(true);
+      setErrors({ form: error.message || "Usuario o contraseña incorrectos." });
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +72,7 @@ export default function LoginForm({ onSubmit }) {
       />
 
       {errors.form && (
-        <p className="text-small text-red-500" role="alert">
+        <p className="text-small text-error" role="alert">
           {errors.form}
         </p>
       )}

@@ -14,10 +14,22 @@ export function createEditProvisionsSchema() {
         .trim()
         .min(1, "Debe seleccionar una categoría"),
 
-      status: z
-        .string({ required_error: "Debe seleccionar un estado" })
+      status: z.enum(["Disponible", "Vencido", "Avería", "Agotado"], {
+        message: "Debe seleccionar un estado válido",
+      }),
+
+      barcode: z
+        .string({ required_error: "El código de barras es requerido" })
         .trim()
-        .min(1, "Debe seleccionar un estado"),
+        .min(1, "El código de barras es requerido")
+        .max(50, "El código de barras es demasiado largo")
+        .regex(/^[0-9A-Za-z-]+$/, "El código de barras solo puede contener letras, números y guiones"),
+
+      expirationDate: z
+        .string()
+        .refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Fecha de vencimiento inválida")
+        .optional(),
+
 
       unit: z
         .string({ required_error: "Debe seleccionar una unidad de medida" })

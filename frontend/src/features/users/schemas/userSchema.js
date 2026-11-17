@@ -2,20 +2,31 @@ import { z } from "zod";
 import { fileSchema } from "../schemas/fileSchema";
 import { users as existingUsers } from "../data/users";
 
-const NAME_NO_DIGITS_REGEX = /^[^\d]*$/;
+// Alineado con el backend (user.schema.js): letras (con tildes y ñ) y espacios
+const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/;
 
 export function createUserSchema({ currentUserId = null } = {}) {
   return z
     .object({
       userName: z
         .string()
+        .trim()
         .min(3, "El nombre debe tener mínimo 3 caracteres")
-        .max(60, "El nombre es demasiado largo")
-        .regex(NAME_NO_DIGITS_REGEX, "El nombre no puede contener números"),
+        .max(100, "El nombre es demasiado largo")
+        .regex(NAME_REGEX, "El nombre solo puede contener letras y espacios"),
 
       userEmail: z.string().min(1, "El correo es requerido").email("Debe ingresar un correo válido"),
 
-      userPhone: z.string().regex(/^[0-9]{10}$/, "El teléfono debe tener 10 dígitos"),
+      userPhone: z.string().regex(/^\d{7,15}$/, "El teléfono debe tener entre 7 y 15 dígitos"),
+
+      // Opcional; si se ingresa: 10–100 caracteres (RFADMIN02)
+      address: z
+        .string()
+        .trim()
+        .refine((v) => v === "" || (v.length >= 10 && v.length <= 100), {
+          message: "La dirección debe tener entre 10 y 100 caracteres",
+        })
+        .optional(),
 
       userImage: fileSchema.shape.files.optional(),
 
@@ -23,12 +34,13 @@ export function createUserSchema({ currentUserId = null } = {}) {
 
       userDocumentNumber: z
         .string()
-        .min(5, "Número de documento inválido")
-        .max(20, "Número de documento demasiado largo"),
+        .regex(/^\d{1,15}$/, "El documento debe ser numérico y tener máximo 15 dígitos"),
 
+      // RNF10: 10–64 caracteres, mayúscula, minúscula, número y símbolo
       userPassword: z
         .string()
-        .min(8, "La contraseña debe tener mínimo 8 caracteres")
+        .min(10, "La contraseña debe tener mínimo 10 caracteres")
+        .max(64, "La contraseña debe tener máximo 64 caracteres")
         .regex(/[A-Z]/, "Debe contener al menos una mayúscula")
         .regex(/[a-z]/, "Debe contener al menos una minúscula")
         .regex(/[0-9]/, "Debe contener al menos un número")

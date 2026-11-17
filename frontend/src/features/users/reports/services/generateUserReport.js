@@ -1,4 +1,5 @@
 // Utilidad para transformar datos en dataset de reporte
+import { api } from "@/services/apiClient";
 import { buildReportDataset } from "../utils/buildReportDataset";
 
 // Servicios de exportación
@@ -13,19 +14,13 @@ export async function generateUserReport({
   documentNumber   // Filtro opcional
 }) {
   try {
-    let url = "http://localhost:4000/api/users/report-data";
+    // Si el alcance es por documento, se envía como query parameter
+    const query =
+      scope === "document" && documentNumber && documentNumber.trim() !== ""
+        ? { document: documentNumber.trim() }
+        : {};
 
-    // Si el alcance es por documento, se envía como Query Parameter de forma segura
-    if (scope === "document" && documentNumber && documentNumber.trim() !== "") {
-      url += `?document=${encodeURIComponent(documentNumber.trim())}`;
-    }
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Error al obtener los datos de los usuarios desde el servidor.");
-    }
-    
-    const users = await response.json();
+    const users = await api.get("/users/report-data", { query });
 
     // Validación: evita generar archivos vacíos
     if (!users || !users.length) {
