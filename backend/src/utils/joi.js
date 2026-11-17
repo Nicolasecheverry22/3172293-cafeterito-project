@@ -1,5 +1,4 @@
-// Instancia de Joi con mensajes en español. Los schemas de cada feature
-// deben importar Joi desde aquí (no directamente de "joi").
+
 import BaseJoi from "joi";
 
 const messages = {

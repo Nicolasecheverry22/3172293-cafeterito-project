@@ -1,9 +1,4 @@
-// Envío de correos con nodemailer, configurado por .env:
-//   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM
-//
-// Si SMTP no está configurado:
-//   - NODE_ENV !== "production": el mensaje se imprime en consola (desarrollo).
-//   - NODE_ENV === "production": no se envía y se registra un error.
+
 import nodemailer from "nodemailer";
 
 let transporter;

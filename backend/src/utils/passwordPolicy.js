@@ -1,10 +1,3 @@
-// Política de contraseñas (RNF10). Fuente única: la usan los schemas Joi
-// y database/seed-admin.js.
-//
-// Nota: RFADMIN01/02 hablan de 8–10 caracteres; se aplica RNF10 (mínimo 10)
-// porque es la regla más estricta. Máximo 64 para evitar hashes de entradas gigantes
-// (bcrypt solo considera los primeros 72 bytes).
-
 export const PASSWORD_MIN = 10;
 export const PASSWORD_MAX = 64;
 
