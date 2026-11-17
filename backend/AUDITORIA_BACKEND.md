@@ -279,3 +279,104 @@ npm test             # ejecuta la suite completa
 - **Órdenes bien diseñadas en creación:** transacción, precio tomado de la BD (ignora el del cliente), cantidades > 0, platillos habilitados, consolidación de ítems repetidos, índice único parcial `uq_orders_active_table` y `unit_price` histórico.
 - Transacciones en la creación/edición de usuarios con roles.
 - Arquitectura por features clara (routes → controller → service → repository).
+
+---
+
+## 6. Estado tras correcciones
+
+**Rama:** `fix/backend-audit-fixes` · **Fecha:** 2026-11-17 · Un commit por fase (8 fases + un commit inicial con este reporte y la suite).
+
+**Fuera de alcance por decisión del equipo (no implementado):** lógica interna de permisos (`requirePermission` no se aplicó a ninguna ruta; solo se exige token), bitácora/auditoría (RNF02), categorías de menú como tabla y descuento de stock al vender.
+
+Leyenda: **Corregido** · **Parcial** (corregido con salvedades, explicadas) · **Pendiente (fuera de alcance)**.
+
+| ID | Estado | Fase | Qué se hizo / qué falta |
+|----|--------|:----:|-------------------------|
+| H01 | Corregido | 1 | `authenticateToken` en todos los routers salvo `/api/auth` y `GET /api/products/top-selling`. |
+| H02 | Corregido | 1 | `userData` campo por campo; `isSuperuser` = grupo Administrador; `isActive` = true; `isStaff` = false. Joi además descarta los campos desconocidos. |
+| H03 | Corregido | 1 | Groups, permissions y los permisos de usuario exigen token. La autorización fina (`requirePermission`) queda fuera de alcance. |
+| H04 | Corregido | 1 | Eliminados los `console.log` del body y del usuario con hash (también el log de la nueva contraseña en `ResetPasswordPage` del frontend). |
+| H05 | Corregido | 1 | `error.middleware.js`: JSON malformado → 400 en JSON, 5xx genérico, detalle solo en consola. |
+| H06 | Corregido | 1, 4 | Códigos PG mapeados a mensajes genéricos; mensajes específicos por `err.constraint` (`withConstraintErrors`). |
+| H07 | Corregido | 1 | Handler 404 en JSON. |
+| H08 | Corregido | 8 | `CORS_ORIGIN` (lista separada por comas). Frontend: `VITE_API_URL` + `apiClient`, sin URLs hardcodeadas. |
+| H09 | Corregido | 7 | `helmet` + `express-rate-limit` en login y recuperación; `x-powered-by` deshabilitado. |
+| H10 | Parcial | 1 | `dotenv/config` primero, validación de variables al arrancar, `nodemon` en devDependencies. **Falta (acción manual):** regenerar `JWT_SECRET` con ≥ 64 bytes aleatorios en cada `.env`. |
+| H11 | Corregido | 3 | `validate.middleware.js` + un `*.schema.js` por feature, con mensajes en español. |
+| H12 | Corregido | 2 | `schema_migrations`, una transacción por archivo, parada en el primer error y modo `--baseline` para bases existentes. |
+| H13 | Parcial | 2 | `0028` es re-ejecutable (`ON CONFLICT`). Su `DELETE` de roles se mantuvo (por instrucción) y quedó documentado en `database/README.md`. |
+| H14 | Corregido | 4, 8 | `user_address` (10–100) en `0031`; el formulario de alta ya envía la dirección. |
+| H15 | Corregido | 4 | `document_type` con CHECK, `nit` NOT NULL + UNIQUE (la migración se detiene si hay nulos o duplicados). |
+| H16 | Corregido | 4, 8 | `barcode` único (rellenado `INV-<id>`), `expiration_date`, `provider_id` FK. Formularios de inventario con código de barras y vencimiento. |
+| H17 | Parcial | 4 | `price > 0`, `is_available` NOT NULL, nombre único por categoría (sin distinguir mayúsculas). La categoría sigue como texto (tabla de categorías fuera de alcance). |
+| H18 | Corregido | 4 | Estados normalizados (`Activo`→`Disponible`, `Averia`→`Avería`) y CHECKs de estado y stock. |
+| H19 | Corregido | 4 | Flags NOT NULL con DEFAULT. Los NULL heredados se rellenaron con su valor efectivo (`is_active` NULL → FALSE, porque ya impedía el login). |
+| H20 | Pendiente (fuera de alcance) | — | Sin `audit_log` ni `created_by`/`updated_by`. |
+| H21 | Corregido | 1 | `npm run seed:admin` (valida RNF10; no duplica). |
+| H22 | Parcial | 2 | Nombres raros documentados en `database/README.md`; no se renombraron (no se editan migraciones aplicadas). |
+| H23 | Corregido | 7 | 3 intentos fallidos → bloqueo de 15 min y 423; un login correcto reinicia el contador; reactivar al usuario desbloquea. |
+| H24 | Parcial | 7, 8 | `JWT_EXPIRES=10m`, `POST /api/auth/refresh` y renovación por actividad en el frontend; cierre a los 10 min de inactividad. **Falta:** logout con revocación del token en el servidor (no se pidió; el logout limpia la sesión del cliente y el token vence en ≤ 10 min). |
+| H25 | Corregido | 7, 8 | forgot / verify / reset con código de 6 dígitos (el flujo que ya tenía el frontend): HMAC, 15 min, un solo uso, invalida los anteriores, máx. 5 intentos; respuesta idéntica exista o no el correo. Pantallas del frontend conectadas. |
+| H26 | Corregido | 3 | Login con Joi: faltan datos → 400. |
+| H27 | Corregido | 7 | El middleware rechaza tokens de usuarios inactivos o bloqueados y valida el esquema `Bearer`. |
+| H28 | Corregido | 3, 8 | RNF10 (10–64, mayúscula, minúscula, número, símbolo) en Joi, en `seed-admin` y en los schemas Zod. Se aplicó RNF10 sobre RFADMIN01/02 (8–10). |
+| H29 | Corregido | 3 | Formatos de usuario validados (backend y frontend alineados). |
+| H30 | Corregido | 3, 4 | Correo `trim().toLowerCase()` al crear, editar y en el login; índice único `lower(user_email)`. |
+| H31 | Parcial | 4 | Backend: `user_personal_email` opcional y distinto del empresarial (Joi + CHECK). **Falta:** campo en el formulario del frontend. |
+| H32 | Corregido | 5 | Sin `DELETE`; `PATCH /api/users/:id/status`. |
+| H33 | Corregido | 8 | Orden alfabético (collation ICU es), `?search&isActive`, paginación opcional. |
+| H34 | Corregido | 3 | Grupo inexistente o inactivo → 400 y ROLLBACK; Administrador → `is_superuser` al crear. |
+| H35 | Corregido | 3 | `:id` validado (entero positivo) → 400. |
+| H36 | Corregido | 3 | Validación completa en el alta de platillos. |
+| H37 | Corregido | 4 | Índice único por categoría → 409 con mensaje claro. |
+| H38 | Corregido | 5 | `PATCH /api/products/:id/status`; 409 si el platillo está en una orden abierta (RFADMIN24). |
+| H39 | Parcial | 8 | Filtros y paginación en el servidor (`?category&search&isAvailable`). Backend de categorías fuera de alcance. |
+| H40 | Corregido | 3, 4 | Validación de inventario + lote único por insumo. |
+| H41 | Corregido | 4, 8 | Un solo catálogo de estados en BD, backend y frontend. |
+| H42 | Pendiente (fuera de alcance) | — | Sin vínculo menú ↔ inventario ni descuento de stock ni alertas de mínimo. |
+| H43 | Corregido | 5 | `PATCH /api/inventory/:id/status`. |
+| H44 | Corregido | 3, 8 | Tipo de documento sin TI, NIT con dígito de verificación, correo válido (backend y frontend). |
+| H45 | Parcial | 4, 5 | Backend: FK `inventory.provider_id` y regla RFADMIN18 (proveedor inactivo → 400). **Falta:** selector de proveedor en el formulario de inventario (la edición conserva el proveedor asignado). |
+| H46 | Corregido | 5 | `PATCH /api/providers/:id/status`. |
+| H47 | Corregido | 8 | `?search&nit&documentType&isActive`, paginación opcional. |
+| H48 | Corregido | 6 | Matriz de transiciones; pagada/cancelada son finales (409), con protección ante cambios concurrentes. |
+| H49 | Corregido | 5 | `PATCH /api/orders/:id/cancel` solo para órdenes abiertas; sin `DELETE`. |
+| H50 | Corregido | 4, 6, 8 | Estado `lista para entrega` en BD, backend y frontend; cuenta como orden abierta de la mesa. |
+| H51 | Corregido | 6 | `waiterId` por defecto = usuario autenticado; si se envía, debe ser un usuario activo. (`created_by`/`updated_by` forman parte de la auditoría, fuera de alcance.) |
+| H52 | Corregido | 8 | `?status&tableNumber&from&to`, más recientes primero, paginación opcional. |
+| H53 | Corregido | 4, 6 | Mensajes según `err.constraint`; el resto va al middleware global. |
+| H54 | Pendiente (fuera de alcance) | — | Bitácora RNF02. |
+| H55 | Parcial | 1, 8 | Los endpoints `/report-data` exigen token y el frontend los consume con `apiClient`. **Falta:** permiso `report_*` (fuera de alcance) y filtros por fecha. |
+| H56 | Corregido | 1, 3 | `utils/httpError.js`; las validaciones manuales se reemplazaron por Joi. |
+
+**Totales (56):** 44 Corregido · 9 Parcial · 3 Pendiente (fuera de alcance).
+
+### Resultado de las pruebas tras las correcciones
+
+| Momento | Pruebas | Pasan | Fallan |
+|---------|--------:|------:|-------:|
+| Auditoría inicial | 99 | 30 | 69 |
+| Fase 1 — seguridad básica | 99 | 52 | 47 |
+| Fase 2 — migraciones | 99 | 52 | 47 |
+| Fase 3 — validación Joi | 99 | 70 | 29 |
+| Fase 4 — esquema 0031–0037 | 101 | 79 | 22 |
+| Fase 5 — sin borrado físico | 110 | 93 | 17 |
+| Fase 6 — reglas de órdenes | 112 | 99 | 13 |
+| Fase 7 — autenticación | 130 | 121 | 9 |
+| **Fase 8 — listados / CORS / frontend** | **135** | **131** | **4** |
+
+Las 4 que siguen fallando corresponden a puntos fuera de alcance: logout con revocación (H24), backend de categorías de menú (H39) y las dos de bitácora RNF02 (H20/H54).
+
+Ajustes de pruebas por **cambios de contrato intencionales** (ninguna aserción se relajó):
+
+- El admin de pruebas se crea directamente en la BD con `seed-admin.js` y las demás peticiones usan su token (las rutas ahora exigen autenticación).
+- "Usuario inactivo no puede iniciar sesión": se desactiva con `PATCH /:id/status`, porque el alta ya no acepta `isActive` del cliente (H02).
+- Datos de prueba: nombres de usuario solo con letras (regla nueva del nombre) e inventario con `barcode` (ahora obligatorio).
+- "Orden pagada/cancelada NO se puede eliminar" → "NO se puede anular (`PATCH /:id/cancel`)", porque ya no existe `DELETE`.
+- Se agregaron 36 pruebas nuevas: estados, RFADMIN18/24, transiciones, bloqueo, refresh, recuperación de contraseña, rate limiting, listados y paginación.
+
+Frontend: `npm run build` ✔. `npm run lint`: 11 errores y 3 advertencias, **todos previos a este trabajo** (al empezar eran 12 errores; se corrigió uno: el `Link` sin uso del Home). No se introdujo ningún error nuevo.
+
+```bash
+cd backend && npm run test:setup && npm test
+```
