@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.js";
+import { OPEN_ORDER_STATUSES } from "./order.constants.js";
 
 const ORDER_SELECT = `
   SELECT
@@ -141,10 +142,13 @@ export const orderRepository = {
     }
   },
 
-  async remove(id) {
+  // Anula la orden solo si sigue abierta (la condición en el WHERE evita carreras).
+  async cancel(id) {
     const result = await pool.query(
-      "DELETE FROM orders WHERE id = $1 RETURNING id",
-      [id]
+      `UPDATE orders SET status = 'cancelada', updated_at = NOW()
+       WHERE id = $1 AND status = ANY($2::text[])
+       RETURNING id, status`,
+      [id, OPEN_ORDER_STATUSES]
     );
     return result.rows[0];
   },

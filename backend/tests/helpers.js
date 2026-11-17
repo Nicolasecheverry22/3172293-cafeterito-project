@@ -124,9 +124,9 @@ export async function createUser(overrides = {}) {
 // Desactiva un usuario como lo haría un administrador (el alta ya no acepta isActive del cliente)
 export async function deactivateUser(user) {
   const { token } = await adminToken();
-  const res = await api("PUT", `/api/users/${user.id}`, {
+  const res = await api("PATCH", `/api/users/${user.id}/status`, {
     token,
-    body: { ...user.payload, isActive: false },
+    body: { isActive: false },
   });
   if (res.status !== 200) throw new Error(`No se pudo desactivar: ${res.status} ${res.text}`);
 }

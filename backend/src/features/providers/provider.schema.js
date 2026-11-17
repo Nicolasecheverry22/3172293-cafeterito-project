@@ -36,6 +36,11 @@ export const providerSchema = Joi.object({
   isActive: Joi.boolean().default(true).label("El estado"),
 });
 
+// PATCH /api/providers/:id/status
+export const providerStatusSchema = Joi.object({
+  isActive: Joi.boolean().required().label("El estado"),
+});
+
 export const providerReportQuery = Joi.object({
   nit: Joi.string().trim().max(30).empty("").label("El NIT"),
 });

@@ -12,6 +12,7 @@ router.get("/report-data", validate({ query: orderReportQuery }), orderControlle
 router.get("/:id", validate({ params: idParam }), orderController.getById);
 router.post("/", validate({ body: createOrderSchema }), orderController.create);
 router.put("/:id", validate({ params: idParam, body: updateOrderSchema }), orderController.update);
-router.delete("/:id", validate({ params: idParam }), orderController.remove);
+// Sin borrado físico: anular = estado "cancelada" (RFADMIN29)
+router.patch("/:id/cancel", validate({ params: idParam }), orderController.cancel);
 
 export default router;

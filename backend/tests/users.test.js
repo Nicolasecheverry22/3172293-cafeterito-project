@@ -187,6 +187,21 @@ describe("USUARIOS — validaciones", () => {
 });
 
 describe("USUARIOS — reglas de negocio", () => {
+  test("[RFADMIN05] PATCH /:id/status deshabilita y habilita (fila conservada)", async () => {
+    const u = await createUser();
+    const off = await api("PATCH", `/api/users/${u.id}/status`, { token: admin.token, body: { isActive: false } });
+    assert.equal(off.status, 200);
+    assert.equal(off.body.isActive, false);
+    const on = await api("PATCH", `/api/users/${u.id}/status`, { token: admin.token, body: { isActive: true } });
+    assert.equal(on.body.isActive, true);
+  });
+
+  test("[RFADMIN05] un usuario no puede desactivarse a sí mismo -> 400", async () => {
+    const res = await api("PATCH", `/api/users/${admin.id}/status`, { token: admin.token, body: { isActive: false } });
+    assert.equal(res.status, 400);
+  });
+
+
   test("[RFADMIN05] no existe borrado físico (DELETE no elimina la fila)", async () => {
     const u = await createUser();
     await api("DELETE", `/api/users/${u.id}`, { token: admin.token });

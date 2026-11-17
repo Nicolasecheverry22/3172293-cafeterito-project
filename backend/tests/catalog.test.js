@@ -243,3 +243,66 @@ describe("PROVEEDORES", () => {
     assert.equal(list.length, 1, "?nit no filtra en GET /api/providers");
   });
 });
+
+// ───────────────────── CAMBIO DE ESTADO (fase 5: sin borrado físico) ─────────────────────
+describe("CAMBIO DE ESTADO (PATCH /:id/status)", () => {
+  test("[RFADMIN24] inhabilitar y habilitar un platillo -> 200", async () => {
+    const created = await api("POST", "/api/products", { token, body: dish() });
+    const id = created.body.productId;
+    const off = await api("PATCH", `/api/products/${id}/status`, { token, body: { isAvailable: false } });
+    assert.equal(off.status, 200);
+    assert.equal(off.body.isAvailable, false);
+    const on = await api("PATCH", `/api/products/${id}/status`, { token, body: { isAvailable: true } });
+    assert.equal(on.body.isAvailable, true);
+  });
+
+  test("[RFADMIN24] no se puede inhabilitar un platillo que está en una orden abierta -> 409", async () => {
+    const created = await api("POST", "/api/products", { token, body: dish() });
+    const id = created.body.productId;
+    const ord = await api("POST", "/api/orders", {
+      token,
+      body: { tableNumber: 990, items: [{ productId: id, quantity: 1 }] },
+    });
+    assert.equal(ord.status, 201, ord.text);
+    const res = await api("PATCH", `/api/products/${id}/status`, { token, body: { isAvailable: false } });
+    assert.equal(res.status, 409);
+    // Tampoco por el PUT completo
+    const put = await api("PUT", `/api/products/${id}`, { token, body: dish({ isAvailable: false }) });
+    assert.equal(put.status, 409);
+  });
+
+  test("[RFADMIN17] inhabilitar proveedor -> 200 y la fila se conserva", async () => {
+    const created = await api("POST", "/api/providers", { token, body: provider() });
+    const id = created.body.providerId;
+    const res = await api("PATCH", `/api/providers/${id}/status`, { token, body: { isActive: false } });
+    assert.equal(res.status, 200);
+    const { rows } = await pool.query("SELECT is_active FROM providers WHERE id=$1", [id]);
+    assert.equal(rows[0].is_active, false);
+  });
+
+  test("[RFADMIN18] no se puede asignar un proveedor inactivo a un insumo nuevo o editado -> 400", async () => {
+    const active = await api("POST", "/api/providers", { token, body: provider() });
+    const inactive = await api("POST", "/api/providers", { token, body: provider() });
+    await api("PATCH", `/api/providers/${inactive.body.providerId}/status`, { token, body: { isActive: false } });
+
+    const bad = await api("POST", "/api/inventory", { token, body: supply({ providerId: inactive.body.providerId }) });
+    assert.equal(bad.status, 400);
+
+    const ok = await api("POST", "/api/inventory", { token, body: supply({ providerId: active.body.providerId }) });
+    assert.equal(ok.status, 201, ok.text);
+    const edit = await api("PUT", `/api/inventory/${ok.body.inventoryId}`, {
+      token, body: supply({ providerId: inactive.body.providerId }),
+    });
+    assert.equal(edit.status, 400);
+  });
+
+  test("[RFADMIN10] cambiar estado de insumo -> 200; estado inválido -> 400", async () => {
+    const created = await api("POST", "/api/inventory", { token, body: supply() });
+    const id = created.body.inventoryId;
+    const ok = await api("PATCH", `/api/inventory/${id}/status`, { token, body: { status: "Avería" } });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.status, "Avería");
+    const bad = await api("PATCH", `/api/inventory/${id}/status`, { token, body: { status: "Borrado" } });
+    assert.equal(bad.status, 400);
+  });
+});

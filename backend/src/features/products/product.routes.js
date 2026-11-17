@@ -2,7 +2,7 @@ import { Router } from "express";
 import { productController } from "./product.controller.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import { idParam } from "../../utils/joi.js";
-import { productSchema, productReportQuery } from "./product.schema.js";
+import { productSchema, productStatusSchema, productReportQuery } from "./product.schema.js";
 
 // Montado en app.js bajo /api/products con authenticateToken.
 // GET /api/products/top-selling es público y se registra directamente en app.js.
@@ -13,6 +13,7 @@ router.get("/report-data", validate({ query: productReportQuery }), productContr
 router.get("/:id", validate({ params: idParam }), productController.getById);
 router.post("/", validate({ body: productSchema }), productController.create);
 router.put("/:id", validate({ params: idParam, body: productSchema }), productController.update);
-router.delete("/:id", validate({ params: idParam }), productController.remove);
+// Sin borrado físico: solo habilitar/inhabilitar (RFADMIN24)
+router.patch("/:id/status", validate({ params: idParam, body: productStatusSchema }), productController.updateStatus);
 
 export default router;

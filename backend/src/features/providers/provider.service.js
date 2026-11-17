@@ -14,8 +14,9 @@ export const providerService = {
   async update(id, data) {
     return await providerRepository.update(id, data);
   },
-  async remove(id) {
-    return await providerRepository.remove(id);
+  // Habilitar/inhabilitar (no hay borrado físico, RFADMIN17)
+  async setStatus(id, isActive) {
+    return await providerRepository.setStatus(id, isActive);
   },
   async getReportData(nit) {
     return await providerRepository.getReportData(nit);

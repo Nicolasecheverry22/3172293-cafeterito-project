@@ -77,8 +77,11 @@ export const inventoryRepository = {
     return result.rows[0];
   },
 
-  async remove(id) {
-    const result = await pool.query("DELETE FROM inventory WHERE id = $1 RETURNING id", [id]);
+  async setStatus(id, status) {
+    const result = await pool.query(
+      "UPDATE inventory SET status = $2 WHERE id = $1 RETURNING id, status",
+      [id, status]
+    );
     return result.rows[0];
   },
 };

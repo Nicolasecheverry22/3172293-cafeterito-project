@@ -133,18 +133,37 @@ describe("ÓRDENES", () => {
     assert.equal(res.status, 409);
   });
 
-  test("[RFADMIN29] orden pagada NO se puede eliminar -> 409", async () => {
+  // Contrato fase 5: anular = PATCH /:id/cancel (ya no existe DELETE)
+  test("[RFADMIN29] orden pagada NO se puede anular (PATCH cancel) -> 409", async () => {
     const created = await createOrder(order());
     await setStatus(created.body.orderId, "pagada");
-    const res = await api("DELETE", `/api/orders/${created.body.orderId}`, { token });
+    const res = await api("PATCH", `/api/orders/${created.body.orderId}/cancel`, { token });
     assert.equal(res.status, 409);
   });
 
-  test("[RFADMIN29] orden cancelada NO se puede eliminar (historial) -> 409", async () => {
+  test("[RFADMIN29] orden cancelada NO se puede anular de nuevo (PATCH cancel) -> 409", async () => {
     const created = await createOrder(order());
-    await setStatus(created.body.orderId, "cancelada");
-    const res = await api("DELETE", `/api/orders/${created.body.orderId}`, { token });
+    await api("PATCH", `/api/orders/${created.body.orderId}/cancel`, { token });
+    const res = await api("PATCH", `/api/orders/${created.body.orderId}/cancel`, { token });
     assert.equal(res.status, 409);
+  });
+
+  test("[RFADMIN29] anular orden activa -> 200, queda cancelada y libera la mesa", async () => {
+    const t = nextTable();
+    const created = await createOrder(order({ tableNumber: t }));
+    const res = await api("PATCH", `/api/orders/${created.body.orderId}/cancel`, { token });
+    assert.equal(res.status, 200);
+    const detail = await api("GET", `/api/orders/${created.body.orderId}`, { token });
+    assert.equal(detail.body.status, "cancelada");
+    const again = await createOrder(order({ tableNumber: t }));
+    assert.equal(again.status, 201);
+  });
+
+  test("[RFADMIN29] DELETE de órdenes ya no existe (sin borrado físico)", async () => {
+    const created = await createOrder(order());
+    await api("DELETE", `/api/orders/${created.body.orderId}`, { token });
+    const { rowCount } = await pool.query("SELECT 1 FROM orders WHERE id=$1", [created.body.orderId]);
+    assert.equal(rowCount, 1);
   });
 
   test("[RFADMIN30] estado 'lista para entrega' es aceptado", async () => {

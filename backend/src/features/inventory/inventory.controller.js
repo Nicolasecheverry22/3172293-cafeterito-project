@@ -42,11 +42,16 @@ export const inventoryController = {
     res.json({ message: "Suministro actualizado correctamente", inventoryId: updated.id });
   }),
 
-  remove: withInventoryErrors(async (req, res) => {
-    const deleted = await inventoryService.remove(Number(req.params.id));
-    if (!deleted) {
+  // PATCH /api/inventory/:id/status  { status }
+  updateStatus: withInventoryErrors(async (req, res) => {
+    const updated = await inventoryService.setStatus(Number(req.params.id), req.body.status);
+    if (!updated) {
       return res.status(404).json({ error: "Suministro no encontrado" });
     }
-    res.json({ message: "Suministro eliminado correctamente", inventoryId: deleted.id });
+    res.json({
+      message: "Estado del suministro actualizado correctamente",
+      inventoryId: updated.id,
+      status: updated.status,
+    });
   }),
 };

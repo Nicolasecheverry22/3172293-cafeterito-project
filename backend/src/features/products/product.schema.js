@@ -10,6 +10,11 @@ export const productSchema = Joi.object({
   isAvailable: Joi.boolean().default(true).label("El estado"),
 });
 
+// PATCH /api/products/:id/status
+export const productStatusSchema = Joi.object({
+  isAvailable: Joi.boolean().required().label("El estado"),
+});
+
 export const productReportQuery = Joi.object({
   category: Joi.string().trim().max(100).empty("").label("La categoría"),
 });

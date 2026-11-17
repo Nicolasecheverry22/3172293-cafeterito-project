@@ -34,6 +34,11 @@ export const inventorySchema = Joi.object({
   providerId: Joi.number().integer().positive().empty("").allow(null).label("El proveedor"),
 });
 
+// PATCH /api/inventory/:id/status
+export const inventoryStatusSchema = Joi.object({
+  status: Joi.string().trim().valid(...INVENTORY_STATUSES).required().label("El estado"),
+});
+
 export const inventoryReportQuery = Joi.object({
   category: Joi.string().trim().max(100).empty("").label("La categoría"),
   status: Joi.string().trim().max(30).empty("").label("El estado"),

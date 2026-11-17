@@ -60,6 +60,11 @@ export const updateUserSchema = Joi.object({
   isActive: Joi.boolean().label("El estado"),
 });
 
+// PATCH /api/users/:id/status
+export const userStatusSchema = Joi.object({
+  isActive: Joi.boolean().required().label("El estado"),
+});
+
 export const userReportQuery = Joi.object({
   document: Joi.string().trim().pattern(/^\d{1,15}$/).empty("").label("El documento"),
 });

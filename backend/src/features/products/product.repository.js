@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.js";
+import { OPEN_ORDER_STATUSES } from "../orders/order.constants.js";
 
 // Consultas SQL del recurso products (platillos del menú).
 export const productRepository = {
@@ -73,12 +74,26 @@ export const productRepository = {
     return result.rows[0];
   },
 
-  async remove(id) {
+  async setAvailability(id, isAvailable) {
     const result = await pool.query(
-      "DELETE FROM products WHERE id = $1 RETURNING id",
-      [id]
+      `UPDATE products SET is_available = $2 WHERE id = $1
+       RETURNING id, is_available AS "isAvailable"`,
+      [id, isAvailable]
     );
     return result.rows[0];
+  },
+
+  // ¿El platillo está en alguna orden abierta (activa o lista para entrega)?
+  async isInOpenOrder(id) {
+    const result = await pool.query(
+      `SELECT EXISTS (
+         SELECT 1 FROM order_items oi
+         JOIN orders o ON o.id = oi.order_id
+         WHERE oi.product_id = $1 AND o.status = ANY($2::text[])
+       ) AS "inUse"`,
+      [id, OPEN_ORDER_STATUSES]
+    );
+    return result.rows[0].inUse;
   },
 
   async getTopSelling() {

@@ -76,8 +76,11 @@ export const providerRepository = {
     return result.rows[0];
   },
 
-  async remove(id) {
-    const result = await pool.query("DELETE FROM providers WHERE id = $1 RETURNING id", [id]);
+  async setStatus(id, isActive) {
+    const result = await pool.query(
+      "UPDATE providers SET is_active = $2 WHERE id = $1 RETURNING id, is_active",
+      [id, isActive]
+    );
     return result.rows[0];
   },
 };

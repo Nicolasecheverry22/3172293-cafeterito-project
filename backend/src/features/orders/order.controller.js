@@ -38,11 +38,12 @@ export const orderController = {
     res.json({ message: "Orden actualizada correctamente", orderId: updated.id });
   }),
 
-  remove: withOrderErrors(async (req, res) => {
-    const deleted = await orderService.remove(Number(req.params.id));
-    if (!deleted) {
+  // PATCH /api/orders/:id/cancel — anular (el frontend pide confirmación antes)
+  cancel: withOrderErrors(async (req, res) => {
+    const cancelled = await orderService.cancel(Number(req.params.id));
+    if (!cancelled) {
       return res.status(404).json({ error: "Orden no encontrada" });
     }
-    res.json({ message: "Orden eliminada correctamente", orderId: deleted.id });
+    res.json({ message: "Orden anulada correctamente", orderId: cancelled.id, status: cancelled.status });
   }),
 };

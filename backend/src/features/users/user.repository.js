@@ -168,6 +168,8 @@ async updateWithGroups(id, userData, groupNames) {
             `UPDATE users
              SET user_name = $1, user_email = $2, user_phone = $3,
                  user_document_types = $4, user_document_number = $5,
+                 failed_login_attempts = CASE WHEN $6 IS TRUE AND is_active = FALSE THEN 0 ELSE failed_login_attempts END,
+                 locked_until = CASE WHEN $6 IS TRUE AND is_active = FALSE THEN NULL ELSE locked_until END,
                  is_active = COALESCE($6, is_active), is_superuser = $7,
                  user_address = $8, user_personal_email = $9
              WHERE id = $10
@@ -313,12 +315,17 @@ async getById(id) {
     return result.rows[0];
 },
 
-// Elimina un usuario por su id. Las filas en user_groups/user_permissions
-// se eliminan en cascada por las llaves foráneas ON DELETE CASCADE.
-async remove(id) {
+// Habilita/deshabilita un usuario (no existe borrado físico, RFADMIN05).
+// Al reactivarlo se reinicia el bloqueo por intentos fallidos (RNF11).
+async setStatus(id, isActive) {
     const result = await pool.query(
-        "DELETE FROM users WHERE id = $1 RETURNING id",
-        [id]
+        `UPDATE users
+         SET is_active = $2,
+             failed_login_attempts = CASE WHEN $2 THEN 0 ELSE failed_login_attempts END,
+             locked_until          = CASE WHEN $2 THEN NULL ELSE locked_until END
+         WHERE id = $1
+         RETURNING id, is_active`,
+        [id, isActive]
     );
     return result.rows[0];
 }

@@ -3,7 +3,6 @@ import { withConstraintErrors } from "../../utils/constraintErrors.js";
 
 const withProductErrors = withConstraintErrors({
   uq_products_category_name: [409, "Ya existe un platillo con ese nombre en la misma categoría"],
-  fk_order_items_product: [409, "No se puede eliminar un platillo que ya fue vendido"],
 });
 
 // Los errores (httpError o de BD) se propagan al middleware global de errores.
@@ -41,12 +40,17 @@ export const productController = {
     res.json({ message: "Producto actualizado correctamente", productId: updated.id });
   }),
 
-  remove: withProductErrors(async (req, res) => {
-    const deleted = await productService.remove(Number(req.params.id));
-    if (!deleted) {
+  // PATCH /api/products/:id/status  { isAvailable }
+  updateStatus: withProductErrors(async (req, res) => {
+    const updated = await productService.setAvailability(Number(req.params.id), req.body.isAvailable);
+    if (!updated) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
-    res.json({ message: "Producto eliminado correctamente", productId: deleted.id });
+    res.json({
+      message: updated.isAvailable ? "Platillo habilitado correctamente" : "Platillo inhabilitado correctamente",
+      productId: updated.id,
+      isAvailable: updated.isAvailable,
+    });
   }),
 
   // Público (montado en app.js sin autenticación): lo consume el Home

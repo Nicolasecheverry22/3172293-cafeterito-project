@@ -1,5 +1,6 @@
 import { orderRepository } from "./order.repository.js";
 import { httpError } from "../../utils/httpError.js";
+import { OPEN_ORDER_STATUSES } from "./order.constants.js";
 
 // La entrada llega validada por order.schema.js (mesa, items y cantidades enteras > 0,
 // estado válido). Aquí solo quedan las reglas de negocio que requieren la BD.
@@ -73,12 +74,15 @@ export const orderService = {
     );
   },
 
-  async remove(id) {
+  // Anular = pasar a "cancelada" (no hay borrado físico). Solo órdenes abiertas.
+  async cancel(id) {
     const order = await orderRepository.getById(id);
     if (!order) return null;
-    if (order.status === "pagada") {
-      throw httpError(409, "No se puede eliminar una orden que ya está pagada");
+    if (!OPEN_ORDER_STATUSES.includes(order.status)) {
+      throw httpError(409, `No se puede anular una orden en estado "${order.status}"`);
     }
-    return await orderRepository.remove(id);
+    const cancelled = await orderRepository.cancel(id);
+    if (!cancelled) throw httpError(409, "La orden cambió de estado; recargue e intente de nuevo");
+    return cancelled;
   },
 };

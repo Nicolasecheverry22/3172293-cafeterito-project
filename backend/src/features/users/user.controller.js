@@ -49,12 +49,17 @@ export const userController = {
     }
   },
 
-  async remove(req, res) {
-    const deleted = await userService.remove(Number(req.params.id));
-    if (!deleted) {
+  // PATCH /api/users/:id/status  { isActive }
+  async updateStatus(req, res) {
+    const updated = await userService.setStatus(Number(req.params.id), req.body.isActive, req.user.id);
+    if (!updated) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
-    res.json({ message: "Usuario eliminado correctamente", userId: deleted.id });
+    res.json({
+      message: updated.is_active ? "Usuario habilitado correctamente" : "Usuario deshabilitado correctamente",
+      userId: updated.id,
+      isActive: updated.is_active,
+    });
   },
 
   // Permisos del usuario (directos + heredados de grupos)

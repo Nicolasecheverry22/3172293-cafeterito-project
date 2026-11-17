@@ -54,8 +54,12 @@ export const userService = {
     return await userRepository.getById(id);
   },
 
-  async remove(id) {
-    return await userRepository.remove(id);
+  // Habilitar/deshabilitar (no hay borrado físico). Un usuario no puede desactivarse a sí mismo.
+  async setStatus(id, isActive, currentUserId) {
+    if (!isActive && id === currentUserId) {
+      throw httpError(400, "No puede desactivar su propia cuenta");
+    }
+    return await userRepository.setStatus(id, isActive);
   },
 
   async getPermissions(userId) {
