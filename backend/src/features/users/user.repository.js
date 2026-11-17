@@ -46,42 +46,48 @@ async create(userData, db = pool) {
     const{
         userName,
         userEmail,
+        userPersonalEmail,
         userPhone,
         userDocumentTypes,
         userDocumentNumber,
+        userAddress,
         userPassword,
         userAvatarUrl,
         isStaff,
         isActive,
         isSuperuser,
-    } = userData; 
+    } = userData;
 
     const query= `
     INSERT INTO users(
     user_name,
     user_email,
+    user_personal_email,
     user_phone,
     user_document_types,
     user_document_number,
+    user_address,
     user_password,
     user_avatar_url,
     is_staff,
     is_active,
     is_superuser
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     RETURNING id;
     `
-    // Array de valores que pasan al query 
-    // El orden debe de coincidir exactamente con los placeholders del sql 
+    // Array de valores que pasan al query
+    // El orden debe de coincidir exactamente con los placeholders del sql
     const values = [
         userName,
         userEmail,
+        userPersonalEmail ?? null,
         userPhone,
         userDocumentTypes,
         userDocumentNumber,
+        userAddress ?? null,
         userPassword,
-        userAvatarUrl,
+        userAvatarUrl ?? null,
         isStaff,
         isActive,
         isSuperuser,
@@ -144,9 +150,11 @@ async updateWithGroups(id, userData, groupNames) {
     const {
         userName,
         userEmail,
+        userPersonalEmail,
         userPhone,
         userDocumentTypes,
         userDocumentNumber,
+        userAddress,
         isActive,
         isSuperuser,
     } = userData;
@@ -160,10 +168,14 @@ async updateWithGroups(id, userData, groupNames) {
             `UPDATE users
              SET user_name = $1, user_email = $2, user_phone = $3,
                  user_document_types = $4, user_document_number = $5,
-                 is_active = COALESCE($6, is_active), is_superuser = $7
-             WHERE id = $8
+                 is_active = COALESCE($6, is_active), is_superuser = $7,
+                 user_address = $8, user_personal_email = $9
+             WHERE id = $10
              RETURNING id`,
-            [userName, userEmail, userPhone, userDocumentTypes, userDocumentNumber, isActive ?? null, isSuperuser, id]
+            [
+                userName, userEmail, userPhone, userDocumentTypes, userDocumentNumber,
+                isActive ?? null, isSuperuser, userAddress ?? null, userPersonalEmail ?? null, id,
+            ]
         );
 
         if (!rows[0]) {
@@ -284,6 +296,8 @@ async getById(id) {
         user_phone           AS "userPhone",
         user_document_types  AS "userDocumentTypes",
         user_document_number AS "userDocument",
+        user_address         AS "userAddress",
+        user_personal_email  AS "userPersonalEmail",
         user_avatar_url      AS "userAvatarUrl",
         is_superuser,
         is_staff,

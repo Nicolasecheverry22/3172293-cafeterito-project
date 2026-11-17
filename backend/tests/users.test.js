@@ -165,6 +165,21 @@ describe("USUARIOS — validaciones", () => {
     assert.equal(res.status, 400);
   });
 
+  test("[RFADMIN02] dirección fuera de 10–100 caracteres -> 400; válida se guarda", async () => {
+    const bad = await post(userPayload({ userAddress: "Corta" }));
+    assert.equal(bad.status, 400);
+    const ok = await post(userPayload({ userAddress: "Calle 10 # 20-30, Cali" }));
+    assert.equal(ok.status, 201);
+    const res = await api("GET", `/api/users/${ok.body.userId}`, { token: admin.token });
+    assert.equal(res.body.userAddress, "Calle 10 # 20-30, Cali");
+  });
+
+  test("[RFADMIN02] correo personal igual al empresarial -> 400", async () => {
+    const p = userPayload();
+    const res = await post({ ...p, userPersonalEmail: p.userEmail.toUpperCase() });
+    assert.equal(res.status, 400);
+  });
+
   test("[RFADMIN04] id no numérico -> 400 (no 500)", async () => {
     const res = await api("GET", "/api/users/abc", { token: admin.token });
     assert.equal(res.status, 400);

@@ -53,4 +53,12 @@ export const DETECTORS = {
   "0029_create_orders_tables.sql": `${table("orders")} AND ${table("order_items")} AND ${index("uq_orders_active_table")}`,
   "0030_seed_permissions_modules.sql": `EXISTS (SELECT 1 FROM content_type WHERE app_label = 'providers')
       AND EXISTS (SELECT 1 FROM permissions WHERE permission_codename = 'delete_order')`,
+  "0031_fix_users_columns.sql": `${column("users", "user_personal_email")} AND ${index("uq_users_email_lower")}`,
+  "0032_auth_lockout.sql": `${column("users", "failed_login_attempts")} AND ${column("users", "locked_until")}`,
+  "0033_password_reset_tokens.sql": table("password_reset_tokens"),
+  "0034_fix_providers.sql": `${column("providers", "document_type")} AND ${constraint("uq_providers_nit")}`,
+  "0035_fix_inventory.sql": `${column("inventory", "barcode")} AND ${constraint("fk_inventory_provider")}`,
+  "0036_fix_products.sql": `${constraint("chk_products_price")} AND ${index("uq_products_category_name")}`,
+  "0037_order_status_ready.sql": `EXISTS (SELECT 1 FROM pg_constraint
+      WHERE conname = 'chk_orders_status' AND pg_get_constraintdef(oid) LIKE '%lista para entrega%')`,
 };

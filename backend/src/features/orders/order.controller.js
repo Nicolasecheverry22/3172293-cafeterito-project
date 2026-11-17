@@ -1,25 +1,11 @@
 import { orderService } from "./order.service.js";
-import { httpError } from "../../utils/httpError.js";
+import { withConstraintErrors } from "../../utils/constraintErrors.js";
 
-// Traduce las violaciones de constraints propias de órdenes a mensajes claros
-// según err.constraint. Cualquier otro error sigue hacia el middleware global.
-const translateOrderError = (err) => {
-  if (err.code === "23505" && err.constraint === "uq_orders_active_table") {
-    return httpError(409, "Esta mesa ya tiene una orden activa");
-  }
-  if (err.code === "23503" && err.constraint === "fk_orders_waiter") {
-    return httpError(400, "El empleado encargado no existe");
-  }
-  return err;
-};
-
-const withOrderErrors = (handler) => async (req, res) => {
-  try {
-    await handler(req, res);
-  } catch (err) {
-    throw translateOrderError(err);
-  }
-};
+// Mensajes según err.constraint; cualquier otro error sigue al middleware global (H53).
+const withOrderErrors = withConstraintErrors({
+  uq_orders_active_table: [409, "Esta mesa ya tiene una orden abierta"],
+  fk_orders_waiter: [400, "El empleado encargado no existe"],
+});
 
 export const orderController = {
   getAll: withOrderErrors(async (req, res) => {
