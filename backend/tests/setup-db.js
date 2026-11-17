@@ -1,9 +1,8 @@
 // Recrea desde cero la base de PRUEBAS y aplica todas las migraciones.
 // Uso: npm run test:setup
 //
-// Se recrea (DROP + migrate) porque database/migrate.js no lleva registro de las
-// migraciones aplicadas y 0028_update_groups_roles.sql no es idempotente:
-// una segunda ejecución sobre la misma base falla.
+// Se recrea (DROP + migrate) para que cada corrida parta de un esquema y datos
+// conocidos (seeds de las migraciones), sin restos de corridas anteriores.
 //
 // SEGURIDAD: solo actúa sobre bases cuyo nombre termina en "_test".
 
