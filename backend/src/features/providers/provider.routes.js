@@ -1,15 +1,17 @@
 import { Router } from "express";
 import { providerController } from "./provider.controller.js";
+import { validate } from "../../middlewares/validate.middleware.js";
+import { idParam } from "../../utils/joi.js";
+import { providerSchema, providerReportQuery } from "./provider.schema.js";
 
+// Montado en app.js bajo /api/providers con authenticateToken.
 const router = Router();
 
 router.get("/", providerController.getAll);
-
-router.get("/report-data", providerController.getReportData);
-
-router.get("/:id", providerController.getById);
-router.post("/", providerController.create);
-router.put("/:id", providerController.update);
-router.delete("/:id", providerController.remove);
+router.get("/report-data", validate({ query: providerReportQuery }), providerController.getReportData);
+router.get("/:id", validate({ params: idParam }), providerController.getById);
+router.post("/", validate({ body: providerSchema }), providerController.create);
+router.put("/:id", validate({ params: idParam, body: providerSchema }), providerController.update);
+router.delete("/:id", validate({ params: idParam }), providerController.remove);
 
 export default router;

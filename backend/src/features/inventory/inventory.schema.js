@@ -1,0 +1,40 @@
+// Validación de entrada del feature inventory (suministros, RFADMIN08–12).
+import { Joi, isoDate } from "../../utils/joi.js";
+
+export const INVENTORY_STATUSES = ["Disponible", "Vencido", "Avería", "Agotado"];
+
+// Usado en POST (crear) y PUT (actualizar).
+export const inventorySchema = Joi.object({
+  provisionName: Joi.string().trim().min(2).max(120).required().label("El nombre"),
+  category: Joi.string().trim().min(1).max(100).required().label("La categoría"),
+  unit: Joi.string().trim().min(1).max(20).required().label("La unidad"),
+  stock: Joi.number().integer().min(0).required().label("El stock"),
+  price: Joi.number().positive().precision(2).max(9999999999).required().label("El precio"),
+  batch: Joi.string()
+    .trim()
+    .max(50)
+    .pattern(/^[0-9A-Za-z-]+$/, { name: "solo puede contener letras, números y guiones" })
+    .required()
+    .label("El lote"),
+  minStock: Joi.number().integer().min(0).required().label("El stock mínimo"),
+  maxStock: Joi.number()
+    .integer()
+    .min(Joi.ref("minStock"))
+    .required()
+    .label("El stock máximo")
+    .messages({ "number.min": "{{#label}} no puede ser inferior al stock mínimo" }),
+  status: Joi.string().trim().valid(...INVENTORY_STATUSES).required().label("El estado"),
+  barcode: Joi.string()
+    .trim()
+    .max(50)
+    .pattern(/^[0-9A-Za-z-]+$/, { name: "solo puede contener letras, números y guiones" })
+    .required()
+    .label("El código de barras"),
+  expirationDate: isoDate().empty("").allow(null).label("La fecha de vencimiento"),
+  providerId: Joi.number().integer().positive().empty("").allow(null).label("El proveedor"),
+});
+
+export const inventoryReportQuery = Joi.object({
+  category: Joi.string().trim().max(100).empty("").label("La categoría"),
+  status: Joi.string().trim().max(30).empty("").label("El estado"),
+});

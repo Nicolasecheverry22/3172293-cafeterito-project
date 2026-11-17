@@ -110,6 +110,7 @@ const supply = (o = {}) => ({
   minStock: 2,
   maxStock: 50,
   status: "Disponible",
+  barcode: `TEST-${uid()}`,
   ...o,
 });
 

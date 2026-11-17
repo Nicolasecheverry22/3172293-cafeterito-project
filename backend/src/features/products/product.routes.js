@@ -1,15 +1,18 @@
 import { Router } from "express";
 import { productController } from "./product.controller.js";
+import { validate } from "../../middlewares/validate.middleware.js";
+import { idParam } from "../../utils/joi.js";
+import { productSchema, productReportQuery } from "./product.schema.js";
 
 // Montado en app.js bajo /api/products con authenticateToken.
 // GET /api/products/top-selling es público y se registra directamente en app.js.
 const router = Router();
 
 router.get("/", productController.getAll);
-router.get("/report-data", productController.getReportData);
-router.get("/:id", productController.getById);
-router.post("/", productController.create);
-router.put("/:id", productController.update);
-router.delete("/:id", productController.remove);
+router.get("/report-data", validate({ query: productReportQuery }), productController.getReportData);
+router.get("/:id", validate({ params: idParam }), productController.getById);
+router.post("/", validate({ body: productSchema }), productController.create);
+router.put("/:id", validate({ params: idParam, body: productSchema }), productController.update);
+router.delete("/:id", validate({ params: idParam }), productController.remove);
 
 export default router;

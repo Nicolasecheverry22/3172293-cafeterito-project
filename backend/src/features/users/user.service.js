@@ -5,72 +5,45 @@ import bcrypt from "bcrypt";
 
 const ADMIN_GROUP = "Administrador";
 
-// Limpia la lista de grupos que llega del frontend: solo strings no vacíos, sin duplicados.
-const normalizeGroupNames = (groupNames) => {
-  if (!Array.isArray(groupNames)) return [];
-  return [
-    ...new Set(
-      groupNames
-        .filter((name) => typeof name === "string")
-        .map((name) => name.trim())
-        .filter(Boolean)
-    ),
-  ];
-};
-
+// La entrada llega validada y normalizada por user.schema.js
+// (correo en minúsculas, documento/teléfono numéricos, contraseña RNF10, ≥ 1 grupo).
 export const userService = {
   async createUser(data) {
-    if (typeof data.userPassword !== "string" || data.userPassword.length === 0) {
-      throw httpError(400, "La contraseña es obligatoria");
-    }
-
-    const groupNames = normalizeGroupNames(data.groupNames);
-    if (groupNames.length === 0) {
-      throw httpError(400, "Debe seleccionar al menos un tipo de usuario");
-    }
-
     // userData se arma campo por campo: los flags de privilegios NUNCA vienen del cliente.
     const userData = {
       userName: data.userName,
-      userEmail: typeof data.userEmail === "string" ? data.userEmail.trim().toLowerCase() : data.userEmail,
+      userEmail: data.userEmail,
+      userPersonalEmail: data.userPersonalEmail ?? null,
       userPhone: data.userPhone,
       userDocumentTypes: data.userDocumentTypes,
       userDocumentNumber: data.userDocumentNumber,
+      userAddress: data.userAddress ?? null,
       userPassword: await bcrypt.hash(data.userPassword, 10),
       userAvatarUrl: data.userAvatarUrl ?? null,
       isStaff: false,
       isActive: true,
       // El rol Administrador = superusuario (mismo criterio que al editar)
-      isSuperuser: groupNames.includes(ADMIN_GROUP),
+      isSuperuser: data.groupNames.includes(ADMIN_GROUP),
     };
 
-    return await userRepository.createWithGroups(userData, groupNames);
+    return await userRepository.createWithGroups(userData, data.groupNames);
   },
 
   async updateUser(id, data) {
-    const requireText = (value, field) => {
-      if (typeof value !== "string" || value.trim() === "") {
-        throw httpError(400, `El campo ${field} es obligatorio`);
-      }
-      return value.trim();
-    };
-
-    const groupNames = normalizeGroupNames(data.groupNames);
-    if (groupNames.length === 0) {
-      throw httpError(400, "Debe seleccionar al menos un tipo de usuario");
-    }
-
     const userData = {
-      userName: requireText(data.userName, "nombre"),
-      userEmail: requireText(data.userEmail, "correo").toLowerCase(),
-      userPhone: requireText(data.userPhone, "teléfono"),
-      userDocumentTypes: requireText(data.userDocumentTypes, "tipo de documento"),
-      userDocumentNumber: requireText(data.userDocumentNumber, "número de documento"),
-      isActive: Boolean(data.isActive),
-      isSuperuser: groupNames.includes(ADMIN_GROUP),
+      userName: data.userName,
+      userEmail: data.userEmail,
+      userPersonalEmail: data.userPersonalEmail ?? null,
+      userPhone: data.userPhone,
+      userDocumentTypes: data.userDocumentTypes,
+      userDocumentNumber: data.userDocumentNumber,
+      userAddress: data.userAddress ?? null,
+      // undefined → se conserva el estado actual
+      isActive: data.isActive,
+      isSuperuser: data.groupNames.includes(ADMIN_GROUP),
     };
 
-    return await userRepository.updateWithGroups(id, userData, groupNames);
+    return await userRepository.updateWithGroups(id, userData, data.groupNames);
   },
 
   async getAll() {

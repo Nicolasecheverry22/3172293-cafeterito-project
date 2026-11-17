@@ -7,7 +7,7 @@ export const authRepository = {
     const query = `
     SELECT id, user_email, user_password, is_active
     FROM users
-    WHERE user_email = $1
+    WHERE lower(user_email) = $1
     LIMIT 1;
     `;
 

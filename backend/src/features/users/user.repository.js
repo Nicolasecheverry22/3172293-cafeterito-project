@@ -2,6 +2,7 @@
 //  Easste pool es una instancia  ompartida configurada en la capad de la insfraestructura 
 
 import { pool } from "../../config/db.js";
+import { httpError } from "../../utils/httpError.js";
 
 // Nombres de los grupos (roles) del usuario como arreglo: ["Caja", "Mesero"]
 const USER_GROUPS_SUBQUERY = `
@@ -11,6 +12,26 @@ const USER_GROUPS_SUBQUERY = `
         INNER JOIN groups g ON g.group_id = ug.group_id
         WHERE ug.user_id = users.id
     ), '{}')`;
+
+// Asigna los grupos (roles) al usuario dentro de la transacción del llamador.
+// Si algún nombre no existe o el grupo está inactivo → 400 (el llamador hace ROLLBACK).
+async function assignGroups(client, userId, groupNames) {
+    const { rows } = await client.query(
+        `INSERT INTO user_groups (user_id, group_id)
+         SELECT $1, g.group_id
+         FROM groups g
+         WHERE g.group_name = ANY($2::text[])
+           AND g.is_active = TRUE
+         ON CONFLICT (user_id, group_id) DO NOTHING
+         RETURNING (SELECT group_name FROM groups WHERE group_id = user_groups.group_id) AS group_name`,
+        [userId, groupNames]
+    );
+    const assigned = new Set(rows.map((r) => r.group_name));
+    const invalid = groupNames.filter((name) => !assigned.has(name));
+    if (invalid.length > 0) {
+        throw httpError(400, `Tipos de usuario inexistentes o inactivos: ${invalid.join(", ")}`);
+    }
+}
 
 // Exportamos el repositorio de usuarios
 // El repositorio encpasula todas las consultas SQL relacionadas con users.
@@ -105,18 +126,7 @@ async createWithGroups(userData, groupNames) {
 
         const created = await this.create(userData, client);
 
-        if (groupNames.length > 0) {
-            // Resuelve los nombres a group_id directamente en SQL (un solo INSERT).
-            await client.query(
-                `INSERT INTO user_groups (user_id, group_id)
-                 SELECT $1, g.group_id
-                 FROM groups g
-                 WHERE g.group_name = ANY($2::text[])
-                   AND g.is_active = TRUE
-                 ON CONFLICT (user_id, group_id) DO NOTHING`,
-                [created.id, groupNames]
-            );
-        }
+        await assignGroups(client, created.id, groupNames);
 
         await client.query("COMMIT");
         return created;
@@ -150,10 +160,10 @@ async updateWithGroups(id, userData, groupNames) {
             `UPDATE users
              SET user_name = $1, user_email = $2, user_phone = $3,
                  user_document_types = $4, user_document_number = $5,
-                 is_active = $6, is_superuser = $7
+                 is_active = COALESCE($6, is_active), is_superuser = $7
              WHERE id = $8
              RETURNING id`,
-            [userName, userEmail, userPhone, userDocumentTypes, userDocumentNumber, isActive, isSuperuser, id]
+            [userName, userEmail, userPhone, userDocumentTypes, userDocumentNumber, isActive ?? null, isSuperuser, id]
         );
 
         if (!rows[0]) {
@@ -162,14 +172,7 @@ async updateWithGroups(id, userData, groupNames) {
         }
 
         await client.query("DELETE FROM user_groups WHERE user_id = $1", [id]);
-        await client.query(
-            `INSERT INTO user_groups (user_id, group_id)
-             SELECT $1, g.group_id
-             FROM groups g
-             WHERE g.group_name = ANY($2::text[])
-               AND g.is_active = TRUE`,
-            [id, groupNames]
-        );
+        await assignGroups(client, id, groupNames);
 
         await client.query("COMMIT");
         return rows[0];

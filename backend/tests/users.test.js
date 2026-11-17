@@ -43,7 +43,7 @@ describe("USUARIOS — camino feliz", () => {
     const u = await createUser();
     const res = await api("PUT", `/api/users/${u.id}`, {
       token: admin.token,
-      body: { ...u.payload, userName: `${PREFIX}Editado`, groupNames: ["Mesero"] },
+      body: { ...u.payload, userName: "Test Editado", groupNames: ["Mesero"] },
     });
     assert.equal(res.status, 200);
   });
@@ -180,8 +180,8 @@ describe("USUARIOS — reglas de negocio", () => {
   });
 
   test("[RFADMIN03] listado ordenado alfabéticamente por nombre", async () => {
-    await createUser({ userName: `${PREFIX}zzz` });
-    await createUser({ userName: `${PREFIX}aaa` });
+    await createUser({ userName: "Test zzz" });
+    await createUser({ userName: "Test aaa" });
     const res = await api("GET", "/api/users", { token: admin.token });
     const list = Array.isArray(res.body) ? res.body : res.body.data;
     const names = list.map((u) => u.userName);

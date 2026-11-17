@@ -70,11 +70,13 @@ export async function api(method, path, { body, token, raw } = {}) {
 let seq = 0;
 // Genera datos únicos por ejecución
 export const uid = () => `${Date.now().toString().slice(-7)}${++seq}`;
+// Versión solo con letras (los nombres de usuario no admiten dígitos ni "_")
+export const letters = (s) => String(s).replace(/\d/g, (d) => "abcdefghij"[d]);
 
 export function userPayload(overrides = {}) {
   const id = uid();
   return {
-    userName: `${PREFIX}Usuario ${id}`,
+    userName: `Test Usuario ${letters(id)}`,
     userEmail: `test_${id}@cafeterito.test`,
     userPhone: "3001234567",
     userDocumentTypes: "CC",
