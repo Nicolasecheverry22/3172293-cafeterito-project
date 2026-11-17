@@ -1,7 +1,6 @@
 import { providerRepository } from "./provider.repository.js";
+import { httpError } from "../../utils/httpError.js";
 
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
 
 const requireText = (value, field) => {
   if (typeof value !== "string" || value.trim() === "") {

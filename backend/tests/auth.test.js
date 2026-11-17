@@ -4,7 +4,7 @@
 import { test, describe, before, after } from "node:test";
 import assert from "node:assert/strict";
 import {
-  startServer, stopServer, cleanup, api, createUser, login, pool, decodeJwt,
+  startServer, stopServer, cleanup, api, createUser, login, pool, decodeJwt, deactivateUser,
 } from "./helpers.js";
 
 before(startServer);
@@ -66,7 +66,8 @@ describe("AUTH", () => {
   });
 
   test("[RFADMIN05] usuario inactivo no puede iniciar sesión", async () => {
-    const inactive = await createUser({ isActive: false });
+    const inactive = await createUser();
+    await deactivateUser(inactive);
     const res = await login(inactive.email, inactive.password);
     assert.ok([401, 403].includes(res.status), `status ${res.status}`);
   });

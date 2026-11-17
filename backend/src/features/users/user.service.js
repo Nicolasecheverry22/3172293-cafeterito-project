@@ -1,10 +1,9 @@
 import { userRepository } from "./user.repository.js";
 import { normalizePermissionIds } from "../permissions/permissions.service.js";
+import { httpError } from "../../utils/httpError.js";
 import bcrypt from "bcrypt";
 
-// Error con código HTTP para que el controller responda 400/404 en lugar de 500.
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
+const ADMIN_GROUP = "Administrador";
 
 // Limpia la lista de grupos que llega del frontend: solo strings no vacíos, sin duplicados.
 const normalizeGroupNames = (groupNames) => {
@@ -26,16 +25,23 @@ export const userService = {
     }
 
     const groupNames = normalizeGroupNames(data.groupNames);
-
     if (groupNames.length === 0) {
       throw httpError(400, "Debe seleccionar al menos un tipo de usuario");
     }
 
-    const hashedPassword = await bcrypt.hash(data.userPassword, 10);
-
+    // userData se arma campo por campo: los flags de privilegios NUNCA vienen del cliente.
     const userData = {
-      ...data,
-      userPassword: hashedPassword,
+      userName: data.userName,
+      userEmail: typeof data.userEmail === "string" ? data.userEmail.trim().toLowerCase() : data.userEmail,
+      userPhone: data.userPhone,
+      userDocumentTypes: data.userDocumentTypes,
+      userDocumentNumber: data.userDocumentNumber,
+      userPassword: await bcrypt.hash(data.userPassword, 10),
+      userAvatarUrl: data.userAvatarUrl ?? null,
+      isStaff: false,
+      isActive: true,
+      // El rol Administrador = superusuario (mismo criterio que al editar)
+      isSuperuser: groupNames.includes(ADMIN_GROUP),
     };
 
     return await userRepository.createWithGroups(userData, groupNames);
@@ -61,8 +67,7 @@ export const userService = {
       userDocumentTypes: requireText(data.userDocumentTypes, "tipo de documento"),
       userDocumentNumber: requireText(data.userDocumentNumber, "número de documento"),
       isActive: Boolean(data.isActive),
-      // Mismo criterio que en el registro: el rol Administrador = superusuario
-      isSuperuser: groupNames.includes("Administrador"),
+      isSuperuser: groupNames.includes(ADMIN_GROUP),
     };
 
     return await userRepository.updateWithGroups(id, userData, groupNames);
@@ -87,8 +92,10 @@ export const userService = {
     return await userRepository.getPermissionsByUserId(userId);
   },
 
-  async getReportData(documentNumber) { return await userRepository.getByDocument(documentNumber); },
-  
+  async getReportData(documentNumber) {
+    return await userRepository.getByDocument(documentNumber);
+  },
+
   async updatePermissions(userId, permissionIds) {
     const ids = normalizePermissionIds(permissionIds);
     if (!ids) throw httpError(400, "permissionIds debe ser un arreglo de ids numéricos");

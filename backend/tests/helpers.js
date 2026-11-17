@@ -86,25 +86,51 @@ export function userPayload(overrides = {}) {
   };
 }
 
-// Crea un usuario por la API y devuelve { id, email, password }
+// Administrador de pruebas: se crea DIRECTO en la BD con database/seed-admin.js
+// (una vez por proceso) y se reutiliza su token en las demás peticiones.
+let adminPromise;
+export function adminToken() {
+  adminPromise ??= (async () => {
+    const id = uid();
+    const email = `test_admin_${id}@cafeterito.test`;
+    const { seedAdmin } = await import("../database/seed-admin.js");
+    const { id: userId } = await seedAdmin({
+      email,
+      password: STRONG_PASSWORD,
+      name: `${PREFIX}Admin ${id}`,
+      database: TEST_DB,
+      log: () => {},
+    });
+    const res = await login(email, STRONG_PASSWORD);
+    if (!res.body?.token) throw new Error(`Login del admin de pruebas falló: ${res.status} ${res.text}`);
+    return { id: userId, email, password: STRONG_PASSWORD, token: res.body.token };
+  })();
+  return adminPromise;
+}
+
+// Crea un usuario por la API (con el token del admin) y devuelve { id, email, password }
 export async function createUser(overrides = {}) {
   const payload = userPayload(overrides);
-  const res = await api("POST", "/api/users", { body: payload });
+  const { token } = await adminToken();
+  const res = await api("POST", "/api/users", { body: payload, token });
   if (res.status !== 201) {
     throw new Error(`No se pudo crear el usuario de prueba: ${res.status} ${res.text}`);
   }
   return { id: res.body.userId, email: payload.userEmail, password: payload.userPassword, payload };
 }
 
-export async function login(email, password) {
-  return api("POST", "/api/auth/login", { body: { email, password } });
+// Desactiva un usuario como lo haría un administrador (el alta ya no acepta isActive del cliente)
+export async function deactivateUser(user) {
+  const { token } = await adminToken();
+  const res = await api("PUT", `/api/users/${user.id}`, {
+    token,
+    body: { ...user.payload, isActive: false },
+  });
+  if (res.status !== 200) throw new Error(`No se pudo desactivar: ${res.status} ${res.text}`);
 }
 
-// Usuario administrador de pruebas con token (para cuando las rutas se protejan)
-export async function adminToken() {
-  const admin = await createUser({ groupNames: ["Administrador"] });
-  const res = await login(admin.email, admin.password);
-  return { ...admin, token: res.body?.token };
+export async function login(email, password) {
+  return api("POST", "/api/auth/login", { body: { email, password } });
 }
 
 // Borra TODO lo creado por la suite (orden importa por las FK).

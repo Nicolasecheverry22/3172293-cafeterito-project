@@ -4,41 +4,36 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { authRepository } from "./auth.repository.js";
+import { httpError } from "../../utils/httpError.js";
+
+const INVALID_CREDENTIALS = "Credenciales inválidas";
 
 export const authService = {
   async login({ email, password }) {
     const user = await authRepository.findByEmail(email);
 
-console.log("USER ENCONTRADO:", user);
+    if (!user) {
+      throw httpError(401, INVALID_CREDENTIALS);
+    }
 
-if (!user) {
-  throw new Error("Credenciales inválidas");
-}
+    const isMatch = await bcrypt.compare(password, user.user_password);
+    if (!isMatch) {
+      throw httpError(401, INVALID_CREDENTIALS);
+    }
 
-const isMatch = await bcrypt.compare(password, user.user_password);
-// const isMatch = password === user.password;
+    if (!user.is_active) {
+      throw httpError(401, "Usuario inactivo");
+    }
 
-if (!isMatch) {
-  throw new Error("Credenciales inválidas");
-}
+    const token = jwt.sign(
+      { id: user.id, email: user.user_email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES }
+    );
 
-
-if (!user.is_active) {
-  throw new Error("Usuario inactivo");
-}
-
-const token = jwt.sign(
-  { id: user.id, email: user.user_email },
-  process.env.JWT_SECRET,
-  { expiresIn: process.env.JWT_EXPIRES },
-);
-
-return {
-  token,
-  user: {
-    id: user.id,
-    email: user.user_email,
-}
-}
-}
-}
+    return {
+      token,
+      user: { id: user.id, email: user.user_email },
+    };
+  },
+};

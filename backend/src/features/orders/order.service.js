@@ -1,7 +1,6 @@
 import { orderRepository } from "./order.repository.js";
+import { httpError } from "../../utils/httpError.js";
 
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
 
 const toPositiveInt = (value) => {
   const n = Number(value);

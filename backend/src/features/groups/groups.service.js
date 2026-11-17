@@ -2,9 +2,8 @@
 
 import { groupsRepository } from "./groups.repository.js";
 import { normalizePermissionIds } from "../permissions/permissions.service.js";
+import { httpError } from "../../utils/httpError.js";
 
-const httpError = (statusCode, message) =>
-  Object.assign(new Error(message), { statusCode });
 
 export const groupsService = {
   async getAll() {
