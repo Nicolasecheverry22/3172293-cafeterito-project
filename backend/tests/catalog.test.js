@@ -306,3 +306,40 @@ describe("CAMBIO DE ESTADO (PATCH /:id/status)", () => {
     assert.equal(bad.status, 400);
   });
 });
+
+// ───────────────────── LISTADOS (fase 8) ─────────────────────
+describe("LISTADOS: filtros y paginación opcional", () => {
+  test("sin page/limit responde un array (compatibilidad con el frontend)", async () => {
+    const res = await api("GET", "/api/providers", { token });
+    assert.ok(Array.isArray(res.body));
+  });
+
+  test("con page y limit responde { data, total, page, limit }", async () => {
+    const res = await api("GET", "/api/products?page=1&limit=5", { token });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.page, 1);
+    assert.equal(res.body.limit, 5);
+    assert.ok(res.body.data.length <= 5);
+    assert.ok(res.body.total >= res.body.data.length);
+  });
+
+  test("límite fuera de rango -> 400", async () => {
+    const res = await api("GET", "/api/products?page=1&limit=1000", { token });
+    assert.equal(res.status, 400);
+  });
+
+  test("?search filtra en el servidor y escapa comodines", async () => {
+    const body = provider();
+    await api("POST", "/api/providers", { token, body });
+    const hit = await api("GET", `/api/providers?search=${encodeURIComponent(body.providerName)}`, { token });
+    assert.equal(hit.body.length, 1);
+    const none = await api("GET", "/api/providers?search=%25%25%25", { token });
+    assert.equal(none.body.length, 0, "'%%%' no debe actuar como comodín");
+  });
+
+  test("inventario ?status filtra por estado", async () => {
+    const res = await api("GET", "/api/inventory?status=Vencido", { token });
+    assert.ok(res.body.length > 0);
+    assert.ok(res.body.every((i) => i.status === "Vencido"));
+  });
+});

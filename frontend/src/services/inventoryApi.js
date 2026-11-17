@@ -1,44 +1,16 @@
 // Llamadas al API del backend para el inventario (suministros).
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { api } from "./apiClient";
 
-export async function getInventory() {
-  const res = await fetch(`${API_URL}/inventory`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar el inventario`);
-  return res.json();
-}
+// Estados permitidos (deben coincidir con el backend: inventory.schema.js)
+export const INVENTORY_STATUSES = ["Disponible", "Vencido", "Avería", "Agotado"];
 
-export async function getInventoryItem(id) {
-  const res = await fetch(`${API_URL}/inventory/${id}`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar el suministro`);
-  return res.json();
-}
+export const getInventory = (query) => api.get("/inventory", { query });
 
-export async function createInventoryItem(payload) {
-  const res = await fetch(`${API_URL}/inventory`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al crear el suministro`);
-  return data;
-}
+export const getInventoryItem = (id) => api.get(`/inventory/${id}`);
 
-export async function deleteInventoryItem(id) {
-  const res = await fetch(`${API_URL}/inventory/${id}`, { method: "DELETE" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al eliminar el suministro`);
-  return data;
-}
+export const createInventoryItem = (payload) => api.post("/inventory", payload);
 
-// Actualiza el suministro en la base de datos (PUT /api/inventory/:id).
-export async function updateInventoryItem(id, payload) {
-  const res = await fetch(`${API_URL}/inventory/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al actualizar el suministro`);
-  return data;
-}
+export const updateInventoryItem = (id, payload) => api.put(`/inventory/${id}`, payload);
+
+// PATCH /api/inventory/:id/status — cambio de estado (no existe borrado físico)
+export const setInventoryStatus = (id, status) => api.patch(`/inventory/${id}/status`, { status });

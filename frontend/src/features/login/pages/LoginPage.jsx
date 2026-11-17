@@ -5,17 +5,11 @@ import imageLogin from "@/assets/images/image-login.png";
 
 export default function LoginPage() {
   const handleLoginSubmit = async (credentials) => {
-    const data = await loginRequest({
+    // authService guarda el token y el usuario en la sesión
+    await loginRequest({
       userEmail: credentials.email,
       userPassword: credentials.password,
     });
-
-    if (data.token) {
-      sessionStorage.setItem("token", data.token);
-    }
-    if (data.user) {
-      sessionStorage.setItem("user", JSON.stringify(data.user));
-    }
 
     window.location.replace("/home");
   };

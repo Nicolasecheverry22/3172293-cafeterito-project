@@ -16,8 +16,9 @@ export const productService = {
   async create(data) {
     return await productRepository.create(data);
   },
-  async getAll() {
-    return await productRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await productRepository.list(query);
   },
   async getById(id) {
     return await productRepository.getById(id);

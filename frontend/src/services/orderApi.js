@@ -1,45 +1,20 @@
 // Llamadas al API del backend para órdenes.
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { api } from "./apiClient";
 
-export async function getOrders() {
-  const res = await fetch(`${API_URL}/orders`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar órdenes`);
-  return res.json();
-}
+// Estados de una orden (deben coincidir con el backend: order.constants.js)
+export const ORDER_STATUSES = ["activa", "lista para entrega", "pagada", "cancelada"];
+export const OPEN_ORDER_STATUSES = ["activa", "lista para entrega"];
 
-export async function getOrderById(id) {
-  const res = await fetch(`${API_URL}/orders/${id}`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar la orden`);
-  return res.json();
-}
+export const getOrders = (query) => api.get("/orders", { query });
 
-// payload: { tableNumber, waiterId, observations, items: [{ productId, quantity }] }
-export async function createOrder(payload) {
-  const res = await fetch(`${API_URL}/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al crear la orden`);
-  return data;
-}
+export const getOrderById = (id) => api.get(`/orders/${id}`);
 
-export async function deleteOrder(id) {
-  const res = await fetch(`${API_URL}/orders/${id}`, { method: "DELETE" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al eliminar la orden`);
-  return data;
-}
+// payload: { tableNumber, waiterId?, observations, items: [{ productId, quantity }] }
+// Si no se envía waiterId, el backend asigna al usuario autenticado.
+export const createOrder = (payload) => api.post("/orders", payload);
 
-// Actualiza la orden en la base de datos (PUT /api/orders/:id).
-export async function updateOrder(id, payload) {
-  const res = await fetch(`${API_URL}/orders/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al actualizar la orden`);
-  return data;
-}
+// PUT /api/orders/:id — 409 si la orden está pagada o cancelada
+export const updateOrder = (id, payload) => api.put(`/orders/${id}`, payload);
+
+// PATCH /api/orders/:id/cancel — anular (solo órdenes activas o listas para entrega)
+export const cancelOrder = (id) => api.patch(`/orders/${id}/cancel`);

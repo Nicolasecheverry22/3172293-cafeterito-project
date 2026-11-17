@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.js";
+import { createFilters, runList, likePattern, alpha } from "../../utils/listQuery.js";
 
 // Columnas devueltas al frontend (alias en camelCase)
 const PROVIDER_COLUMNS = `
@@ -34,9 +35,24 @@ export const providerRepository = {
     return result.rows[0];
   },
 
-  async getAll() {
-    const result = await pool.query(`SELECT ${PROVIDER_COLUMNS} FROM providers ORDER BY id`);
-    return result.rows;
+  // Filtros opcionales: ?search (nombre/NIT/correo), ?nit (exacto), ?documentType,
+  // ?isActive, ?page&limit. Orden alfabético por nombre.
+  async list({ search, nit, documentType, isActive, page, limit } = {}) {
+    const filters = createFilters();
+    if (search) {
+      filters.add("(provider_name ILIKE $? OR nit ILIKE $? OR provider_email ILIKE $?)", likePattern(search));
+    }
+    if (nit) filters.add("nit = $?", nit);
+    if (documentType) filters.add("document_type = $?", documentType);
+    if (isActive !== undefined) filters.add("is_active = $?", isActive);
+    return runList({
+      select: PROVIDER_COLUMNS,
+      from: "FROM providers",
+      filters,
+      orderBy: `${alpha("provider_name")}, id`,
+      page,
+      limit,
+    });
   },
 
   async getById(id) {

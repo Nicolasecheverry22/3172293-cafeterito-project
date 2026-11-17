@@ -21,7 +21,7 @@ export const userController = {
   },
 
   async getAll(req, res) {
-    res.json(await userService.getAll());
+    res.json(await userService.list(req.query));
   },
 
   async getById(req, res) {

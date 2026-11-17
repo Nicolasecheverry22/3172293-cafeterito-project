@@ -1,44 +1,14 @@
 // Llamadas al API del backend para proveedores.
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { api } from "./apiClient";
 
-export async function getProviders() {
-  const res = await fetch(`${API_URL}/providers`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar proveedores`);
-  return res.json();
-}
+export const getProviders = (query) => api.get("/providers", { query });
 
-export async function getProviderById(id) {
-  const res = await fetch(`${API_URL}/providers/${id}`);
-  if (!res.ok) throw new Error(`Error ${res.status} al cargar el proveedor`);
-  return res.json();
-}
+export const getProviderById = (id) => api.get(`/providers/${id}`);
 
-export async function createProvider(payload) {
-  const res = await fetch(`${API_URL}/providers`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al crear el proveedor`);
-  return data;
-}
+export const createProvider = (payload) => api.post("/providers", payload);
 
-export async function deleteProvider(id) {
-  const res = await fetch(`${API_URL}/providers/${id}`, { method: "DELETE" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al eliminar el proveedor`);
-  return data;
-}
+export const updateProvider = (id, payload) => api.put(`/providers/${id}`, payload);
 
-// Actualiza el proveedor en la base de datos (PUT /api/providers/:id).
-export async function updateProvider(id, payload) {
-  const res = await fetch(`${API_URL}/providers/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Error ${res.status} al actualizar el proveedor`);
-  return data;
-}
+// PATCH /api/providers/:id/status — habilitar/inhabilitar (no existe borrado físico)
+export const setProviderStatus = (id, isActive) =>
+  api.patch(`/providers/${id}/status`, { isActive });

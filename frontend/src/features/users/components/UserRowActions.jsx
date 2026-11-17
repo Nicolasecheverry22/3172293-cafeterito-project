@@ -1,64 +1,29 @@
-// Iconos usados en los botones de acciones
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Eye, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  showConfirmDeleteAlert,
-  showDeleteCancelAlert,
-  showSystemErrorAlert,
-  showSuccessAlert
-} from "@/shared/services/alertService";
+import { confirmAction } from "@/shared/services/confirmAction";
+import { setUserStatus } from "@/services/userApi";
 
-import { deleteUser } from "@/services/userApi";
-
-
-export default function UserRowActions({ user, onDeleted }) {
+// Acciones por fila. No existe "Eliminar": el usuario se habilita/deshabilita (RFADMIN05).
+export default function UserRowActions({ user, onChanged }) {
   const navigate = useNavigate();
+  const isActive = user.is_active ?? user.isActive ?? true;
+  const name = user.userName || user.nombre || "este usuario";
 
- 
-  const handleEdit = () => {
-    navigate(`/EditUser/${user.id}`);
-  };
-
-  
-  const handleDelete = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Eliminar usuario?",
-      text: `Esta acción eliminará a "${user.userName || user.nombre || "este usuario"} y no se podrá revertir.`,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+  const handleToggleStatus = () =>
+    confirmAction({
+      title: isActive ? "¿Deshabilitar usuario?" : "¿Habilitar usuario?",
+      text: isActive
+        ? `"${name}" no podrá iniciar sesión hasta que se habilite de nuevo.`
+        : `"${name}" podrá volver a iniciar sesión (también se levanta un bloqueo por intentos fallidos).`,
+      confirmText: isActive ? "Sí, deshabilitar" : "Sí, habilitar",
+      action: () => setUserStatus(user.id, !isActive),
+      successTitle: isActive ? "Usuario deshabilitado" : "Usuario habilitado",
+      successText: "El estado del usuario se actualizó correctamente.",
+      onDone: onChanged,
     });
 
-    if (!result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Operación cancelada",
-        text: "El usuario no fue eliminado.",
-      });
-      return;
-    }
-
-    try {
-      // Elimina el usuario en la base de datos (DELETE /api/users/:id)
-      await deleteUser(user.id);
-
-      await showSuccessAlert({
-        title: "¡Usuario eliminado!",
-        text: "El usuario fue eliminado correctamente."
-      });
-
-      // Refresca el listado desde la BD
-      onDeleted?.(user.id);
-    } catch (error) {
-      console.error("Error al eliminar el usuario:", error);
-      await showSystemErrorAlert({
-        text: "El usuario no pudo ser eliminado. Intenta nuevamente.",
-      });
-    }
-  };
-
   return (
-    // Contenedor de los botones de acciones
     <div className="flex gap-2">
-      {/* Botón visualizar */}
       <button
         onClick={() => navigate(`/UserView/${user.id}`)}
         className="p-1 rounded hover:bg-surface-muted cursor-pointer"
@@ -67,22 +32,24 @@ export default function UserRowActions({ user, onDeleted }) {
         <Eye size={16} />
       </button>
 
-      {/* Botón editar */}
       <button
-        onClick={handleEdit}
+        onClick={() => navigate(`/EditUser/${user.id}`)}
         className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar usuario"
       >
         <Pencil size={16} />
       </button>
 
-      {/* Botón eliminar */}
       <button
-        onClick={handleDelete}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-        title="Eliminar usuario"
+        onClick={handleToggleStatus}
+        className={`p-1 rounded hover:bg-surface-muted cursor-pointer ${
+          isActive
+            ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+        }`}
+        title={isActive ? "Deshabilitar usuario" : "Habilitar usuario"}
       >
-        <Trash2 size={16} />
+        {isActive ? <PowerOff size={16} /> : <Power size={16} />}
       </button>
     </div>
   );

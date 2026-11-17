@@ -16,7 +16,7 @@ export const providerController = {
   }),
 
   getAll: withProviderErrors(async (req, res) => {
-    res.json(await providerService.getAll());
+    res.json(await providerService.list(req.query));
   }),
 
   getById: withProviderErrors(async (req, res) => {

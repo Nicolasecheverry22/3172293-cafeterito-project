@@ -1,5 +1,6 @@
 import { pool } from "../../config/db.js";
 import { OPEN_ORDER_STATUSES } from "../orders/order.constants.js";
+import { createFilters, runList, likePattern, alpha } from "../../utils/listQuery.js";
 
 // Consultas SQL del recurso products (platillos del menú).
 export const productRepository = {
@@ -15,19 +16,26 @@ export const productRepository = {
     return result.rows[0];
   },
 
-  async getAll() {
-    const query = `
-      SELECT id,
-             product_name AS "productName",
-             category,
-             price::float AS price,
-             description,
-             is_available AS "isAvailable"
-      FROM products
-      ORDER BY id;
-    `;
-    const result = await pool.query(query);
-    return result.rows;
+  // Filtros opcionales: ?search (nombre/descripción), ?category, ?isAvailable, ?page&limit.
+  // Orden alfabético por nombre.
+  async list({ search, category, isAvailable, page, limit } = {}) {
+    const filters = createFilters();
+    if (search) filters.add("(product_name ILIKE $? OR description ILIKE $?)", likePattern(search));
+    if (category) filters.add("lower(category) = lower($?)", category);
+    if (isAvailable !== undefined) filters.add("is_available = $?", isAvailable);
+    return runList({
+      select: `id,
+               product_name AS "productName",
+               category,
+               price::float AS price,
+               description,
+               is_available AS "isAvailable"`,
+      from: "FROM products",
+      filters,
+      orderBy: `${alpha("product_name")}, id`,
+      page,
+      limit,
+    });
   },
 
   async getById(id) {

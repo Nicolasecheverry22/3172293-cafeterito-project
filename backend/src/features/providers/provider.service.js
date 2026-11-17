@@ -5,8 +5,9 @@ export const providerService = {
   async create(data) {
     return await providerRepository.create(data);
   },
-  async getAll() {
-    return await providerRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await providerRepository.list(query);
   },
   async getById(id) {
     return await providerRepository.getById(id);

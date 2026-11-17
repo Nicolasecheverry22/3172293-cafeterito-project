@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Input, Button } from "@/shared";
-import { verifyTokenSchema } from "../schemas/verifyTokenSchema"; 
+import { verifyTokenSchema } from "../schemas/verifyTokenSchema";
+import { verifyResetToken, requestPasswordReset, getResetEmail } from "../services/authService";
+import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
 
 export default function VerifyTokenPage() {
     const navigate = useNavigate();
@@ -18,8 +20,13 @@ export default function VerifyTokenPage() {
         });
     };
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
+
+  if (!getResetEmail()) {
+    setErrors({ token: "Primero solicita un código desde \"¿Olvidaste tu contraseña?\"." });
+    return;
+  }
 
   const result = verifyTokenSchema.safeParse(formData);
 
@@ -34,7 +41,29 @@ const handleSubmit = (e) => {
 
   setErrors({});
 
-  navigate(`/auth/newPassword?token=${result.data.token}`);
+  try {
+    await verifyResetToken(result.data.token);
+    navigate(`/auth/newPassword?token=${result.data.token}`);
+  } catch (error) {
+    setErrors({ token: error.message });
+  }
+};
+
+const handleResend = async () => {
+  const email = getResetEmail();
+  if (!email) {
+    navigate("/auth/resetPassword");
+    return;
+  }
+  try {
+    await requestPasswordReset(email);
+    await showSuccessAlert({
+      title: "Código reenviado",
+      text: "Si el correo está registrado, recibirás un código nuevo. El anterior deja de ser válido.",
+    });
+  } catch (error) {
+    await showSystemErrorAlert({ text: error.message });
+  }
 };
 
     return (
@@ -93,7 +122,7 @@ const handleSubmit = (e) => {
                         <button 
                             type="button"
                             className="text-small text-text-primary font-bold cursor-pointer hover:underline focus:outline-none"
-                            onClick={() => {}} 
+                            onClick={handleResend}
                         >
                             Solicitar un nuevo código
                         </button>

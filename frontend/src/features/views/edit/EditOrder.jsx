@@ -17,6 +17,7 @@ import {
 // Deben coincidir con el CHECK chk_orders_status de la BD
 const ORDER_STATUS_OPTIONS = [
   { value: "activa", label: "Activa" },
+  { value: "lista para entrega", label: "Lista para entrega" },
   { value: "pagada", label: "Pagada" },
   { value: "cancelada", label: "Cancelada" },
 ];

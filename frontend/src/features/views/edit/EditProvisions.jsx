@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
 import { Input, Button, Select, FileInput } from "@/shared";
-import { getInventoryItem, updateInventoryItem } from "@/services/inventoryApi";
+import { getInventoryItem, updateInventoryItem, INVENTORY_STATUSES } from "@/services/inventoryApi";
 import { createEditProvisionsSchema } from "../../inventory/schemas/editProvisionsSchema";
 import {
   showSystemErrorAlert,
@@ -36,12 +36,8 @@ const UNIT_OPTIONS = [
   { value: "lb", label: "Libras (lb)" },
 ];
 
-const STATUS_OPTIONS = [
-  { value: "Activo", label: "Activo" },
-  { value: "Vencido", label: "Vencido" },
-  { value: "Agotado", label: "Agotado" },
-  { value: "Averia", label: "Avería" },
-];
+// Estados del backend (RFADMIN08): Disponible / Vencido / Avería / Agotado
+const STATUS_OPTIONS = INVENTORY_STATUSES.map((s) => ({ value: s, label: s }));
 
 export default function EditProvisions() {
   const navigate = useNavigate();
@@ -67,9 +63,11 @@ export default function EditProvisions() {
         setFormData({
           provisionName: data.provisionName ?? "",
           category: data.category ?? "",
-          status: data.status ?? "Activo",
+          status: data.status ?? "Disponible",
           unit: data.unit ?? "",
           batch: data.batch ?? "",
+          barcode: data.barcode ?? "",
+          expirationDate: data.expirationDate ?? "",
           stock: data.stock ?? 0,
           minStock: data.minStock ?? 0,
           maxStock: data.maxStock ?? 0,
@@ -132,9 +130,13 @@ export default function EditProvisions() {
         stock: Number(result.data.stock),
         price: Number(result.data.price),
         batch: result.data.batch,
+        barcode: result.data.barcode,
+        expirationDate: result.data.expirationDate || null,
         minStock: Number(result.data.minStock),
         maxStock: Number(result.data.maxStock),
         status: formData.status,
+        // El PUT reemplaza todos los campos: se conserva el proveedor asignado
+        providerId: item.providerId ?? null,
       });
 
       await showSuccessAlert({
@@ -273,6 +275,25 @@ export default function EditProvisions() {
             placeholder="Ingrese el lote"
             onChange={handleChange}
             error={errors.batch}
+          />
+
+          <Input
+            label="Código de barras"
+            name="barcode"
+            type="text"
+            value={formData.barcode}
+            placeholder="Ingrese el código de barras (Ej. 7701234567890)"
+            onChange={handleChange}
+            error={errors.barcode}
+          />
+
+          <Input
+            label="Fecha de vencimiento (opcional)"
+            name="expirationDate"
+            type="date"
+            value={formData.expirationDate}
+            onChange={handleChange}
+            error={errors.expirationDate}
           />
 
           <Input

@@ -38,6 +38,8 @@ export default function CreateInventoryPage() {
         stock: Number(validatedData.stock),
         price: Number(validatedData.price),
         batch: validatedData.batch,
+        barcode: validatedData.barcode,
+        expirationDate: validatedData.expirationDate || null,
         minStock: Number(validatedData.minStock),
         maxStock: Number(validatedData.maxStock),
         status: validatedData.status,

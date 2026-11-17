@@ -20,8 +20,9 @@ export const inventoryService = {
     await assertProviderAssignable(data.providerId);
     return await inventoryRepository.create(data);
   },
-  async getAll() {
-    return await inventoryRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await inventoryRepository.list(query);
   },
   async getById(id) {
     return await inventoryRepository.getById(id);

@@ -18,7 +18,7 @@ export const inventoryController = {
   }),
 
   getAll: withInventoryErrors(async (req, res) => {
-    res.json(await inventoryService.getAll());
+    res.json(await inventoryService.list(req.query));
   }),
 
   getById: withInventoryErrors(async (req, res) => {

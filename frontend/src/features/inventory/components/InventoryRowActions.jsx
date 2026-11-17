@@ -1,88 +1,72 @@
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Eye, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  showSuccessAlert,
-  showDeleteCancelAlert,
-  showSystemErrorAlert,
-  showConfirmDeleteAlert
-} from "@/shared/services/alertService";
-import { deleteInventoryItem } from "@/services/inventoryApi";
+import Swal from "sweetalert2";
+import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
+import { setInventoryStatus, INVENTORY_STATUSES } from "@/services/inventoryApi";
 
-export default function InventoryRowActions({ provision, onDeleted }) {
+// Acciones por fila. No existe "Eliminar": se cambia el estado del insumo
+// (Disponible / Vencido / Avería / Agotado) (RFADMIN10).
+export default function InventoryRowActions({ provision, onChanged }) {
   const navigate = useNavigate();
 
-  // Obtener el ID dinámico de forma segura (soporta id o provisionId)
-  const targetId = provision?.id ?? provision?.provisionId;
-
-  const handleView = () => {
+  const handleChangeStatus = async () => {
     if (!provision.id) return;
-    navigate(`/InventoryView/${provision.id}`);
-  };
 
-  const handleEdit = () => {
-    if (!provision.id) return;
-    navigate(`/editInventory/${provision.id}`); 
-  };
-
-  const handleDelete = async () => {
-    if (!targetId) return;
-
-    const result = await showConfirmDeleteAlert({
-      title: "¿Eliminar suministro?",
-      text: `Esta acción eliminará "${provision.provisionName || provision.nombre || "este suministro"}" del inventario y no se podrá revertir.`,
-      confirmButtonText: "Sí, eliminar",
+    const { value: status, isConfirmed } = await Swal.fire({
+      title: "Cambiar estado del suministro",
+      text: provision.provisionName || "",
+      input: "select",
+      inputOptions: Object.fromEntries(INVENTORY_STATUSES.map((s) => [s, s])),
+      inputValue: provision.status,
+      showCancelButton: true,
+      confirmButtonText: "Guardar",
       cancelButtonText: "Cancelar",
+      customClass: {
+        popup: "rounded-2xl",
+        confirmButton: "!bg-brand text-white px-4 py-2 rounded-lg font-medium cursor-pointer mr-2",
+        cancelButton: "bg-surface-muted px-4 py-2 rounded-lg font-medium cursor-pointer",
+      },
+      buttonsStyling: false,
     });
 
-    if (!result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Operación cancelada",
-        text: "El suministro no fue eliminado.",
-      });
-      return;
-    }
+    if (!isConfirmed || status === provision.status) return;
 
     try {
-      await deleteInventoryItem(targetId);
-
+      await setInventoryStatus(provision.id, status);
       await showSuccessAlert({
-        title: "¡Suministro eliminado!",
-        text: "El suministro fue eliminado del inventario correctamente.",
+        title: "Estado actualizado",
+        text: `El suministro quedó en estado "${status}".`,
       });
-
-      onDeleted?.(targetId);
+      onChanged?.();
     } catch (error) {
-      console.error("Error al eliminar el suministro:", error);
-      await showSystemErrorAlert({
-        text: "El suministro no pudo ser eliminado. Intenta nuevamente.",
-      });
+      await showSystemErrorAlert({ text: error.message || "No se pudo cambiar el estado." });
     }
   };
 
   return (
     <div className="flex gap-2 items-center">
       <button
-        onClick={handleView}
+        onClick={() => provision.id && navigate(`/InventoryView/${provision.id}`)}
         className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Ver detalles"
       >
-        <Eye size={18} />
+        <Eye size={16} />
       </button>
 
       <button
-        onClick={handleEdit}
+        onClick={() => provision.id && navigate(`/editInventory/${provision.id}`)}
         className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar suministro"
       >
-        <Pencil size={18} />
+        <Pencil size={16} />
       </button>
 
       <button
-        onClick={handleDelete}
-        className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors cursor-pointer"
-        title="Eliminar suministro"
+        onClick={handleChangeStatus}
+        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        title="Cambiar estado"
       >
-        <Trash2 size={18} />
+        <RefreshCw size={16} />
       </button>
     </div>
   );

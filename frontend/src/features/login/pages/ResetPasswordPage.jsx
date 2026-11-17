@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ResetPasswordForm from "../components/ResetPasswordForm";
+import { resetPassword } from "../services/authService";
+import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
 
 async function validateResetToken(token) {
   if (!token) return false;
@@ -24,8 +26,17 @@ export default function ResetPasswordPage() {
   }, [token]);
 
   const handleResetSubmit = async (newPassword) => {
-    console.log("Nueva contraseña para token:", token, newPassword);
-    navigate("/auth");
+    try {
+      // El backend valida el código (vigente, de un solo uso) y la política RNF10
+      await resetPassword(token, newPassword);
+      await showSuccessAlert({
+        title: "Contraseña actualizada",
+        text: "Ya puedes iniciar sesión con tu nueva contraseña.",
+      });
+      navigate("/auth");
+    } catch (error) {
+      await showSystemErrorAlert({ text: error.message });
+    }
   };
 
   return (
@@ -46,7 +57,7 @@ export default function ResetPasswordPage() {
                 Este enlace de recuperación es inválido o ha expirado. Solicita uno nuevo.
               </p>
               <button
-                onClick={() => navigate("/auth/ResetPassword")}
+                onClick={() => navigate("/auth/resetPassword")}
                 className="text-text-primary font-bold cursor-pointer hover:underline"
               >
                 Solicitar nuevo enlace

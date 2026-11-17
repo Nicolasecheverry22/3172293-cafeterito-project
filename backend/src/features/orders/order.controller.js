@@ -9,7 +9,7 @@ const withOrderErrors = withConstraintErrors({
 
 export const orderController = {
   getAll: withOrderErrors(async (req, res) => {
-    res.json(await orderService.getAll());
+    res.json(await orderService.list(req.query));
   }),
 
   getById: withOrderErrors(async (req, res) => {

@@ -3,19 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import ForgotPasswordForm from "../components/ForgotPasswordForm";
 import imageLogin from "@/assets/images/image-login.png";
+import { requestPasswordReset } from "../services/authService";
+import { showSystemErrorAlert } from "@/shared/services/alertService";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const [wasSent, setWasSent] = useState(false);
 
   const handleForgotSubmit = async ({ email }) => {
-
-    console.log("Solicitud de recuperación para:", email);
-
-
-    setWasSent(true);
-
-    setTimeout(() => navigate("/auth/verifyToken"), 1800);
+    try {
+      // El backend responde igual exista o no el correo (no revela usuarios)
+      await requestPasswordReset(email);
+      setWasSent(true);
+      setTimeout(() => navigate("/auth/verifyToken"), 1800);
+    } catch (error) {
+      await showSystemErrorAlert({ text: error.message });
+    }
   };
 
   return (
@@ -49,7 +52,7 @@ export default function ForgotPasswordPage() {
             className="rounded-lg border p-4 text-body text-text-primary"
             role="status"
           >
-            Se ha enviado un correo de restablecimiento.
+            Si el correo está registrado, recibirás un código de 6 dígitos para restablecer tu contraseña.
           </div>
         ) : (
           <ForgotPasswordForm onSubmit={handleForgotSubmit} />

@@ -16,7 +16,7 @@ export const productController = {
   }),
 
   getAll: withProductErrors(async (req, res) => {
-    res.json(await productService.getAll());
+    res.json(await productService.list(req.query));
   }),
 
   getById: withProductErrors(async (req, res) => {

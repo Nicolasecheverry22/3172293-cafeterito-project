@@ -3,6 +3,7 @@
 
 import { pool } from "../../config/db.js";
 import { httpError } from "../../utils/httpError.js";
+import { createFilters, runList, likePattern, alpha } from "../../utils/listQuery.js";
 
 // Nombres de los grupos (roles) del usuario como arreglo: ["Caja", "Mesero"]
 const USER_GROUPS_SUBQUERY = `
@@ -267,9 +268,20 @@ async updatePermissions(userId, permissionIds) {
 // Metodo encargado de listar todos los usuarios registrados
 // Usamos alias (AS "userName", ...) para que la respuesta coincida
 // con los campos que espera la tabla del frontend
-async getAll() {
-    const query = `
-    SELECT
+// Filtros opcionales: ?search (nombre/correo/documento), ?isActive, ?page&limit.
+// Orden alfabético por nombre (RFADMIN03).
+async list({ search, isActive, page, limit } = {}) {
+    const filters = createFilters();
+    if (search) {
+        filters.add(
+            "(user_name ILIKE $? OR user_email ILIKE $? OR user_document_number ILIKE $?)",
+            likePattern(search)
+        );
+    }
+    if (isActive !== undefined) filters.add("is_active = $?", isActive);
+
+    return runList({
+        select: `
         id,
         user_name            AS "userName",
         user_email           AS "userEmail",
@@ -278,14 +290,13 @@ async getAll() {
         is_superuser,
         is_staff,
         is_active,
-        ${USER_GROUPS_SUBQUERY} AS groups
-    FROM users
-    ORDER BY id;
-    `;
-
-    const result = await pool.query(query);
-
-    return result.rows;
+        ${USER_GROUPS_SUBQUERY} AS groups`,
+        from: "FROM users",
+        filters,
+        orderBy: `${alpha("user_name")}, id`,
+        page,
+        limit,
+    });
 },
 
 // Metodo encargado de obtener un usuario por su id

@@ -1,5 +1,6 @@
 // Validación de entrada del feature users (RFADMIN02–05, RNF10).
 import { Joi, email } from "../../utils/joi.js";
+import { paginationFields } from "../../utils/listQuery.js";
 import { PASSWORD_MIN, PASSWORD_MAX, PASSWORD_RULES } from "../../utils/passwordPolicy.js";
 
 // Letras (con tildes y ñ) y espacios
@@ -67,4 +68,11 @@ export const userStatusSchema = Joi.object({
 
 export const userReportQuery = Joi.object({
   document: Joi.string().trim().pattern(/^\d{1,15}$/).empty("").label("El documento"),
+});
+
+// GET /api/users — filtros opcionales y paginación (solo si llegan page y limit)
+export const userListQuery = Joi.object({
+  search: Joi.string().trim().max(100).empty("").label("La búsqueda"),
+  isActive: Joi.boolean().label("El estado"),
+  ...paginationFields,
 });

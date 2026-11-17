@@ -39,10 +39,10 @@ export default function CreateUserPage() {
         userDocumentTypes: validatedData.userDocumentTypes,
         userDocumentNumber: validatedData.userDocumentNumber,
         userPassword: validatedData.userPassword,
+        userAddress: validatedData.address || null,
         userAvatarUrl: null,
-        isStaff: false,
-        isActive: validatedData.isActive ?? true,
-        isSuperuser: validatedData.isSuperUser ?? false,
+        // isSuperuser/isStaff/isActive NO se envían: el backend los calcula
+        // (Administrador = superusuario; todo usuario nuevo queda activo).
         // Los checkboxes de "Tipo de Usuario" definen los grupos (y con ellos los permisos)
         groupNames: validatedData.groupNames ?? [],
       };

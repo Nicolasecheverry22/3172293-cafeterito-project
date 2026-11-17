@@ -2,12 +2,12 @@ import { Router } from "express";
 import { userController } from "./user.controller.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import { idParam } from "../../utils/joi.js";
-import { createUserSchema, updateUserSchema, userStatusSchema, userReportQuery } from "./user.schema.js";
+import { createUserSchema, updateUserSchema, userStatusSchema, userReportQuery, userListQuery } from "./user.schema.js";
 
 // Montado en app.js bajo /api/users con authenticateToken.
 const router = Router();
 
-router.get("/", userController.getAll);
+router.get("/", validate({ query: userListQuery }), userController.getAll);
 
 // RUTA DE REPORTE (debe ir antes de /:id para evitar conflictos)
 router.get("/report-data", validate({ query: userReportQuery }), userController.getReportData);

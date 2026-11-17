@@ -1,5 +1,6 @@
 // Validación de entrada del feature providers (RFADMIN14–17).
 import { Joi, email } from "../../utils/joi.js";
+import { paginationFields } from "../../utils/listQuery.js";
 
 // Sin Tarjeta de identidad (TI): un proveedor no puede ser menor de edad.
 export const PROVIDER_DOCUMENT_TYPES = ["NIT", "CC", "CE", "PEP", "PPT"];
@@ -43,4 +44,13 @@ export const providerStatusSchema = Joi.object({
 
 export const providerReportQuery = Joi.object({
   nit: Joi.string().trim().max(30).empty("").label("El NIT"),
+});
+
+// GET /api/providers — filtros opcionales y paginación (solo si llegan page y limit)
+export const providerListQuery = Joi.object({
+  search: Joi.string().trim().max(100).empty("").label("La búsqueda"),
+  nit: Joi.string().trim().max(30).empty("").label("El NIT"),
+  documentType: Joi.string().trim().uppercase().valid(...PROVIDER_DOCUMENT_TYPES).empty("").label("El tipo de documento"),
+  isActive: Joi.boolean().label("El estado"),
+  ...paginationFields,
 });

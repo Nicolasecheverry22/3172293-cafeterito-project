@@ -42,7 +42,8 @@ export const updateOrderSchema = () =>
   z.object({
     tableNumber: tableNumberSchema,
     waiterId: z.string().min(1, "Debe seleccionar un empleado encargado"),
-    status: z.enum(["activa", "pagada", "cancelada"], {
+    // Deben coincidir con el backend (order.constants.js)
+    status: z.enum(["activa", "lista para entrega", "pagada", "cancelada"], {
       message: "Debe seleccionar un estado válido",
     }),
     observations: observationsSchema,

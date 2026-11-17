@@ -1,9 +1,6 @@
-export function logout() {
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("user");
-  
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+import { clearSession } from "@/services/apiClient";
 
+export function logout() {
+  clearSession();
   window.location.replace("/auth");
 }

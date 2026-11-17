@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared";
 import { UtensilsCrossed, Truck, Package } from "lucide-react";
 import Card from "@/shared/components/Card";
+import { getTopSellingProducts } from "@/services/productApi";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -12,12 +13,8 @@ export default function Home() {
   useEffect(() => {
     async function fetchTopSelling() {
       try {
-        const response = await fetch("http://localhost:4000/api/products/top-selling");
-        if (!response.ok) {
-          throw new Error("Error al obtener los platillos más vendidos");
-        }
-        const data = await response.json();
-        setTopProducts(data);
+        // Endpoint público: el Home se muestra antes de iniciar sesión
+        setTopProducts(await getTopSellingProducts());
       } catch (error) {
         console.error("Error al cargar platillos:", error);
       } finally {

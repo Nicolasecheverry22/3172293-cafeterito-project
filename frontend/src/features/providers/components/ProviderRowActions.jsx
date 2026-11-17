@@ -1,58 +1,26 @@
-// Iconos usados en los botones de acciones
-import { Pencil, Trash2, Eye } from "lucide-react";
-
-// Hook de React Router para navegar programáticamente entre rutas
+import { Pencil, Eye, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { confirmAction } from "@/shared/services/confirmAction";
+import { setProviderStatus } from "@/services/providerApi";
 
-
-import {
-  showDeleteCancelAlert,
-  showSystemErrorAlert,
-  showConfirmDeleteAlert,
-  showSuccessAlert
-} from "@/shared/services/alertService";
-
-import { deleteProvider } from "@/services/providerApi";
-
-export default function ProviderRowActions({ provider, onDeleted }) {
+// Acciones por fila. No existe "Eliminar": el proveedor se habilita/inhabilita (RFADMIN17).
+export default function ProviderRowActions({ provider, onChanged }) {
   const navigate = useNavigate();
+  const isActive = provider.is_active ?? provider.isActive ?? true;
+  const name = provider.providerName || provider.nombre || "este proveedor";
 
-  const handleEdit = () => {
-    navigate(`/EditProvider/${provider.id}`);
-  };
-
-  const handleDelete = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Eliminar proveedor?",
-      text: `Esta acción eliminará a "${provider.providerName || provider.nombre || "este proveedor"}" y no se podrá revertir.`,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+  const handleToggleStatus = () =>
+    confirmAction({
+      title: isActive ? "¿Inhabilitar proveedor?" : "¿Habilitar proveedor?",
+      text: isActive
+        ? `"${name}" no podrá asignarse a insumos nuevos mientras esté inhabilitado.`
+        : `"${name}" podrá volver a asignarse a insumos.`,
+      confirmText: isActive ? "Sí, inhabilitar" : "Sí, habilitar",
+      action: () => setProviderStatus(provider.id, !isActive),
+      successTitle: isActive ? "Proveedor inhabilitado" : "Proveedor habilitado",
+      successText: "El estado del proveedor se actualizó correctamente.",
+      onDone: onChanged,
     });
-
-    if (!result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Operación cancelada",
-        text: "El proveedor no fue eliminado.",
-      });
-      return;
-    }
-
-    try {
-      await deleteProvider(provider.id);
-
-      await showSuccessAlert({
-        title: "¡Proveedor eliminado!",
-        text: "El proveedor fue eliminado correctamente.",
-      });
-
-      onDeleted?.(provider.id);
-    } catch (error) {
-      console.error("Error al eliminar el proveedor:", error);
-      await showSystemErrorAlert({
-        text: "El proveedor no pudo ser eliminado. Intenta nuevamente.",
-      });
-    }
-  };
 
   return (
     <div className="flex gap-2">
@@ -65,7 +33,7 @@ export default function ProviderRowActions({ provider, onDeleted }) {
       </button>
 
       <button
-        onClick={handleEdit}
+        onClick={() => navigate(`/EditProvider/${provider.id}`)}
         className="p-1 rounded hover:bg-surface-muted cursor-pointer"
         title="Editar proveedor"
       >
@@ -73,11 +41,15 @@ export default function ProviderRowActions({ provider, onDeleted }) {
       </button>
 
       <button
-        onClick={handleDelete}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-        title="Eliminar proveedor"
+        onClick={handleToggleStatus}
+        className={`p-1 rounded hover:bg-surface-muted cursor-pointer ${
+          isActive
+            ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+        }`}
+        title={isActive ? "Inhabilitar proveedor" : "Habilitar proveedor"}
       >
-        <Trash2 size={16} />
+        {isActive ? <PowerOff size={16} /> : <Power size={16} />}
       </button>
     </div>
   );

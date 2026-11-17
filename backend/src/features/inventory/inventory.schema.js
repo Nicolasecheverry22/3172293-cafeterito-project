@@ -1,5 +1,6 @@
 // Validación de entrada del feature inventory (suministros, RFADMIN08–12).
 import { Joi, isoDate } from "../../utils/joi.js";
+import { paginationFields } from "../../utils/listQuery.js";
 
 export const INVENTORY_STATUSES = ["Disponible", "Vencido", "Avería", "Agotado"];
 
@@ -42,4 +43,13 @@ export const inventoryStatusSchema = Joi.object({
 export const inventoryReportQuery = Joi.object({
   category: Joi.string().trim().max(100).empty("").label("La categoría"),
   status: Joi.string().trim().max(30).empty("").label("El estado"),
+});
+
+// GET /api/inventory — filtros opcionales y paginación (solo si llegan page y limit)
+export const inventoryListQuery = Joi.object({
+  search: Joi.string().trim().max(100).empty("").label("La búsqueda"),
+  category: Joi.string().trim().max(100).empty("").label("La categoría"),
+  status: Joi.string().trim().valid(...INVENTORY_STATUSES).empty("").label("El estado"),
+  providerId: Joi.number().integer().positive().empty("").label("El proveedor"),
+  ...paginationFields,
 });

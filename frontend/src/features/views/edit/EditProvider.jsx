@@ -95,6 +95,8 @@ export default function EditProvider() {
 
       // PUT /api/providers/:id
       await updateProvider(provider.id, {
+        // El formulario de edición no cambia el tipo de documento: se conserva el guardado
+        documentType: provider.documentType ?? "NIT",
         nit: result.data.nit,
         providerName: result.data.providerName,
         providerEmail: result.data.providerEmail,

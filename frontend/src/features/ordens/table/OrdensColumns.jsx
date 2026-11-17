@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import OrdensRowActions from "../components/OrdensRowActions";
 
-export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
+export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
   // Columna Orden (ID)
   {
     accessorKey: "id",
@@ -102,14 +102,14 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
         activa: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700",
         pagada: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700",
         cancelada: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700",
-        pendiente: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700",
+        "lista para entrega": "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700",
       };
 
       const statusLabels = {
         activa: "Activa",
         pagada: "Pagada",
         cancelada: "Cancelada",
-        pendiente: "Pendiente",
+        "lista para entrega": "Lista para entrega",
       };
 
       return (
@@ -128,6 +128,6 @@ export const getOrdensColumns = (sortConfig, onSort, onDeleted) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <OrdensRowActions order={row.original} onDeleted={onDeleted} />,
+    cell: ({ row }) => <OrdensRowActions order={row.original} onChanged={onChanged} />,
   },
 ];

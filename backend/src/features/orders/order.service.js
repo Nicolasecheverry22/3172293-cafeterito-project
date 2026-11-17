@@ -34,8 +34,9 @@ async function assertActiveWaiter(waiterId) {
 }
 
 export const orderService = {
-  async getAll() {
-    return await orderRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await orderRepository.list(query);
   },
 
   async getById(id) {

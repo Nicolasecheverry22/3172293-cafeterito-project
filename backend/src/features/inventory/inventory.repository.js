@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.js";
+import { createFilters, runList, likePattern, alpha } from "../../utils/listQuery.js";
 
 // Columnas devueltas al frontend (alias en camelCase)
 const INVENTORY_COLUMNS = `
@@ -39,9 +40,24 @@ export const inventoryRepository = {
     return result.rows[0];
   },
 
-  async getAll() {
-    const result = await pool.query(`SELECT ${INVENTORY_COLUMNS} ${FROM_INVENTORY} ORDER BY i.id`);
-    return result.rows;
+  // Filtros opcionales: ?search (nombre/lote/código de barras), ?category, ?status,
+  // ?providerId, ?page&limit. Orden alfabético por nombre y luego lote.
+  async list({ search, category, status, providerId, page, limit } = {}) {
+    const filters = createFilters();
+    if (search) {
+      filters.add("(i.provision_name ILIKE $? OR i.batch ILIKE $? OR i.barcode ILIKE $?)", likePattern(search));
+    }
+    if (category) filters.add("lower(i.category) = lower($?)", category);
+    if (status) filters.add("i.status = $?", status);
+    if (providerId) filters.add("i.provider_id = $?", providerId);
+    return runList({
+      select: INVENTORY_COLUMNS,
+      from: FROM_INVENTORY,
+      filters,
+      orderBy: `${alpha("i.provision_name")}, i.batch, i.id`,
+      page,
+      limit,
+    });
   },
 
   async getById(id) {

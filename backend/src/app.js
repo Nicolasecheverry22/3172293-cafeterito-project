@@ -25,8 +25,12 @@ app.disable("x-powered-by");
 // Cabeceras de seguridad HTTP (H09)
 app.use(helmet());
 
-// Solo el frontend en desarrollo (Vite) puede consumir la API
-app.use(cors({ origin: "http://localhost:5173" }));
+// Orígenes permitidos desde CORS_ORIGIN (lista separada por comas); por defecto Vite (H08)
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+app.use(cors({ origin: allowedOrigins }));
 
 app.use(express.json());
 

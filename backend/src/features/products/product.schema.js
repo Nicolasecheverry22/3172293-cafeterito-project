@@ -1,5 +1,6 @@
 // Validación de entrada del feature products (platillos del menú, RFADMIN20–24).
 import { Joi } from "../../utils/joi.js";
+import { paginationFields } from "../../utils/listQuery.js";
 
 // Usado en POST (crear) y PUT (actualizar): ambos envían el platillo completo.
 export const productSchema = Joi.object({
@@ -17,4 +18,12 @@ export const productStatusSchema = Joi.object({
 
 export const productReportQuery = Joi.object({
   category: Joi.string().trim().max(100).empty("").label("La categoría"),
+});
+
+// GET /api/products — filtros opcionales y paginación (solo si llegan page y limit)
+export const productListQuery = Joi.object({
+  search: Joi.string().trim().max(100).empty("").label("La búsqueda"),
+  category: Joi.string().trim().max(100).empty("").label("La categoría"),
+  isAvailable: Joi.boolean().label("El estado"),
+  ...paginationFields,
 });

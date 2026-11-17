@@ -2,7 +2,7 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import UserRowActions from "../components/UserRowActions";
 
-export const getUserColumns = (sortConfig, onSort, onDeleted) => [
+export const getUserColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "id",
     header: () => (
@@ -84,6 +84,6 @@ export const getUserColumns = (sortConfig, onSort, onDeleted) => [
   {
     id: "actions",
     header: "Acciones",
-    cell: ({ row }) => <UserRowActions user={row.original} onDeleted={onDeleted} />,
+    cell: ({ row }) => <UserRowActions user={row.original} onChanged={onChanged} />,
   },
 ];

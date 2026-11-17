@@ -46,8 +46,9 @@ export const userService = {
     return await userRepository.updateWithGroups(id, userData, data.groupNames);
   },
 
-  async getAll() {
-    return await userRepository.getAll();
+  // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
+  async list(query) {
+    return await userRepository.list(query);
   },
 
   async getById(id) {

@@ -1,7 +1,8 @@
 // Validación de entrada del feature orders (RFADMIN26–30).
 // El precio NO se acepta del cliente: stripUnknown elimina price/unitPrice de los items
 // y el servicio toma el precio vigente de la BD.
-import { Joi } from "../../utils/joi.js";
+import { Joi, isoDate } from "../../utils/joi.js";
+import { paginationFields } from "../../utils/listQuery.js";
 import { ORDER_STATUSES } from "./order.constants.js";
 
 const orderItem = Joi.object({
@@ -35,4 +36,13 @@ export const updateOrderSchema = Joi.object({
 
 export const orderReportQuery = Joi.object({
   tableNumber: Joi.number().integer().positive().empty("").label("El número de mesa"),
+});
+
+// GET /api/orders — filtros opcionales y paginación (solo si llegan page y limit)
+export const orderListQuery = Joi.object({
+  status: Joi.string().trim().lowercase().valid(...ORDER_STATUSES).empty("").label("El estado"),
+  tableNumber: Joi.number().integer().positive().empty("").label("El número de mesa"),
+  from: isoDate().empty("").label("La fecha inicial"),
+  to: isoDate().empty("").label("La fecha final"),
+  ...paginationFields,
 });
