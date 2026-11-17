@@ -1,6 +1,7 @@
 import { orderRepository } from "./order.repository.js";
+import { userRepository } from "../users/user.repository.js";
 import { httpError } from "../../utils/httpError.js";
-import { OPEN_ORDER_STATUSES } from "./order.constants.js";
+import { OPEN_ORDER_STATUSES, FINAL_ORDER_STATUSES, ORDER_TRANSITIONS } from "./order.constants.js";
 
 // La entrada llega validada por order.schema.js (mesa, items y cantidades enteras > 0,
 // estado válido). Aquí solo quedan las reglas de negocio que requieren la BD.
@@ -24,6 +25,14 @@ const priceNewItem = (item, productsById) => {
   return { ...item, unitPrice: product.price, dispatched: false };
 };
 
+// El mesero indicado debe existir y estar activo (H51).
+async function assertActiveWaiter(waiterId) {
+  const user = await userRepository.getById(waiterId);
+  if (!user || !user.is_active) {
+    throw httpError(400, "El empleado encargado no existe o está inactivo");
+  }
+}
+
 export const orderService = {
   async getAll() {
     return await orderRepository.getAll();
@@ -37,21 +46,41 @@ export const orderService = {
     return await orderRepository.getReportData(tableNumber ?? null);
   },
 
-  async create({ tableNumber, waiterId, observations, items }) {
+  // currentUserId: usuario autenticado (req.user.id). Si no se indica mesero, es él.
+  async create({ tableNumber, waiterId, observations, items }, currentUserId) {
+    if (waiterId != null) {
+      await assertActiveWaiter(waiterId);
+    }
+
     const merged = mergeItems(items);
     const products = await orderRepository.getProductsByIds(merged.map((i) => i.productId));
     const productsById = new Map(products.map((p) => [p.id, p]));
     const pricedItems = merged.map((item) => priceNewItem(item, productsById));
 
     return await orderRepository.create(
-      { tableNumber, waiterId: waiterId ?? null, observations: observations ?? null },
+      { tableNumber, waiterId: waiterId ?? currentUserId, observations: observations ?? null },
       pricedItems
     );
   },
 
-  async update(id, { tableNumber, waiterId, status, observations, items }) {
+  async update(id, { tableNumber, waiterId, status, observations, items }, currentUserId) {
     const current = await orderRepository.getById(id);
     if (!current) return undefined;
+
+    // RFADMIN28: pagada y cancelada son estados finales
+    if (FINAL_ORDER_STATUSES.includes(current.status)) {
+      throw httpError(409, `No se puede modificar una orden en estado "${current.status}"`);
+    }
+    if (!ORDER_TRANSITIONS[current.status]?.includes(status)) {
+      throw httpError(409, `No se puede pasar una orden de "${current.status}" a "${status}"`);
+    }
+
+    // Si no se envía mesero se conserva el actual (o el usuario autenticado si no tenía).
+    // No se reasigna al usuario que edita: editar no debe cambiar quién atendió la mesa.
+    if (waiterId != null && waiterId !== current.waiterId) {
+      await assertActiveWaiter(waiterId);
+    }
+    const finalWaiterId = waiterId ?? current.waiterId ?? currentUserId;
 
     const merged = mergeItems(items);
     // Los platillos que ya estaban en la orden conservan su precio y estado de despacho
@@ -67,11 +96,14 @@ export const orderService = {
         : priceNewItem(item, productsById);
     });
 
-    return await orderRepository.update(
+    const updated = await orderRepository.update(
       id,
-      { tableNumber, waiterId: waiterId ?? null, status, observations: observations ?? null },
+      { tableNumber, waiterId: finalWaiterId, status, observations: observations ?? null },
       pricedItems
     );
+    // La orden existía pero pasó a un estado final mientras se editaba
+    if (!updated) throw httpError(409, "La orden cambió de estado; recargue e intente de nuevo");
+    return updated;
   },
 
   // Anular = pasar a "cancelada" (no hay borrado físico). Solo órdenes abiertas.

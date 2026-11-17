@@ -4,6 +4,7 @@ import { test, describe, before, after } from "node:test";
 import assert from "node:assert/strict";
 import {
   startServer, stopServer, cleanup, api, pool, adminToken, TEST_TABLE_MIN, PREFIX,
+  createUser, deactivateUser,
 } from "./helpers.js";
 
 let token;
@@ -170,6 +171,21 @@ describe("ÓRDENES", () => {
     const created = await createOrder(order());
     const res = await setStatus(created.body.orderId, "lista para entrega");
     assert.equal(res.status, 200, res.text);
+  });
+
+  test("[RFADMIN30] transiciones válidas: activa → lista para entrega → activa → pagada", async () => {
+    const created = await createOrder(order());
+    for (const status of ["lista para entrega", "activa", "lista para entrega", "pagada"]) {
+      const res = await setStatus(created.body.orderId, status);
+      assert.equal(res.status, 200, `${status}: ${res.text}`);
+    }
+  });
+
+  test("[RFADMIN26] mesero inactivo -> 400", async () => {
+    const waiter = await createUser();
+    await deactivateUser(waiter);
+    const res = await createOrder(order({ waiterId: waiter.id }));
+    assert.equal(res.status, 400);
   });
 
   test("[RFADMIN30] estado inválido -> 400", async () => {

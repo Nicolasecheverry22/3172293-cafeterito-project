@@ -26,12 +26,12 @@ export const orderController = {
   }),
 
   create: withOrderErrors(async (req, res) => {
-    const order = await orderService.create(req.body);
+    const order = await orderService.create(req.body, req.user.id);
     res.status(201).json({ message: "Orden creada correctamente", orderId: order.id });
   }),
 
   update: withOrderErrors(async (req, res) => {
-    const updated = await orderService.update(Number(req.params.id), req.body);
+    const updated = await orderService.update(Number(req.params.id), req.body, req.user.id);
     if (!updated) {
       return res.status(404).json({ error: "Orden no encontrada" });
     }

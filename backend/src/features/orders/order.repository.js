@@ -1,5 +1,5 @@
 import { pool } from "../../config/db.js";
-import { OPEN_ORDER_STATUSES } from "./order.constants.js";
+import { OPEN_ORDER_STATUSES, FINAL_ORDER_STATUSES } from "./order.constants.js";
 
 const ORDER_SELECT = `
   SELECT
@@ -107,9 +107,9 @@ export const orderRepository = {
         `UPDATE orders
          SET table_number = $1, waiter_id = $2, status = $3,
              observations = $4, updated_at = NOW()
-         WHERE id = $5
+         WHERE id = $5 AND status <> ALL($6::text[])
          RETURNING id`,
-        [tableNumber, waiterId, status, observations, id]
+        [tableNumber, waiterId, status, observations, id, FINAL_ORDER_STATUSES]
       );
 
       if (!rows[0]) {
