@@ -1,6 +1,11 @@
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import useDialogA11y from "@/shared/hooks/useDialogA11y";
 
 export default function OrderDetailModal({ isOpen, onClose, order }) {
+  // Escape, foco inicial, Tab atrapado y foco devuelto al cerrar
+  const dialogRef = useDialogA11y(isOpen && Boolean(order), onClose);
+
   if (!isOpen || !order) return null;
 
   const total = order.total ?? 0;
@@ -10,21 +15,29 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
     ? order.createdAt.split("-").reverse().join("/")
     : "-";
 
-  return (
+  // Portal a <body>: la tarjeta de la página usa backdrop-blur, y backdrop-filter
+  // convierte a sus hijos position:fixed en relativos a ella (el modal salía cortado bajo el Navbar)
+  return createPortal(
     // Overlay oscuro de fondo con animación y backdrop
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
       onClick={onClose}
     >
       {/* Contenido del modal (e.stopPropagation evita que al hacer clic dentro se cierre) */}
+      {/* M3 dialog: radio 28px, padding 24px, elevación 3; scroll interno si no cabe */}
       <div
-        className="bg-background text-text-primary rounded-2xl max-w-lg w-full p-6 shadow-2xl relative transition-all"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+        aria-labelledby="order-detail-title"
+        className="bg-background text-text-primary rounded-shape-xl max-w-lg w-full max-h-[calc(100dvh-2rem)] overflow-y-auto p-6 shadow-elevation-3 relative transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Encabezado */}
         <div className="flex justify-between items-center border-b border-surface-muted pb-4 mb-4">
           <div>
-            <h3 className="text-lg font-bold text-text-primary">
+            <h3 id="order-detail-title" className="text-lg font-bold text-text-primary">
               Detalles de la Orden #{order.id}
             </h3>
             <p className="text-xs text-text-secondary">
@@ -33,14 +46,15 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-text-secondary hover:text-text-primary rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
+            aria-label="Cerrar detalle"
+            className="touch-target p-2 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-muted transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Información general */}
-        <div className="grid grid-cols-3 gap-3 mb-4 text-sm bg-surface-muted/50 p-3 rounded-xl border border-surface-muted">
+        <div className="grid grid-cols-3 gap-3 mb-4 text-sm bg-surface-muted/50 p-3 rounded-shape-md border border-surface-muted">
           <div>
             <span className="block text-xs text-text-secondary font-medium">Mesa</span>
             <span className="font-semibold text-text-primary">Mesa {order.tableNumber}</span>
@@ -54,8 +68,8 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
             <span
               className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
                 order.status === "pagada"
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
+                  ? "bg-success-container text-on-success-container"
+                  : "bg-warning-container text-on-warning-container"
               }`}
             >
               {order.status}
@@ -67,7 +81,7 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
         <h4 className="font-semibold text-text-primary text-sm mb-2">
           Productos solicitados
         </h4>
-        <div className="border border-surface-muted rounded-xl overflow-hidden mb-4">
+        <div className="border border-surface-muted rounded-shape-md overflow-hidden mb-4">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-muted/50 text-text-secondary font-medium border-b border-surface-muted">
               <tr>
@@ -80,12 +94,12 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
             <tbody className="divide-y divide-surface-muted text-text-primary">
               {order.items?.map((item) => (
                 <tr key={item.id}>
-                  <td className="py-2.5 px-3 font-medium">{item.dish}</td>
-                  <td className="py-2.5 px-3 text-center">{item.quantity}</td>
-                  <td className="py-2.5 px-3 text-right text-text-secondary">
+                  <td className="py-2 px-3 font-medium">{item.dish}</td>
+                  <td className="py-2 px-3 text-center">{item.quantity}</td>
+                  <td className="py-2 px-3 text-right text-text-secondary">
                     ${item.price.toLocaleString("es-CO")}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-medium">
+                  <td className="py-2 px-3 text-right font-medium">
                     ${(item.price * item.quantity).toLocaleString("es-CO")}
                   </td>
                 </tr>
@@ -109,12 +123,13 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
 
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-surface-muted hover:bg-border text-text-primary rounded-xl text-sm font-medium transition-colors cursor-pointer"
+            className="touch-target h-10 px-4 bg-surface-muted hover:bg-border text-text-primary rounded-md text-sm font-medium transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
           >
             Cerrar
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

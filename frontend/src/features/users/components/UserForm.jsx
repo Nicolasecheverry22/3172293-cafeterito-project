@@ -204,7 +204,7 @@ export default function UserForm({
             multiple
           />
           {errors.userImage && (
-            <span className="text-error text-caption block mt-1">{errors.userImage}</span>
+            <span className="text-error text-small block mt-1">{errors.userImage}</span>
           )}
         </div>
 
@@ -232,7 +232,7 @@ export default function UserForm({
       </div>
 
       <div className="flex flex-col justify-between h-full">
-        <div className="bg-surface-inverse/70 p-6 rounded-2xl text-text-inverse space-y-3 shadow-inner">
+        <div className="bg-surface-inverse/70 p-4 sm:p-6 rounded-shape-lg text-text-inverse space-y-3 shadow-inner">
           <h3 className="font-heading text-subtitle mb-2">Tipo de Usuario:</h3>
 
           {ROLE_CHECKBOXES.map(({ name, label }) => (
@@ -240,7 +240,7 @@ export default function UserForm({
           ))}
 
           {errors.isSuperUser && (
-            <span className="text-error text-caption block">{errors.isSuperUser}</span>
+            <span className="text-error text-small block">{errors.isSuperUser}</span>
           )}
 
           {!isAdmin && (
@@ -265,7 +265,7 @@ export default function UserForm({
           )}
         </div>
 
-        <div className="flex gap-4 items-center justify-end mt-4">
+        <div className="flex gap-4 items-center justify-end mt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>
@@ -273,7 +273,7 @@ export default function UserForm({
             type="submit" 
             variant="primary"
             disabled={isSubmitting}
-            className="w-full md:w-auto px-14 font-bold shadow-sm"
+            className="w-full md:w-auto px-14 font-bold shadow-elevation-1"
           >
             {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Usuario"}
           </Button>

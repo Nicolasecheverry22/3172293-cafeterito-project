@@ -9,7 +9,7 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("id")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Id</span>
         {sortConfig.key === "id" ? (
@@ -27,7 +27,7 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("provisionName")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Provisión</span>
         {sortConfig.key === "provisionName" ? (
@@ -102,17 +102,17 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
 
       // 3. Mapeo de clases de Tailwind según estado
       const statusStyles = {
-        activo: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700 font-semibold",
-        disponible: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700 font-semibold",
+        activo: "bg-success-container text-on-success-container border-success/30 font-semibold",
+        disponible: "bg-success-container text-on-success-container border-success/30 font-semibold",
         vencido: "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-700 font-semibold",
-        averia: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700 font-semibold",
-        agotado: "bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700 font-semibold",
+        averia: "bg-warning-container text-on-warning-container border-warning/30 font-semibold",
+        agotado: "bg-surface-muted text-text-primary border-border font-semibold",
       };
 
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border capitalize ${
-            statusStyles[normalizedKey] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700"
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border capitalize ${
+            statusStyles[normalizedKey] || "bg-surface-muted text-text-primary border-border"
           }`}
         >
           {rawStatus}

@@ -26,10 +26,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       {/* Accesos rápidos */}
       <div className="flex flex-col gap-10">
-        <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-border">
+        <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md p-4 sm:p-6 rounded-shape-xl shadow-elevation-1 border border-border">
           <h2 className="text-title font-heading font-bold mb-4 text-text-primary">
             Accesos rápidos
           </h2>
@@ -39,9 +39,9 @@ export default function Home() {
               variant="primary"
               size="md"
               onClick={() => navigate("/ordensCreate")}
-              className="w-full justify-start p-2 h-auto rounded-2xl shadow-sm border border-border hover:border-brand transition-all cursor-pointer"
+              className="w-full justify-start p-2 h-auto rounded-shape-lg shadow-elevation-1 border border-border hover:border-border-strong transition-all cursor-pointer"
             >
-              <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-xl w-full">
+              <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-shape-md w-full">
                 <UtensilsCrossed className="w-6 h-6 text-text-primary shrink-0" />
                 <span className="font-heading font-semibold text-text-primary">Nuevo Pedido</span>
               </div>
@@ -51,9 +51,9 @@ export default function Home() {
               variant="primary"
               size="md"
               onClick={() => navigate("/providerCreate")}
-              className="w-full justify-start p-2 h-auto rounded-2xl shadow-sm border border-border hover:border-brand transition-all cursor-pointer"
+              className="w-full justify-start p-2 h-auto rounded-shape-lg shadow-elevation-1 border border-border hover:border-border-strong transition-all cursor-pointer"
             >
-              <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-xl w-full">
+              <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-shape-md w-full">
                 <Truck className="w-6 h-6 text-text-primary shrink-0" />
                 <span className="font-heading font-semibold text-text-primary">Registrar Proveedor</span>
               </div>
@@ -63,9 +63,9 @@ export default function Home() {
               variant="primary"
               size="md"
               onClick={() => navigate("/inventoryCreate")}
-              className="w-full justify-start p-2 h-auto rounded-2xl shadow-sm border border-border hover:border-brand transition-all cursor-pointer"
+              className="w-full justify-start p-2 h-auto rounded-shape-lg shadow-elevation-1 border border-border hover:border-border-strong transition-all cursor-pointer"
             >
-              <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-xl w-full">
+              <div className="flex items-center gap-4 p-3 bg-brand-soft rounded-shape-md w-full">
                 <Package className="w-6 h-6 text-text-primary shrink-0" />
                 <span className="font-heading font-semibold text-text-primary">Nuevo Producto</span>
               </div>
@@ -75,7 +75,7 @@ export default function Home() {
       </div>
 
       {/* Platillos más vendidos */}
-      <div className="rounded-xl bg-surface/40 dark:bg-surface/80 backdrop-blur-md p-6 shadow-lg border border-border">
+      <div className="rounded-shape-md bg-surface/40 dark:bg-surface/80 backdrop-blur-md p-4 sm:p-6 shadow-elevation-3 border border-border">
         <h2 className="text-title font-heading font-bold mb-4 text-text-primary">Platillos más vendidos</h2>
 
         {loading ? (

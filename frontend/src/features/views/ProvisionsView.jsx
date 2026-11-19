@@ -58,7 +58,7 @@ export default function ProvisionsView() {
   };
 
   return (
-    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <UtensilsCrossed className="w-9 h-9 text-text-primary" />
@@ -71,7 +71,7 @@ export default function ProvisionsView() {
       <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Columna 1: Estado General y Acciones */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">
           <div className="w-full flex flex-col items-center gap-3">
             <p className="text-text-primary font-heading font-bold text-md">
               Estado
@@ -97,20 +97,20 @@ export default function ProvisionsView() {
         </div>
 
         {/* Columna 2, 3 y 4: Información Detallada */}
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6">
+        <div className="lg:col-span-3 bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6">
           
           {/* Tarjeta Compacta del Suministro */}
-          <div className="w-full max-w-xs bg-surface rounded-2xl p-4 flex flex-col items-center text-center shadow-md border border-border/30">
+          <div className="w-full max-w-xs bg-surface rounded-shape-lg p-4 flex flex-col items-center text-center shadow-elevation-2 border border-border/30">
             {/* Avatar / Imagen Dinámica Compacta */}
             <div className="mb-2 flex items-center justify-center">
               {provision.image || provision.imageUrl ? (
                 <img
                   src={provision.image || provision.imageUrl}
                   alt={provisionName}
-                  className="w-14 h-14 object-cover shadow-md border-2 border-white/50"
+                  className="w-14 h-14 object-cover shadow-elevation-2 border-2 border-white/50"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-[#ec4899] text-white font-black text-xl flex items-center justify-center shadow-md uppercase select-none">
+                <div className="w-14 h-14 rounded-full bg-[#ec4899] text-text-on-brand font-black text-xl flex items-center justify-center shadow-elevation-2 uppercase select-none">
                   {getInitials(provisionName)}
                 </div>
               )}
@@ -125,7 +125,7 @@ export default function ProvisionsView() {
           </div>
 
           {/* Formulario de Información (Inputs deshabilitados) */}
-          <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="w-full bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Nombre del Suministro"
               value={provisionName}

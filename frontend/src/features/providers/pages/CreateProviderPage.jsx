@@ -75,16 +75,16 @@ export default function CreateProviderPage() {
   };
 
   return (
-    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       <div className="w-full max-w-6xl mx-auto p-4">
         <div className="flex items-center gap-3 mb-6">
-          <Truck className="w-8 h-8 text-text-primary/" />
-          <h1 className="text-main font-heading font-bold text-text-primary/">
+          <Truck className="w-8 h-8 text-text-primary" />
+          <h1 className="text-main font-heading font-bold text-text-primary">
             Registrar proveedor nuevo
           </h1>
         </div>
 
-        <div className="bg-surface rounded-3xl p-8 shadow-sm">
+        <div className="bg-surface rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1">
           <ProviderForm
             mode="create"
             documentTypes={documentTypes}

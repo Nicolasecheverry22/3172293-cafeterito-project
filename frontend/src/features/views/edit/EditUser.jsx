@@ -136,7 +136,7 @@ export default function EditUser() {
   };
 
   return (
-    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-2 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-2 border border-border/40 shadow-elevation-3">
 
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <Pencil className="w-9 h-9 text-text-primary" />
@@ -148,7 +148,7 @@ export default function EditUser() {
       <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         <div className="flex flex-col gap-6">
-          <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+          <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
             <p className="text-text-primary font-heading font-bold text-lg">Estado</p>
             <StatusSwitch
               size="lg"
@@ -158,7 +158,7 @@ export default function EditUser() {
           </div>
 
           {/* Roles = grupos de la BD (mismo criterio que en el registro) */}
-          <div className="bg-surface-inverse/70 p-6 rounded-2xl text-text-inverse space-y-3 shadow-inner">
+          <div className="bg-surface-inverse/70 p-4 sm:p-6 rounded-shape-lg text-text-inverse space-y-3 shadow-inner">
             <h3 className="font-heading text-subtitle mb-2">Tipo de Usuario:</h3>
             {groups.map((group) => (
               <Checkbox
@@ -171,12 +171,12 @@ export default function EditUser() {
               />
             ))}
             {errors.groupNames && (
-              <span className="text-error text-caption block">{errors.groupNames}</span>
+              <span className="text-error text-small block">{errors.groupNames}</span>
             )}
           </div>
         </div>
 
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col gap-8">
+        <div className="lg:col-span-3 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1 border border-border/50 flex flex-col gap-8">
 
           <div className="w-full flex flex-col items-center">
             <FileInput
@@ -186,7 +186,7 @@ export default function EditUser() {
             />
           </div>
 
-          <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Select
               label="Tipo de Documento"
               name="userDocumentTypes"
@@ -231,7 +231,7 @@ export default function EditUser() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-center justify-end border-t border-border/40 pt-6">
+          <div className="flex gap-4 items-center justify-end border-t border-border/40 pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
             <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>

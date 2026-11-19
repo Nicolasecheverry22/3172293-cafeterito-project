@@ -23,33 +23,33 @@ export default function MenuRowActions({ product, onChanged }) {
     });
 
   return (
-    <div className="flex gap-2">
+    <div className="row-actions">
       <button
         onClick={() => navigate(`/ProductView/${product.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Visualizar platillo"
       >
-        <Eye size={16} />
+        <Eye size={20} />
       </button>
 
       <button
         onClick={() => navigate(`/EditProduct/${product.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar platillo"
       >
-        <Pencil size={16} />
+        <Pencil size={20} />
       </button>
 
       <button
         onClick={handleToggleStatus}
-        className={`p-1 rounded hover:bg-surface-muted cursor-pointer ${
+        className={`row-actions__btn touch-target hover:bg-surface-muted cursor-pointer ${
           isAvailable
-            ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+            ? "text-success"
+            : "text-error"
         }`}
-        title={isAvailable ? "Inhabilitar platillo" : "Habilitar platillo"}
+        title={isAvailable ? "Disponible — clic para inhabilitar" : "Inhabilitado — clic para habilitar"}
       >
-        {isAvailable ? <PowerOff size={16} /> : <Power size={16} />}
+        {isAvailable ? <Power size={20} /> : <PowerOff size={20} />}
       </button>
     </div>
   );

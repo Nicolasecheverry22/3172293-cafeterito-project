@@ -23,33 +23,33 @@ export default function UserRowActions({ user, onChanged }) {
     });
 
   return (
-    <div className="flex gap-2">
+    <div className="row-actions">
       <button
         onClick={() => navigate(`/UserView/${user.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Visualizar usuario"
       >
-        <Eye size={16} />
+        <Eye size={20} />
       </button>
 
       <button
         onClick={() => navigate(`/EditUser/${user.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar usuario"
       >
-        <Pencil size={16} />
+        <Pencil size={20} />
       </button>
 
       <button
         onClick={handleToggleStatus}
-        className={`p-1 rounded hover:bg-surface-muted cursor-pointer ${
+        className={`row-actions__btn touch-target hover:bg-surface-muted cursor-pointer ${
           isActive
-            ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+            ? "text-success"
+            : "text-error"
         }`}
-        title={isActive ? "Deshabilitar usuario" : "Habilitar usuario"}
+        title={isActive ? "Activo — clic para deshabilitar" : "Inactivo — clic para habilitar"}
       >
-        {isActive ? <PowerOff size={16} /> : <Power size={16} />}
+        {isActive ? <Power size={20} /> : <PowerOff size={20} />}
       </button>
     </div>
   );

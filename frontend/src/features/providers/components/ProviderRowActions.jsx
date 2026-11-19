@@ -23,33 +23,33 @@ export default function ProviderRowActions({ provider, onChanged }) {
     });
 
   return (
-    <div className="flex gap-2">
+    <div className="row-actions">
       <button
         onClick={() => navigate(`/ProviderView/${provider.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Visualizar proveedor"
       >
-        <Eye size={16} />
+        <Eye size={20} />
       </button>
 
       <button
         onClick={() => navigate(`/EditProvider/${provider.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar proveedor"
       >
-        <Pencil size={16} />
+        <Pencil size={20} />
       </button>
 
       <button
         onClick={handleToggleStatus}
-        className={`p-1 rounded hover:bg-surface-muted cursor-pointer ${
+        className={`row-actions__btn touch-target hover:bg-surface-muted cursor-pointer ${
           isActive
-            ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            : "text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+            ? "text-success"
+            : "text-error"
         }`}
-        title={isActive ? "Inhabilitar proveedor" : "Habilitar proveedor"}
+        title={isActive ? "Activo — clic para inhabilitar" : "Inactivo — clic para habilitar"}
       >
-        {isActive ? <PowerOff size={16} /> : <Power size={16} />}
+        {isActive ? <Power size={20} /> : <PowerOff size={20} />}
       </button>
     </div>
   );

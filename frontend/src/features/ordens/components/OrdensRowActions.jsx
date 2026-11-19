@@ -25,40 +25,40 @@ export default function OrdensRowActions({ order, onChanged }) {
     });
 
   return (
-    <div className="flex gap-1.5 items-center">
+    <div className="row-actions">
       <button
         onClick={() => navigate(`/OrderView/${order.id}`)}
         title="Visualizar orden"
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
       >
-        <Eye size={16} />
+        <Eye size={20} />
       </button>
 
       {isOpen && (
         <button
           onClick={() => navigate(`/EditOrder/${order.id}`)}
           title="Editar orden"
-          className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+          className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         >
-          <Pencil size={16} />
+          <Pencil size={20} />
         </button>
       )}
 
       <button
         onClick={() => setOpen(true)}
         title="Ver detalles completos"
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
       >
-        <FileText size={16} />
+        <FileText size={20} />
       </button>
 
       {isOpen && (
         <button
           onClick={handleCancel}
           title="Anular orden"
-          className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer transition-colors"
+          className="row-actions__btn touch-target hover:bg-error-container text-error hover:text-on-error-container cursor-pointer transition-colors"
         >
-          <Ban size={16} />
+          <Ban size={20} />
         </button>
       )}
 

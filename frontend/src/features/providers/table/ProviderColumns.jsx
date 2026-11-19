@@ -11,7 +11,7 @@ export const getProviderColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("nit")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>NIT</span>
         {sortConfig.key === "nit" ? (
@@ -30,7 +30,7 @@ export const getProviderColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("providerName")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Nombre</span>
         {sortConfig.key === "providerName" ? (

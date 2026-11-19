@@ -192,7 +192,7 @@ export default function EditProvisions() {
   };
 
   return (
-    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
         <Pencil className="w-8 h-8 text-text-primary" />
         <h1 className="text-2xl font-heading font-bold text-text-primary">
@@ -328,13 +328,13 @@ export default function EditProvisions() {
               }
             />
             {errors.provisionImage && (
-              <span className="text-error text-caption block mt-1">
+              <span className="text-error text-small block mt-1">
                 {errors.provisionImage}
               </span>
             )}
           </div>
 
-          <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40">
+          <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
             <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>

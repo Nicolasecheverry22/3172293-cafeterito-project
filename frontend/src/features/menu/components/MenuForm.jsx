@@ -70,7 +70,7 @@ export default function MenuForm({
             multiple={false}
             accept="image/*"
           />
-          {errors.imagen && <span className="text-error text-caption mt-1">{errors.imagen}</span>}
+          {errors.imagen && <span className="text-error text-small mt-1">{errors.imagen}</span>}
         </div>
 
         <div className="flex items-center gap-4 mt-2">
@@ -124,7 +124,7 @@ export default function MenuForm({
           />
         </div>
 
-        <div className="flex justify-end gap-4 mt-12 pt-6">
+        <div className="flex justify-end gap-4 mt-12 pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
           <Button type="button" variant="secondary" onClick={onCancel} className="px-10">
             Cancelar
           </Button>
@@ -132,7 +132,7 @@ export default function MenuForm({
             type="submit"
             variant="primary"
             disabled={isSubmitting}
-            className="w-full md:w-auto px-14 font-bold shadow-sm"
+            className="w-full md:w-auto px-14 font-bold shadow-elevation-1"
           >
             {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Platillo"}
           </Button>

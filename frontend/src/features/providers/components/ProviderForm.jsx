@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { Input, Select, Checkbox, Button, FileInput, StatusSwitch } from "@/shared";
 import { createProviderSchema } from "../schemas/providerSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
@@ -208,7 +207,7 @@ export default function ProviderForm({
       </div>
 
       <div className="flex flex-col justify-between h-full">
-        <div className="bg-surface-inverse/70 p-6 rounded-2xl text-text-inverse space-y-3 shadow-inner">
+        <div className="bg-surface-inverse/70 p-4 sm:p-6 rounded-shape-lg text-text-inverse space-y-3 shadow-inner">
           <h3 className="font-heading text-subtitle mb-2">Producto que suministra:</h3>
 
           {PRODUCT_CHECKBOXES.map(({ name, label }) => (
@@ -216,11 +215,11 @@ export default function ProviderForm({
           ))}
 
           {errors.productFood && (
-            <span className="text-error text-caption block">{errors.productFood}</span>
+            <span className="text-error text-small block">{errors.productFood}</span>
           )}
         </div>
 
-        <div className="flex gap-4 items-center justify-end mt-4">
+        <div className="flex gap-4 items-center justify-end mt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>
@@ -228,7 +227,7 @@ export default function ProviderForm({
             type="submit" 
             variant="primary" 
             disabled={isSubmitting}
-            className="w-full md:w-auto px-10 font-bold shadow-sm"
+            className="w-full md:w-auto px-10 font-bold shadow-elevation-1"
           >
             {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Proveedor"}
           </Button>

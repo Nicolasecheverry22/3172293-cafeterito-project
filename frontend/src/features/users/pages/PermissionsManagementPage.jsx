@@ -22,7 +22,7 @@ import {
 } from "@/shared/services/alertService";
 
 const SELECT_CLASSES =
-  "w-full appearance-none bg-brand text-text-on-brand h-12 px-6 rounded-full font-bold outline-none cursor-pointer shadow-md hover:brightness-95 transition-all";
+  "w-full appearance-none bg-brand text-text-on-brand h-12 px-6 rounded-full font-bold outline-none cursor-pointer shadow-elevation-2 hover:brightness-95 transition-all";
 
 // Agrupa el catálogo plano de permisos por módulo (content_type).
 const groupByModule = (permissions) => {
@@ -219,13 +219,13 @@ export default function PermissionsManagementPage() {
   };
 
   return (
-    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-4 border border-border/40 shadow-2xl">
-      <div className="w-full px-6 md:px-12 pt-8">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-4 border border-border/40 shadow-elevation-3">
+      <div className="w-full px-0 sm:px-6 md:px-12 pt-4 sm:pt-8">
         <div className="mx-auto">
           <div className="flex items-center gap-4 mb-8">
             <div>
-              <h1 className="text-main font-heading font-bold text-text-primary/ flex items-center gap-3">
-                <UserRoundKey className="w-8 h-8 text-text-primary/" />
+              <h1 className="text-main font-heading font-bold text-text-primary flex items-center gap-3">
+                <UserRoundKey className="w-8 h-8 text-text-primary" />
                 Gestión de Permisos
               </h1>
               <p className="text-body text-text-inverse/40 mt-1">
@@ -242,7 +242,7 @@ export default function PermissionsManagementPage() {
               <div className="flex flex-col gap-2 relative">
                 <label
                   htmlFor="permissions-group"
-                  className="text-body text-text-primary/ font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]"
+                  className="text-body text-text-primary font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]"
                 >
                   Grupos usuarios
                 </label>
@@ -267,7 +267,7 @@ export default function PermissionsManagementPage() {
               <div className="flex flex-col gap-2 relative">
                 <label
                   htmlFor="permissions-user"
-                  className="text-body text-text-primary/ font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]"
+                  className="text-body text-text-primary font-bold border-b border-border-strong pb-1 w-full text-center mx-auto max-w-[80%]"
                 >
                   Usuario individual
                 </label>
@@ -298,7 +298,7 @@ export default function PermissionsManagementPage() {
             </div>
 
             <div
-              className={`lg:col-span-3 bg-surface-muted/50 rounded-2xl p-8 md:p-10 shadow-inner border border-border transition-opacity ${
+              className={`lg:col-span-3 bg-surface-muted/50 rounded-shape-lg p-4 sm:p-6 md:p-8 md:p-10 shadow-inner border border-border transition-opacity ${
                 isLoading ? "opacity-60" : ""
               }`}
             >
@@ -358,7 +358,7 @@ export default function PermissionsManagementPage() {
               ))}
             </div>
 
-            <div className="lg:col-span-4 mt-6 flex justify-end gap-4 border-t border-border pt-6">
+            <div className="lg:col-span-4 mt-6 flex justify-end gap-4 border-t border-border pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
               <Button variant="secondary" type="button" onClick={handleCancel}>
                 Cancelar
               </Button>

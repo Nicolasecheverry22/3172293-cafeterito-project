@@ -5,9 +5,9 @@ import { ClipboardList, SquarePen } from "lucide-react";
 import { getOrderById } from "@/services/orderApi";
 
 const STATUS_STYLES = {
-  activa: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700",
-  pagada: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700",
-  cancelada: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700",
+  activa: "bg-warning-container text-on-warning-container border-warning/30",
+  pagada: "bg-success-container text-on-success-container border-success/30",
+  cancelada: "bg-error-container text-on-error-container border-error/30",
 };
 
 const formatCurrency = (amount) =>
@@ -57,7 +57,7 @@ export default function OrderView() {
   const status = order.status?.toLowerCase() ?? "";
 
   return (
-    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-4 mt-4 mb-6 flex items-center gap-3">
         <ClipboardList className="w-9 h-9 text-text-primary" />
@@ -69,12 +69,12 @@ export default function OrderView() {
       <div className="max-w-7xl w-full mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         {/* Columna 1: Estado General y Acciones */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">
           <div className="w-full flex flex-col items-center gap-3">
             <p className="text-text-primary font-heading font-bold text-md">Estado</p>
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border capitalize ${
-                STATUS_STYLES[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700"
+                STATUS_STYLES[status] || "bg-surface-muted text-text-primary border-border"
               }`}
             >
               {order.status}
@@ -97,10 +97,10 @@ export default function OrderView() {
         </div>
 
         {/* Columnas 2-4: Información Detallada */}
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6">
+        <div className="lg:col-span-3 bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6">
 
           {/* Datos Generales */}
-          <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="w-full bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 border border-border/40 grid grid-cols-1 md:grid-cols-3 gap-6">
             <Input label="Número de Mesa" value={`Mesa ${order.tableNumber ?? "-"}`} disabled />
             <Input label="Mesero Asignado" value={order.waiter || "Sin asignar"} disabled />
             <Input label="Fecha" value={formatDate(order.createdAt)} disabled />
@@ -110,7 +110,7 @@ export default function OrderView() {
           </div>
 
           {/* Tabla de Platillos */}
-          <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 space-y-4">
+          <div className="w-full bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 border border-border/40 space-y-4">
             <h3 className="text-lg font-heading font-bold text-text-primary">
               Detalle de Platillos
             </h3>
