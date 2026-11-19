@@ -1,5 +1,5 @@
-// Hooks de react para manerjar estados y efectos
-import { useState, useEffect } from "react";
+// Hook de React para manejar el estado
+import { useState } from "react";
 
 // Iconos usados dentro del switch
 import { Check, X } from "lucide-react";
@@ -16,11 +16,14 @@ export default function StatusSwitch({
   // Se inicializa con el valor recibido desde la prop "checked"
   const [isActive, setIsActive] = useState(checked);
 
-  // Efecto que sincroniza el estado interno
-  // con el valor recibido desde el componente padre
-  useEffect(() => {
+  // Sincroniza el estado interno cuando el padre cambia "checked".
+  // Patrón recomendado por React ("ajustar estado al cambiar una prop"): se hace
+  // durante el render en lugar de en un useEffect, que provocaba un render extra.
+  const [prevChecked, setPrevChecked] = useState(checked);
+  if (checked !== prevChecked) {
+    setPrevChecked(checked);
     setIsActive(checked);
-  }, [checked]); // Se ejecuta cada vez que cambia "checked"
+  }
 
   // Función que maneja el cambio del switch
   const handleToggle = () => {
@@ -41,63 +44,61 @@ export default function StatusSwitch({
     }
   };
 
-  // Clases de tamaño del contenedor del switch
+  // Track: md = 52×32 (M3). Knob con 4px de margen a cada lado.
   const sizes = {
-    sm: "h-5 w-9",
-    md: "h-6 w-11",
-    lg: "h-7 w-14",
+    sm: "h-6 w-10",  // 40×24 (versión compacta para tablas)
+    md: "h-8 w-13",  // 52×32 (M3)
+    lg: "h-9 w-16",  // 64×36
   };
 
-  // Clases de tamaño del "knob" (el circulo que se mueve)
+  // Knob (el círculo que se mueve)
   const knobSizes = {
-    sm: "h-4 w-4",
-    md: "h-5 w-5",
-    lg: "h-6 w-6",
+    sm: "h-4 w-4",   // 16px
+    md: "h-6 w-6",   // 24px (M3, estado seleccionado)
+    lg: "h-7 w-7",   // 28px
   };
+
+  // Desplazamiento = ancho del track − knob − 2 × 4px de margen
+  const knobOffsets = {
+    sm: "translate-x-4", // 40 − 16 − 8 = 16px
+    md: "translate-x-5", // 52 − 24 − 8 = 20px
+    lg: "translate-x-7", // 64 − 28 − 8 = 28px
+  };
+
+  const iconSizes = { sm: 12, md: 16, lg: 18 };
 
   return (
 
     // Botón que funciona como switch
     <button
         type="button"
+        role="switch"            // Lectores de pantalla: "interruptor, activado/desactivado"
+        aria-checked={isActive}
         onClick={handleToggle}  // Evento que cambia el estado
         disabled={disabled}     // Permite deshabilitar el botón
+        // Los comentarios // dentro del template literal acababan como clases basura:
+        // ahora van fuera. touch-target: área táctil de 48px (global.css).
+        // Colores semánticos: activo = success; inactivo = border-strong (≥ 3:1 sobre el fondo).
         className={`
-        
-            // Posicionamiento base del switch
-            relative inline-flex items-center
-            
-            // Forma redondeada del contenedor
+            touch-target inline-flex items-center
             rounded-full transition-colors
-            
-            // Tamaño dinámico según la prop "size"
-            ${sizes[size]}
-            
-            // Color dependiendo del estado
-            ${isActive ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}
-            
-            // Estilo cuando está deshabilitado
-            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2
+            ${sizes[size] || sizes.md}
+            ${isActive ? "bg-success" : "bg-border-strong"}
+            ${disabled ? "opacity-disabled cursor-not-allowed" : "cursor-pointer"}
         `}
     >
         {/*
-            "Knob" del switch (el círculo que se mueve de izquierda a derecha)
+            "Knob" del switch (el círculo que se mueve de izquierda a derecha).
+            Usa el color de fondo: blanco en claro, casi negro en oscuro (como M3).
         */}
         <span
             className={`
-            absolute left-0.5 flex items-center justify-center
-            
-            // Forma del knob
-            rounded-full bg-white shadow
-
-            // Animación de movimiento
+            absolute left-1 flex items-center justify-center
+            rounded-full bg-background shadow-elevation-1
             transition-transform
-
-            // Tamaño dinámico del knob
-            ${knobSizes[size]}
-
-            // Posici+on dependiendo del estado
-            ${isActive ? "translate-x-full" : "translate-x-0"}
+            ${knobSizes[size] || knobSizes.md}
+            ${isActive ? knobOffsets[size] || knobOffsets.md : "translate-x-0"}
         `}
         >
 
@@ -107,9 +108,9 @@ export default function StatusSwitch({
             ✕ inactivo
         */}
         {isActive ? (
-            <Check size={12} className="text-green-600" />
+            <Check size={iconSizes[size] || 16} className="text-success" />
         ) : (
-            <X size={12} className="text-gray-500" />
+            <X size={iconSizes[size] || 16} className="text-text-secondary" />
         )}
         </span>
 

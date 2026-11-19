@@ -7,7 +7,9 @@ import {
   cloneElement
 } from "react"
 
-export const DropdownContext = createContext(null)
+// Sin export: solo lo usan los componentes de este archivo, y exportarlo
+// rompía el Fast Refresh de Vite (react-refresh/only-export-components)
+const DropdownContext = createContext(null)
 
 export function Dropdown({
   children,
@@ -30,26 +32,31 @@ export function Dropdown({
 
   const containerRef = useRef(null)
 
-  // Click outside
+  // Los listeners se registran una sola vez y capturaban el setOpen del primer
+  // render (en modo controlado llamaban a un onOpenChange viejo). La ref siempre
+  // apunta a la versión actual.
+  const setOpenRef = useRef(setOpen)
+  useEffect(() => {
+    setOpenRef.current = setOpen
+  })
+
+  // Click outside + tecla Escape
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false)
+        setOpenRef.current(false)
       }
+    }
+    const handleEscape = (e) => {
+      if (e.key === "Escape") setOpenRef.current(false)
     }
 
     document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  // Escape key
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape") setOpen(false)
-    }
-
     document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleEscape)
+    }
   }, [])
 
   return (
@@ -91,9 +98,9 @@ export function DropdownContent({ children, className = "" }) {
         bg-background
         border border-border
         text-text-primary
-        p-1
-        shadow-lg
-        rounded-xl
+        py-2
+        shadow-elevation-2
+        rounded-shape-xs
         overflow-hidden
         z-50
         ${className}
@@ -121,8 +128,8 @@ export function DropdownItem({
       role="menuitem"
       onClick={handleClick}
       className={`
-        w-full text-left px-3 py-2 rounded-md
-        hover:bg-surface-muted focus:bg-surface-muted
+        w-full min-h-touch flex items-center text-left px-3
+        hover:bg-surface-muted focus:bg-surface-muted focus:outline-none
         transition-colors
         ${className}
       `}

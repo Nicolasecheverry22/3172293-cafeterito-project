@@ -14,7 +14,8 @@ export default function DashboardLayout() {
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+        {/* Márgenes M3: 16px en compact (< 600px), 24px desde medium */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
           <Outlet />
         </main>
 

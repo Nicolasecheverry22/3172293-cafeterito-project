@@ -5,12 +5,13 @@ import { Search, X, LoaderCircle } from "lucide-react";
 import clsx from "clsx";
 
 const baseStyles =
-    "search flex items-center rounded-xl px-3 transition-all border";
+    "search flex items-center rounded-shape-full px-4 transition-all border";
 
+// M3 search bar: 56px; md cumple el mínimo táctil de 48px
 const sizeStyles = {
-    sm: "h-9 text-sm",
-    md: "h-11 text-sm",
-    lg: "h-12 text-base",
+    sm: "h-10 text-sm",
+    md: "h-12 text-sm",
+    lg: "h-14 text-base",
 };
 
 const variantStyles = {
@@ -98,7 +99,7 @@ const SearchField = forwardRef(
                         type="button"
                         onClick={handleClear}
                         aria-label="Limpiar búsqueda"
-                        className="search__clear rounded-full p-1 hover:bg-surface-muted"
+                        className="search__clear touch-target rounded-full p-1 hover:bg-surface-muted"
                     >
                         <X className="size-4 text-text-muted" />
                     </button>

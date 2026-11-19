@@ -13,7 +13,8 @@ export default function MainLayout() {
       <div className="min-h-screen w-full flex flex-col bg-black/55 backdrop-brightness-75 z-0">
         <SessionTimeout />
         <FormNavbar />
-        <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
+        {/* Márgenes M3: 16px en compact (< 600px), 24px desde medium */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8">
           <Outlet />
         </main>
       </div>

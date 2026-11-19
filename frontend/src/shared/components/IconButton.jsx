@@ -37,7 +37,7 @@ export const IconButton = React.forwardRef(function IconButton(
         rounded-full
         transition-colors duration-200
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-        disabled:opacity-50 disabled:pointer-events-none
+        disabled:opacity-disabled disabled:pointer-events-none
     `;
 
     const variants = {
@@ -53,9 +53,9 @@ export const IconButton = React.forwardRef(function IconButton(
             focus-visible:ring-focus-ring
         `,
         primary: `
-            text-white bg-blue-600
-            hover:bg-blue-700
-            focus-visible:ring-blue-500
+            text-text-on-brand bg-brand
+            hover:bg-brand-hover
+            focus-visible:ring-focus-ring
         `,
     };
 
