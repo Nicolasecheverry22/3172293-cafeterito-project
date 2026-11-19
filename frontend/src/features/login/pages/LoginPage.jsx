@@ -1,9 +1,13 @@
 import LoginForm from "../components/LoginForm";
 import { login as loginRequest } from "@/features/login/services/authService";
-import authBg from "@/assets/images/bg-1.png";
-import imageLogin from "@/assets/images/image-login.png";
+import imageLoginLight from "@/assets/images/image-login.png";
+import imageLoginDark from "@/assets/images/image-login__black.png";
+import useTheme from "@/shared/theme/useTheme";
 
 export default function LoginPage() {
+  const { theme } = useTheme();
+  const imageLogin = theme === "dark" ? imageLoginDark : imageLoginLight;
+
   const handleLoginSubmit = async (credentials) => {
     // authService guarda el token y el usuario en la sesión
     await loginRequest({
@@ -15,31 +19,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4"
-        style={{
-          backgroundImage: `url(${authBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-background rounded-2xl shadow-xl overflow-hidden">
-        <div className="hidden md:flex md:w-1/2 items-center justify-center p-8">
-          <div className="w-full max-w-sm flex justify-center">
-            <img src={imageLogin} alt="Ilustración de login" className="w-full h-auto object-contain" />
-          </div>
+    // AuthLayout ya pone el fondo, el centrado y el alto de pantalla: aquí solo va la tarjeta.
+    <div className="flex flex-col md:flex-row w-full max-w-5xl bg-background rounded-shape-xl shadow-elevation-3 overflow-hidden">
+      <div className="hidden md:flex md:w-1/2 items-center justify-center p-8">
+        <div className="w-full max-w-sm flex justify-center">
+          <img src={imageLogin} alt="Ilustración de login" className="w-full h-auto max-h-[50dvh] object-contain" />
         </div>
+      </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-16">
-          <h2 className="text-display font-heading text-text-primary mb-1">
-            Te damos la Bienvenida
-          </h2>
-          <p className="text-body text-text-secondary mb-8">
-            Inicia sesión<br />
-            Y disfruta la experiencia
-          </p>
+      <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-12">
+        {/* M3 headline-l (32/40) en lugar de display (48px), que partía el título en dos líneas */}
+        <h2 className="text-main leading-10 font-heading text-text-primary mb-2">
+          Te damos la Bienvenida
+        </h2>
+        <p className="text-body text-text-secondary mb-6">
+          Inicia sesión<br />
+          Y disfruta la experiencia
+        </p>
 
-          <LoginForm onSubmit={handleLoginSubmit} />
-        </div>
+        <LoginForm onSubmit={handleLoginSubmit} />
       </div>
     </div>
   );

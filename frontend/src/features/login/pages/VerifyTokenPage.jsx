@@ -67,68 +67,67 @@ const handleResend = async () => {
 };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 bg-surface-muted/30">
-            
-            <div className="w-full max-w-3xl bg-background rounded-2xl shadow-xl overflow-hidden relative p-8 md:p-16 flex flex-col items-center justify-center ">
-                
-                <button 
-                    type="button"
-                    onClick={() => navigate(-1)}
-                    className="absolute top-6 left-6 p-2 text-text-primary hover:text-brand transition-colors z-10 cursor-pointer"
-                    aria-label="Volver"
-                >
-                    <ArrowLeft className="w-8 h-8 stroke-[2.5]" />
-                </button>
+        // AuthLayout ya pone el fondo, el centrado y el alto de pantalla: aquí solo va la tarjeta.
+        // pt-20 en móvil deja sitio al botón Volver.
+        <div className="w-full max-w-3xl bg-background rounded-shape-xl shadow-elevation-3 overflow-hidden relative px-6 pb-6 pt-20 md:p-12 flex flex-col items-center justify-center">
 
-                <div className="w-full max-w-md flex flex-col items-center text-center">
-                    
-                    <h2 className="text-display font-heading font-bold text-text-primary mb-4">
-                        Enviamos un token a tu correo
-                    </h2>
-                    
-                    <p className="text-body text-text-secondary mb-10">
-                        Ingresa el código más reciente que te enviamos a tu correo:
-                    </p>
+            <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="absolute top-4 left-4 size-touch flex items-center justify-center rounded-full text-text-primary hover:bg-surface-muted transition-colors z-10 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                aria-label="Volver"
+            >
+                <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
+            </button>
 
-                    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-8">
-                        <div className="flex flex-col gap-1 text-left">
-                            <Input 
-                                type="text" 
-                                name="token"
-                                value={formData.token}
-                                onChange={handleChange}
-                                placeholder="Ingrese su token" 
-                                className="text-center tracking-widest" 
-                            />
-                            {errors.token && (
-                                <span className="text-xs text-error font-medium ml-1 text-center">
-                                    {errors.token}
-                                </span>
-                            )}
-                        </div>
+            <div className="w-full max-w-md flex flex-col items-center text-center">
 
-                        <div className="flex justify-center mt-2 w-full">
-                            <Button variant="primary" type="submit" size="md">
-                                Continuar
-                            </Button>
-                        </div>
-                    </form>
+                <h2 className="text-main leading-10 font-heading text-text-primary mb-2">
+                    Enviamos un token a tu correo
+                </h2>
 
-                    <div className="mt-10 flex flex-col items-center gap-2">
-                        <p className="text-small text-text-muted">
-                            ¿No recibiste el código?
-                        </p>
-                        
-                        <button 
-                            type="button"
-                            className="text-small text-text-primary font-bold cursor-pointer hover:underline focus:outline-none"
-                            onClick={handleResend}
-                        >
-                            Solicitar un nuevo código
-                        </button>
+                <p className="text-body text-text-secondary mb-6">
+                    Ingresa el código más reciente que te enviamos a tu correo:
+                </p>
+
+                <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+                    <div className="flex flex-col gap-1 text-left">
+                        <Input
+                            type="text"
+                            name="token"
+                            value={formData.token}
+                            onChange={handleChange}
+                            placeholder="Ingrese su token"
+                            className="text-center tracking-widest"
+                        />
+                        {errors.token && (
+                            <span className="text-small text-error px-4 text-center">
+                                {errors.token}
+                            </span>
+                        )}
                     </div>
 
+                    <div className="flex justify-center w-full">
+                        <Button variant="primary" type="submit" size="md">
+                            Continuar
+                        </Button>
+                    </div>
+                </form>
+
+                <div className="mt-6 flex flex-col items-center gap-1">
+                    <p className="text-small text-text-muted">
+                        ¿No recibiste el código?
+                    </p>
+
+                    <button
+                        type="button"
+                        className="inline-flex items-center min-h-touch px-2 text-small text-text-primary font-bold cursor-pointer hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+                        onClick={handleResend}
+                    >
+                        Solicitar un nuevo código
+                    </button>
                 </div>
+
             </div>
         </div>
     );

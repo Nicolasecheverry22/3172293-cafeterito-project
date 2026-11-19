@@ -35,7 +35,7 @@ export default function ForgotPasswordForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <Input
           type="email"
@@ -46,17 +46,15 @@ export default function ForgotPasswordForm({ onSubmit }) {
           disabled={isSubmitting}
         />
         {errors.email && (
-          <span className="text-xs text-error font-medium ml-1">
+          <span className="text-small text-error px-4">
             {errors.email}
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-4 mt-4">
-        <Button variant="primary" type="submit" size="md" disabled={isSubmitting}>
-          {isSubmitting ? "Enviando..." : "Continuar"}
-        </Button>
-      </div>
+      <Button variant="primary" type="submit" size="md" disabled={isSubmitting}>
+        {isSubmitting ? "Enviando..." : "Continuar"}
+      </Button>
     </form>
   );
 }

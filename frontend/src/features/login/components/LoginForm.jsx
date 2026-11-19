@@ -50,7 +50,7 @@ export default function LoginForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
         name="email" // 👈 Cambiado a email
         type="email" // 👈 Tipo email para validación nativa
@@ -87,16 +87,14 @@ export default function LoginForm({ onSubmit }) {
         />
       </div>
 
-      <div className="flex flex-col gap-4 mt-4">
-        <Button variant="primary" type="submit" size="md" disabled={isLocked || isSubmitting}>
-          {isSubmitting ? "Validando..." : "Iniciar Sesión"}
-        </Button>
-      </div>
+      <Button variant="primary" type="submit" size="md" disabled={isLocked || isSubmitting}>
+        {isSubmitting ? "Validando..." : "Iniciar Sesión"}
+      </Button>
 
-      <div className="text-center mt-6">
+      <div className="text-center">
         <Link
           to="/auth/resetPassword"
-          className="text-small text-text-muted hover:text-text-primary hover:underline transition-colors"
+          className="inline-flex items-center min-h-touch px-2 text-small text-text-muted hover:text-text-primary hover:underline transition-colors"
         >
           Olvidé mi contraseña
         </Link>
