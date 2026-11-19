@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useState } from "react";
+import useDialogA11y from "@/shared/hooks/useDialogA11y";
 
 // Componentes UI reutilizables
 import { Button, Select } from "@/shared";
@@ -20,7 +22,9 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const [format, setFormat] = useState("pdf");
   const [scope, setScope] = useState("all");
   const [category, setCategory] = useState("");
-  const [status, setStatus] = useState("Activo");
+  // "" y no "Activo": selectedStatus se envía siempre, y el antiguo useEffect lo vaciaba
+  // al montar (scope = "all"). Así se conserva ese comportamiento sin el efecto.
+  const [status, setStatus] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const inventoryReportFields = [
@@ -36,10 +40,16 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     inventoryReportFields.filter((f) => f.default)
   );
 
-  useEffect(() => {
-    if (scope !== "category") setCategory("");
-    if (scope !== "status") setStatus("");
-  }, [scope]);
+  // Al cambiar el alcance se limpian los filtros que ya no aplican. Antes se hacía en un
+  // useEffect (setState dentro de un efecto = render extra; lo marca react-hooks).
+  const handleScopeChange = (value) => {
+    setScope(value);
+    if (value !== "category") setCategory("");
+    if (value !== "status") setStatus("");
+  };
+
+  // Escape, foco inicial, Tab atrapado y foco devuelto al cerrar
+  const dialogRef = useDialogA11y(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -125,9 +135,11 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-surface/90 text-text-primary p-6 shadow-lg dark:bg-surface/95">
+  // Portal a <body>: la tarjeta de la página usa backdrop-blur, y backdrop-filter
+  // convierte a sus hijos position:fixed en relativos a ella (el modal salía cortado bajo el Navbar)
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-shape-xl bg-surface/90 text-text-primary p-6 shadow-elevation-3 dark:bg-surface/95">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de inventario
         </h2>
@@ -173,7 +185,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           <Select
             label="Alcance del reporte"
             value={scope}
-            onChange={(e) => setScope(e.target.value)}
+            onChange={(e) => handleScopeChange(e.target.value)}
             options={[
               { label: "Todo el inventario", value: "all" },
               { label: "Filtrar por categoría", value: "category" },
@@ -216,7 +228,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         )}
 
         {/* Acciones */}
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex flex-wrap justify-end gap-2 mt-6">
           <Button
             variant="secondary"
             onClick={handleCancel}
@@ -234,6 +246,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

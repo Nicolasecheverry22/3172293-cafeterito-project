@@ -236,13 +236,13 @@ export default function InventoryForm({
             }
           />
           {errors.provisionImage && (
-            <span className="text-error text-caption block mt-1">
+            <span className="text-error text-small block mt-1">
               {errors.provisionImage}
             </span>
           )}
         </div>
 
-        <div className="flex gap-4 items-center justify-end pt-4">
+        <div className="flex gap-4 items-center justify-end pt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>
@@ -250,7 +250,7 @@ export default function InventoryForm({
             type="submit"
             variant="primary"
             disabled={isSubmitting}
-            className="w-full md:w-auto px-10 font-bold shadow-sm"
+            className="w-full md:w-auto px-10 font-bold shadow-elevation-1"
           >
             {isSubmitting
               ? "Guardando..."

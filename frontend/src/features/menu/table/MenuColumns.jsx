@@ -10,7 +10,7 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("id")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Id</span>
         {sortConfig.key === "id" ? (
@@ -29,7 +29,7 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("productName")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Platillo</span>
         {sortConfig.key === "productName" ? (
@@ -48,7 +48,7 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("category")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Categoría</span>
         {sortConfig.key === "category" ? (
@@ -67,7 +67,7 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("price")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Precio</span>
         {sortConfig.key === "price" ? (
@@ -103,12 +103,12 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
       const isAvailable = row.original.isAvailable;
 
       const statusStyles = isAvailable
-        ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700"
-        : "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700";
+        ? "bg-success-container text-on-success-container border-success/30"
+        : "bg-error-container text-on-error-container border-error/30";
 
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${statusStyles}`}
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${statusStyles}`}
         >
           {isAvailable ? "Disponible" : "No disponible"}
         </span>

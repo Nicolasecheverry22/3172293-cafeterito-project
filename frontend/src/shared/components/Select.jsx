@@ -16,8 +16,8 @@ export default function Select({
             {label && (
               <label
                 htmlFor={htmlFor}
-                  className={`block text-caption font-label ${
-                    error ? "text-error" : "text-secondary"
+                  className={`block text-small font-label ${
+                    error ? "text-error" : "text-text-secondary"
                   }`}
               >
                 {label}
@@ -32,7 +32,7 @@ export default function Select({
                 className="
                     w-full
                     h-12
-                    rounded-md
+                    rounded-shape-xs
                     border
                     bg-background
                     px-4
@@ -58,7 +58,7 @@ export default function Select({
                 ))}
             </select>
             {error && (
-                <p className="text-caption text-error place-self-start mt-1">{error}</p>
+                <p className="text-small text-error place-self-start px-4">{error}</p>
             )}
         </div>
     )

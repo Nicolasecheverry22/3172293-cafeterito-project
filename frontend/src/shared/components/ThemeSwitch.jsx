@@ -16,14 +16,14 @@ export default function ThemeSwitch({ className = "" }) {
       onClick={toggleTheme}
       className={`
         theme-switch ${isDark ? "theme-switch--active" : ""}
-        w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md
+        w-full min-h-touch flex items-center justify-between gap-3 px-3
         text-text-primary hover:bg-surface-muted
         focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring
         transition-colors cursor-pointer
         ${className}
       `}
     >
-      <span className="theme-switch__label flex items-center gap-3 ml-3">
+      <span className="theme-switch__label flex items-center gap-3">
         {isDark ? (
           <Moon className="w-5 h-5" aria-hidden="true" />
         ) : (
@@ -37,16 +37,16 @@ export default function ThemeSwitch({ className = "" }) {
         aria-hidden="true"
         className={`
           theme-switch__track
-          relative inline-flex items-center shrink-0 h-5 w-9 rounded-full transition-colors
-          ${isDark ? "bg-green-500" : "bg-gray-300"}
+          relative inline-flex items-center shrink-0 h-6 w-10 rounded-full transition-colors
+          ${isDark ? "bg-success" : "bg-border-strong"}
         `}
       >
         {/* Knob */}
         <span
           className={`
             theme-switch__thumb
-            absolute left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform
-            ${isDark ? "translate-x-full" : "translate-x-0"}
+            absolute left-1 h-4 w-4 rounded-full bg-background shadow-elevation-1 transition-transform
+            ${isDark ? "translate-x-4" : "translate-x-0"}
           `}
         />
       </span>

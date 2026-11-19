@@ -60,9 +60,9 @@ export default function InventoryListPage() {
 
   return (
     <div className="w-full">
-      <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+      <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold font-heading text-text-primary/">
+          <h1 className="text-2xl font-bold font-heading text-text-primary">
             Listado de Inventario
           </h1>
 
@@ -75,11 +75,7 @@ export default function InventoryListPage() {
               Reportar inventario
             </Button>
 
-            <Link to="/inventoryCreate">
-              <Button size="md" variant="primary">
-                Crear suministro
-              </Button>
-            </Link>
+            <Button as={Link} to="/inventoryCreate" size="md" variant="primary">Crear suministro</Button>
           </div>
         </div>
 
@@ -89,7 +85,7 @@ export default function InventoryListPage() {
           </p>
         )}
 
-        <div className="overflow-x-auto bg-surface/0 shadow-xs">
+        <div className="overflow-x-auto bg-surface/0 shadow-elevation-1">
           <DataTable data={sortedInventory} columns={columns} />
         </div>
 

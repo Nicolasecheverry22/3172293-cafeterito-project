@@ -209,7 +209,7 @@ export default function EditOrder() {
   };
 
   return (
-    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
         <Pencil className="w-8 h-8 text-text-primary" />
         <h1 className="text-2xl font-heading font-bold text-text-primary">
@@ -219,7 +219,7 @@ export default function EditOrder() {
 
       <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto space-y-8">
         {/* Datos Principales de la Orden */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-surface p-6 rounded-2xl border border-border/40 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-surface p-4 sm:p-6 rounded-shape-lg border border-border/40 shadow-elevation-1">
           <Input
             label="Observaciones"
             name="observations"
@@ -262,7 +262,7 @@ export default function EditOrder() {
         </div>
 
         {/* Selección y Gestión de Platillos */}
-        <div className="bg-surface p-6 rounded-2xl border border-border/40 shadow-sm space-y-6">
+        <div className="bg-surface p-4 sm:p-6 rounded-shape-lg border border-border/40 shadow-elevation-1 space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h3 className="text-lg font-heading font-bold text-text-primary">
               Platillos de la Orden
@@ -282,7 +282,7 @@ export default function EditOrder() {
             </div>
           </div>
           {errors.items && (
-            <span className="text-error text-caption block mt-1">
+            <span className="text-error text-small block mt-1">
               {errors.items}
             </span>
           )}
@@ -317,7 +317,8 @@ export default function EditOrder() {
                                 e.stopPropagation(); // Evita que el evento se propague doble
                                 handleQuantityChange(index, -1);
                                 }}
-                                className="w-7 h-7 rounded-md bg-surface-muted hover:bg-border/30 flex items-center justify-center font-bold text-text-primary"
+                                aria-label="Disminuir cantidad"
+                                className="touch-target w-8 h-8 rounded-md bg-surface-muted hover:bg-border/30 flex items-center justify-center font-bold text-text-primary"
                             >
                                 -
                             </button>
@@ -330,7 +331,8 @@ export default function EditOrder() {
                                 e.stopPropagation(); // Evita que el evento se propague doble
                                 handleQuantityChange(index, 1);
                                 }}
-                                className="w-7 h-7 rounded-md bg-surface-muted hover:bg-border/30 flex items-center justify-center font-bold text-text-primary"
+                                aria-label="Aumentar cantidad"
+                                className="touch-target w-8 h-8 rounded-md bg-surface-muted hover:bg-border/30 flex items-center justify-center font-bold text-text-primary"
                             >
                                 +
                             </button>
@@ -343,7 +345,8 @@ export default function EditOrder() {
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(index)}
-                          className="text-error hover:opacity-80 p-1 rounded-md transition-colors"
+                          aria-label="Quitar producto"
+                          className="touch-target text-error hover:opacity-80 p-2 rounded-md transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -369,7 +372,7 @@ export default function EditOrder() {
         </div>
 
         {/* Acciones de Guardado */}
-        <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40">
+        <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
           <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
             Cancelar
           </Button>

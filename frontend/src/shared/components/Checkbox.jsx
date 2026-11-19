@@ -12,7 +12,8 @@ export default function Checkbox({
         <label
             htmlFor={id}
             className={`
-                flex items-center gap-2
+                flex items-center gap-3
+                min-h-touch
                 text-sm
                 cursor-pointer
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
@@ -29,7 +30,7 @@ export default function Checkbox({
             checked={checked}
             disabled={disabled}
             onChange={onChange}
-            className="w-5 h-5" 
+            className="size-[18px] accent-text-primary cursor-pointer"
         />
 
         {/* Texto del checkbox */}

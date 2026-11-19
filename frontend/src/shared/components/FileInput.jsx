@@ -57,9 +57,12 @@ export default function FileInput({
   return (
     <div className="flex flex-col items-center justify-center w-full">
       {value.length === 0 ? (
-        <div
+        // <button> (antes <div onClick>): se alcanza con Tab y se activa con Enter/Espacio
+        <button
+          type="button"
           onClick={() => !isLoading && inputRef.current?.click()}
-          className={`w-48 h-48 rounded-2xl bg-surface/40 border-2 border-dashed border-border-strong flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-surface/60 transition-all ${
+          disabled={isLoading}
+          className={`w-48 h-48 rounded-shape-lg bg-surface/40 border-2 border-dashed border-border-strong flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-surface/60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
             isLoading ? "opacity-70 pointer-events-none" : ""
           }`}
         >
@@ -73,7 +76,7 @@ export default function FileInput({
               <Upload className="w-7 h-7" />
             </div>
           )}
-        </div>
+        </button>
       ) : (
         <div className="flex flex-col items-center gap-3 w-full">
           <span className="text-caption font-heading text-text-muted">
@@ -88,7 +91,7 @@ export default function FileInput({
                 onDragStart={() => setDragIndex(i)}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => reorder(dragIndex, i)}
-                className="group relative h-24 w-24 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm hover:shadow-md transition cursor-grab active:cursor-grabbing"
+                className="group relative h-24 w-24 overflow-hidden rounded-shape-lg border border-border bg-surface shadow-elevation-1 hover:shadow-elevation-2 transition cursor-grab active:cursor-grabbing"
               >
                 {isImage(file) ? (
                   <img
@@ -104,11 +107,13 @@ export default function FileInput({
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                {/* focus-within: el botón Quitar también aparece al llegar con Tab, no solo con el ratón */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex items-center justify-center transition-opacity">
                   <button
                     type="button"
                     onClick={() => remove(i)}
-                    className="h-7 w-7 bg-error text-text-inverse rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+                    aria-label={`Quitar ${file.name}`}
+                    className="touch-target h-8 w-8 bg-error text-on-error rounded-full flex items-center justify-center hover:scale-110 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-text-inverse"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -117,9 +122,12 @@ export default function FileInput({
             ))}
 
             {multiple && value.length < 12 && (
-              <div
+              <button
+                type="button"
                 onClick={() => !isLoading && inputRef.current?.click()}
-                className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-border bg-surface-muted hover:border-brand cursor-pointer transition"
+                disabled={isLoading}
+                aria-label="Añadir imagen"
+                className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-shape-lg border-2 border-dashed border-border bg-surface-muted hover:border-border-strong cursor-pointer transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
               >
                 {isLoading ? (
                   <InfinityLoader size="30" color="var(--semantic-brand)" />
@@ -131,7 +139,7 @@ export default function FileInput({
                     </span>
                   </>
                 )}
-              </div>
+              </button>
             )}
           </div>
         </div>

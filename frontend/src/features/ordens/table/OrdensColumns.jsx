@@ -10,7 +10,7 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("id")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Orden</span>
         {sortConfig.key === "id" ? (
@@ -35,7 +35,7 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("createdAt")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Fecha</span>
         {sortConfig.key === "createdAt" ? (
@@ -62,7 +62,7 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("waiter")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Encargado</span>
         {sortConfig.key === "waiter" ? (
@@ -99,10 +99,10 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
 
       // Mapeo de colores y estilos según el estado de la orden
       const statusStyles = {
-        activa: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700",
-        pagada: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700",
-        cancelada: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700",
-        "lista para entrega": "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700",
+        activa: "bg-warning-container text-on-warning-container border-warning/30",
+        pagada: "bg-success-container text-on-success-container border-success/30",
+        cancelada: "bg-error-container text-on-error-container border-error/30",
+        "lista para entrega": "bg-info-container text-on-info-container border-info/30",
       };
 
       const statusLabels = {
@@ -114,8 +114,8 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
 
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${
-            statusStyles[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/40 dark:text-gray-200 dark:border-gray-700"
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${
+            statusStyles[status] || "bg-surface-muted text-text-primary border-border"
           }`}
         >
           {statusLabels[status] || status}

@@ -15,9 +15,10 @@ export default function Input({
   };
 
   const sizes = {
-    sm: "h-8 text-xs",
-    md: "h-10 text-sm",
-    lg: "h-12 text-base",
+    // M3: mínimo 48px de área táctil; lg = 56px (alto estándar de text field)
+    sm: "h-10 text-xs",
+    md: "h-12 text-sm",
+    lg: "h-14 text-base",
   };
 
   return (
@@ -26,8 +27,8 @@ export default function Input({
       {label && (
         <label
           htmlFor={htmlFor}
-          className={`block text-caption font-label ${
-            error ? "text-error" : "text-secondary"
+          className={`block text-small font-label ${
+            error ? "text-error" : "text-text-secondary"
           }`}
         >
           {label}
@@ -42,14 +43,14 @@ export default function Input({
           type={type}
           className={`
             w-full
-            rounded-md
+            rounded-shape-xs
             border
             px-4
             text-body
             transition-colors
             focus:outline-none
             focus:ring-2
-            focus:ring-brand
+            focus:ring-focus-ring
             ${variants[variant] || variants.primary}
             ${sizes[size] || sizes.md}
             ${error ? "border-error focus:ring-error" : "border-border"}
@@ -59,7 +60,7 @@ export default function Input({
       </div>
 
       {error && (
-        <p className="text-caption text-error place-self-start mt-0.5">
+        <p className="text-small text-error place-self-start px-4">
           {error}
         </p>
       )}

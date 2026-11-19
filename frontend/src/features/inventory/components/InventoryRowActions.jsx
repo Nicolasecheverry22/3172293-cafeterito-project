@@ -22,9 +22,9 @@ export default function InventoryRowActions({ provision, onChanged }) {
       confirmButtonText: "Guardar",
       cancelButtonText: "Cancelar",
       customClass: {
-        popup: "rounded-2xl",
-        confirmButton: "!bg-brand text-white px-4 py-2 rounded-lg font-medium cursor-pointer mr-2",
-        cancelButton: "bg-surface-muted px-4 py-2 rounded-lg font-medium cursor-pointer",
+        popup: "rounded-shape-lg",
+        confirmButton: "!bg-brand !text-text-on-brand px-4 py-2 rounded-shape-sm font-medium cursor-pointer mr-2",
+        cancelButton: "bg-surface-muted px-4 py-2 rounded-shape-sm font-medium cursor-pointer",
       },
       buttonsStyling: false,
     });
@@ -44,29 +44,29 @@ export default function InventoryRowActions({ provision, onChanged }) {
   };
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className="row-actions">
       <button
         onClick={() => provision.id && navigate(`/InventoryView/${provision.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Ver detalles"
       >
-        <Eye size={16} />
+        <Eye size={20} />
       </button>
 
       <button
         onClick={() => provision.id && navigate(`/editInventory/${provision.id}`)}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar suministro"
       >
-        <Pencil size={16} />
+        <Pencil size={20} />
       </button>
 
       <button
         onClick={handleChangeStatus}
-        className="p-1 rounded hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Cambiar estado"
       >
-        <RefreshCw size={16} />
+        <RefreshCw size={20} />
       </button>
     </div>
   );

@@ -138,7 +138,7 @@ export default function EditProvider() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-surface/80 backdrop-blur-md rounded-3xl p-8 border border-border/40 dark:bg-surface/90 shadow-2xl">
+    <div className="w-full max-w-6xl mx-auto bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 dark:bg-surface/90 shadow-elevation-3">
       <div className="flex items-center gap-3 mb-6">
         <Pencil className="w-8 h-8 text-text-primary" />
         <h1 className="text-3xl font-heading font-black text-text-primary">
@@ -148,7 +148,7 @@ export default function EditProvider() {
 
       <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Bloque Izquierdo: Estado */}
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 flex flex-col items-center justify-center gap-4 text-center shadow-md">
+        <div className="lg:col-span-3 bg-surface-muted rounded-shape-xl p-4 sm:p-6 flex flex-col items-center justify-center gap-4 text-center shadow-elevation-2">
           <span className="text-text-primary font-heading font-bold text-lg">
             Estado
           </span>
@@ -162,7 +162,7 @@ export default function EditProvider() {
         </div>
 
         {/* Bloque Derecho: FileInput + Inputs del Formulario */}
-        <div className="lg:col-span-9 bg-surface-muted rounded-3xl p-8 flex flex-col items-center gap-6 shadow-md">
+        <div className="lg:col-span-9 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 flex flex-col items-center gap-6 shadow-elevation-2">
           {/* Subir imagen / FileInput centrado */}
           <div className="w-full flex justify-center">
             <FileInput
@@ -176,7 +176,7 @@ export default function EditProvider() {
           </div>
 
           {/* Sub-tarjeta contenedora de los campos de texto */}
-          <div className="w-full bg-surface/70 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="w-full bg-surface/70 rounded-shape-lg p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="NIT"
               name="nit"
@@ -230,7 +230,7 @@ export default function EditProvider() {
           </div>
 
           {/* Botones de Acción */}
-          <div className="w-full flex items-center justify-end gap-3 pt-2">
+          <div className="w-full flex items-center justify-end gap-3 pt-2 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
             <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>

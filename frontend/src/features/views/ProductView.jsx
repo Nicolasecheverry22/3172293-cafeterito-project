@@ -59,7 +59,7 @@ export default function ProductView() {
   const bgColor = colors[product.id % colors.length];
 
   return (
-    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
         <UtensilsCrossed className="w-9 h-9 text-text-primary" />
@@ -72,7 +72,7 @@ export default function ProductView() {
       <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Columna 1: Estado General y Acciones */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">
           <div className="w-full flex flex-col items-center gap-3">
             <p className="text-text-primary font-heading font-bold text-md">
               Estado
@@ -98,21 +98,21 @@ export default function ProductView() {
         </div>
 
         {/* Columna 2, 3 y 4: Información Detallada */}
-        <div className="lg:col-span-3 bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6">
+        <div className="lg:col-span-3 bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6">
           
           {/* Tarjeta Compacta del Platillo */}
-          <div className="w-full max-w-xs bg-surface rounded-2xl p-4 flex flex-col items-center text-center shadow-md border border-border/30">
+          <div className="w-full max-w-xs bg-surface rounded-shape-lg p-4 flex flex-col items-center text-center shadow-elevation-2 border border-border/30">
             <div className="mb-2 flex items-center justify-center">
               {product.productImage && product.productImage.length > 0 ? (
                 <img
                   src={product.productImage[0]}
                   alt={productName}
-                  className="w-14 h-14 object-cover rounded-full shadow-md border-2 border-white/50"
+                  className="w-14 h-14 object-cover rounded-full shadow-elevation-2 border-2 border-white/50"
                 />
               ) : (
                 <div
                   style={{ backgroundColor: bgColor }}
-                  className="w-14 h-14 rounded-full text-white font-black text-xl flex items-center justify-center shadow-md uppercase select-none"
+                  className="w-14 h-14 rounded-full text-text-on-brand font-black text-xl flex items-center justify-center shadow-elevation-2 uppercase select-none"
                 >
                   {getInitials(productName)}
                 </div>
@@ -125,7 +125,7 @@ export default function ProductView() {
           </div>
 
           {/* Formulario de Información (Inputs deshabilitados) */}
-          <div className="w-full bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="w-full bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Nombre del Platillo"
               value={productName}

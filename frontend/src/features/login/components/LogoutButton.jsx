@@ -2,7 +2,7 @@ import { LogOut } from "lucide-react";
 import { showConfirmDeleteAlert } from "@/shared/services/alertService";
 import { logout } from "@/features/login/services/logoutService";
 
-export default function LogoutButton({ className = "", showLabel = true }) {
+export default function LogoutButton({ className = "", showLabel = true, ...props }) {
 
   const handleLogout = async () => {
     const result = await showConfirmDeleteAlert({
@@ -21,7 +21,8 @@ export default function LogoutButton({ className = "", showLabel = true }) {
     <button
       type="button"
       onClick={handleLogout}
-      className={`flex items-center gap-3 text-error hover:bg-error/10 transition-colors cursor-pointer ${className}`}
+      className={`flex items-center gap-3 text-error hover:bg-error/10 transition-colors cursor-pointer focus:outline-none focus-visible:bg-error/10 ${className}`}
+      {...props}
     >
       <LogOut className="w-5 h-5" />
       {showLabel && <span className="font-medium font-body text-body">Cerrar Sesión</span>}

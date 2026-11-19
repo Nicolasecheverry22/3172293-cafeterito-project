@@ -37,6 +37,21 @@
     --color-tertiary-100: #FFB8B8;
     --color-tertiary-50: #FFE5E5;
 
+    /* Escalas de estado propias: antes semantic.css usaba --color-green-* de Tailwind,
+       que v4 solo genera si alguna clase green-* lo usa (se rompía al quitarlas). */
+    --color-success-100: #DCFCE7;
+    --color-success-400: #4ADE80;
+    --color-success-700: #15803D;
+    --color-success-900: #14532D;
+
+    --color-warning-100: #FEF3C7;
+    --color-warning-900: #78350F;
+
+    --color-info-100: #DBEAFE;
+    --color-info-400: #60A5FA;
+    --color-info-700: #1D4ED8;
+    --color-info-900: #1E3A8A;
+
     --color-white: #ffffff;
     --color-black: #000000;
     --color-gray-950: #181818;
@@ -69,4 +84,70 @@
     --fs-xxs: 0.875rem;
     --fs-xxxs: 0.75rem;
     --fs-xxxxs: 0.5rem;
+}
+
+/* ===================================================================
+   MATERIAL DESIGN 3 — métricas (1dp ≈ 1px en web)
+   Solo métricas: los colores siguen viniendo de la paleta de arriba
+   y de semantic.css. Se exponen a Tailwind en global.css (@theme).
+   =================================================================== */
+:root {
+    /* Espaciado – retícula 8dp, medios pasos 4dp */
+    --md-space-0: 0;
+    --md-space-1: 4px;
+    --md-space-2: 8px;
+    --md-space-3: 12px;
+    --md-space-4: 16px;
+    --md-space-5: 24px;
+    --md-space-6: 32px;
+    --md-space-7: 48px;
+    --md-space-8: 64px;
+
+    /* Márgenes de layout por ventana */
+    --md-margin-compact: 16px;   /* < 600px */
+    --md-margin-medium: 24px;    /* 600–839px */
+    --md-margin-expanded: 24px;  /* >= 840px */
+    --md-gutter: 16px;
+
+    /* Áreas táctiles */
+    --md-touch-target: 48px;
+
+    /* Formas */
+    --md-shape-none: 0;
+    --md-shape-xs: 4px;      /* text fields, menús */
+    --md-shape-sm: 8px;      /* chips, snackbars */
+    --md-shape-md: 12px;     /* cards */
+    --md-shape-lg: 16px;     /* FAB, sheets */
+    --md-shape-xl: 28px;     /* diálogos */
+    --md-shape-full: 9999px; /* botones, switches, search bar */
+
+    /* Elevación (niveles 0–5) */
+    --md-elevation-0: none;
+    --md-elevation-1: 0 1px 2px rgb(0 0 0 / .3), 0 1px 3px 1px rgb(0 0 0 / .15);
+    --md-elevation-2: 0 1px 2px rgb(0 0 0 / .3), 0 2px 6px 2px rgb(0 0 0 / .15);
+    --md-elevation-3: 0 4px 8px 3px rgb(0 0 0 / .15), 0 1px 3px rgb(0 0 0 / .3);
+    --md-elevation-4: 0 6px 10px 4px rgb(0 0 0 / .15), 0 2px 3px rgb(0 0 0 / .3);
+    --md-elevation-5: 0 8px 12px 6px rgb(0 0 0 / .15), 0 4px 4px rgb(0 0 0 / .3);
+
+    /* Tipografía (escala M3). Se conserva la fuente de marca (Helvetica/Arial):
+       en Windows Arial solo tiene 400/700, así que 500 se degrada. */
+    --md-font: var(--main-font);
+    --md-display-l: 400 57px/64px var(--md-font);
+    --md-headline-l: 400 32px/40px var(--md-font);
+    --md-headline-m: 400 28px/36px var(--md-font);
+    --md-title-l: 400 22px/28px var(--md-font);
+    --md-title-m: 500 16px/24px var(--md-font);
+    --md-body-l: 400 16px/24px var(--md-font);
+    --md-body-m: 400 14px/20px var(--md-font);
+    --md-body-s: 400 12px/16px var(--md-font);
+    --md-label-l: 500 14px/20px var(--md-font);
+    --md-label-m: 500 12px/16px var(--md-font);
+
+    /* Estados (opacidad de capa) */
+    --md-state-hover: .08;
+    --md-state-focus: .10;
+    --md-state-pressed: .10;
+    --md-state-dragged: .16;
+    --md-disabled-content: .38;
+    --md-disabled-container: .12;
 }

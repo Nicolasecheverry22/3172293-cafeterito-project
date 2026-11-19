@@ -1,4 +1,6 @@
+import { createPortal } from "react-dom";
 import { useState } from "react";
+import useDialogA11y from "@/shared/hooks/useDialogA11y";
 
 // Configuración de campos disponibles para el reporte
 import { userReportFields } from "../config/userReportFields";
@@ -38,6 +40,9 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Evita render si el modal está cerrado
+  // Escape, foco inicial, Tab atrapado y foco devuelto al cerrar
+  const dialogRef = useDialogA11y(isOpen, onClose);
+
   if (!isOpen) return null;
 
   // Toggle de campos
@@ -118,9 +123,11 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-xl bg-surface/90 text-text-primary p-6 shadow-lg dark:bg-surface/95">
+  // Portal a <body>: la tarjeta de la página usa backdrop-blur, y backdrop-filter
+  // convierte a sus hijos position:fixed en relativos a ella (el modal salía cortado bajo el Navbar)
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-shape-xl bg-surface/90 text-text-primary p-6 shadow-elevation-3 dark:bg-surface/95">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de usuarios
         </h2>
@@ -188,7 +195,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
         )}
 
         {/* Acciones */}
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex flex-wrap justify-end gap-2 mt-6">
           <Button
             variant="secondary"
             onClick={handleCancel}
@@ -206,6 +213,7 @@ export default function ReportConfigModal({ isOpen, onClose }) {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

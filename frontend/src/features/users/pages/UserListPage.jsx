@@ -65,10 +65,10 @@ export default function UserListPage() {
 
   return (
     <div className="w-full">
-      <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+      <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-2xl font-bold font-heading text-text-primary/">
+          <h1 className="text-2xl font-bold font-heading text-text-primary">
             Listado de Usuarios
           </h1>
 
@@ -81,11 +81,7 @@ export default function UserListPage() {
               Reportar usuarios
             </Button>
 
-            <Link to="/userCreate">
-              <Button size="md" variant="primary">
-                Crear usuario
-              </Button>
-            </Link>
+            <Button as={Link} to="/userCreate" size="md" variant="primary">Crear usuario</Button>
           </div>
         </div>
 

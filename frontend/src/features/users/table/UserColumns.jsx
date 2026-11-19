@@ -9,7 +9,7 @@ export const getUserColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("id")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>ID</span>
         {sortConfig.key === "id" ? (
@@ -26,7 +26,7 @@ export const getUserColumns = (sortConfig, onSort, onChanged) => [
       <button
         type="button"
         onClick={() => onSort("userName")}
-        className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+        className="flex items-center gap-2 min-h-touch min-w-touch font-semibold hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
       >
         <span>Nombre</span>
         {sortConfig.key === "userName" ? (
@@ -69,12 +69,12 @@ export const getUserColumns = (sortConfig, onSort, onChanged) => [
       const isActive = Boolean(activeValue);
 
       const statusStyles = isActive
-        ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/40 dark:text-green-200 dark:border-green-700 font-semibold"
-        : "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700 font-semibold";
+        ? "bg-success-container text-on-success-container border-success/30 font-semibold"
+        : "bg-error-container text-on-error-container border-error/30 font-semibold";
 
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border capitalize ${statusStyles}`}
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border capitalize ${statusStyles}`}
         >
           {isActive ? "Activo" : "Inactivo"}
         </span>

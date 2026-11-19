@@ -109,13 +109,14 @@ export default function OrderForm({
       />
 
       <div className="space-y-4">
-        <label className="block text-caption text-text-primary font-medium">
+        <label className="block text-small text-text-primary font-medium">
           Platillos del Menú
         </label>
 
         {orderItems.map((item) => (
-          <div key={item.id} className="flex items-center gap-3">
-            <div className="flex-1">
+          // En móvil el select de platillo ocupa toda la fila y cantidad + eliminar van debajo
+          <div key={item.id} className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
+            <div className="basis-full sm:basis-auto sm:flex-1 min-w-0">
               <Select
                 name={`dish-${item.id}`}
                 value={item.dishId}
@@ -123,7 +124,7 @@ export default function OrderForm({
                 options={menuDishesData}
               />
             </div>
-            <div className="w-24">
+            <div className="flex-1 sm:flex-none sm:w-24">
               <Input
                 name={`qty-${item.id}`}
                 type="number"
@@ -136,7 +137,7 @@ export default function OrderForm({
             <button
               type="button"
               onClick={() => removeDishRow(item.id)}
-              className="p-3 text-text-primary hover:text-error hover:bg-error/20 transition-colors rounded-lg flex items-center justify-center h-12 border border-border"
+              className="size-touch shrink-0 text-text-primary hover:text-error hover:bg-error/20 transition-colors rounded-shape-sm flex items-center justify-center border border-border cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
               aria-label="Eliminar platillo"
             >
               <Trash2 className="w-5 h-5" />
@@ -144,7 +145,7 @@ export default function OrderForm({
           </div>
         ))}
 
-        {errors.items && <span className="text-error text-caption block">{errors.items}</span>}
+        {errors.items && <span className="text-error text-small block">{errors.items}</span>}
 
         <Button
           variant="secondary"
@@ -158,17 +159,17 @@ export default function OrderForm({
       </div>
 
       <div>
-        <label className="block text-caption text-text-primary font-medium mb-1">Observaciones</label>
+        <label className="block text-small text-text-primary font-medium mb-1">Observaciones</label>
         <textarea
           name="observations"
           value={formData.observations}
           onChange={handleChange}
           rows={3}
           placeholder="Ej: sin cebolla, para llevar, alergias..."
-          className="w-full rounded-lg border border-border bg-background p-3 text-body text-text-primary focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-focus-border"
+          className="w-full rounded-shape-sm border border-border bg-background p-3 text-body text-text-primary focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-focus-border"
         />
         {errors.observations && (
-          <span className="text-error text-caption block mt-1">{errors.observations}</span>
+          <span className="text-error text-small block mt-1">{errors.observations}</span>
         )}
       </div>
 
@@ -188,7 +189,7 @@ export default function OrderForm({
         </div>
       )}
 
-      <div className="flex justify-end gap-4 pt-4">
+      <div className="flex justify-end gap-4 pt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
         <Button variant="secondary" type="button" onClick={onCancel}>
           Cancelar
         </Button>
@@ -196,7 +197,7 @@ export default function OrderForm({
           variant="primary"
           type="submit"
           disabled={isSubmitting}
-          className="w-full md:w-64 py-3 text-base font-bold shadow-md"
+          className="w-full md:w-64 py-3 text-base font-bold shadow-elevation-2"
         >
           {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear orden"}
         </Button>

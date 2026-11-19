@@ -32,14 +32,34 @@
     
     /* ============ FOCUS ================== */
 
-    --semantic-focus-ring: var(--color-primary-700);
-    
-    
+    /* El amarillo daba 1.07:1 sobre blanco (foco invisible). gray-900: ~15:1 */
+    --semantic-focus-ring: var(--color-gray-900);
+    --semantic-focus-border: var(--semantic-focus-ring); /* global.css lo referenciaba sin definir */
+
+
     /* ============ STATE ================== */
 
-    --semantic-success: var(--color-green-700);
-    --semantic-warning: var(--color-secondary-950);
+    /* Patrón M3: color / on-color (texto sobre relleno) / container / on-container.
+       Todas las parejas texto-fondo cumplen ≥ 4.5:1. */
+    --semantic-success: var(--color-success-700);          /* 5.0:1 sobre blanco */
+    --semantic-on-success: var(--color-white);
+    --semantic-success-container: var(--color-success-100);
+    --semantic-on-success-container: var(--color-success-900);
+
+    --semantic-warning: var(--color-secondary-950);        /* 5.0:1 sobre blanco */
+    --semantic-on-warning: var(--color-white);
+    --semantic-warning-container: var(--color-warning-100);
+    --semantic-on-warning-container: var(--color-warning-900);
+
     --semantic-error: var(--color-tertiary-700);
+    --semantic-on-error: var(--color-white);
+    --semantic-error-container: var(--color-tertiary-50);
+    --semantic-on-error-container: var(--color-tertiary-800);
+
+    --semantic-info: var(--color-info-700);
+    --semantic-on-info: var(--color-white);
+    --semantic-info-container: var(--color-info-100);
+    --semantic-on-info-container: var(--color-info-900);
 
     color-scheme: light;
     
@@ -52,13 +72,14 @@
     --semantic-font-size-body: var(--fs-xs);
     --semantic-font-size-medium: var(--fs-xxs);
     --semantic-font-size-small: var(--fs-xxxs);
-    --semantic-font-size-caption: var(--fs-xxxxs); /*Caption es un texto auxiliar mas pequeño*/
+    /* Caption: texto auxiliar. Antes 0.5rem (8px), ilegible; M3 label-s = 11px */
+    --semantic-font-size-caption: 0.6875rem;
 
     /* ============ FONT WEIGHT ================== */
 
     --semantic-font-weight-heading: var(--font-weight-bold);
     --semantic-font-weight-body: var(--font-weight-regular);
-    --semantic-font-weight-label: var(--font-weight-light);
+    --semantic-font-weight-label: 500; /* M3: etiquetas medium (500), no light (200) */
 
    /* ============================================= */
 
@@ -105,12 +126,29 @@
 
     /* ============ FOCUS ================== */
 
-    --semantic-focus-ring: var(--color-primary-700);
+    --semantic-focus-ring: var(--color-primary-700); /* amarillo: ~8:1 sobre fondos oscuros */
+    --semantic-focus-border: var(--semantic-focus-ring);
 
     /* ============ STATE ================== */
-    /* tokens.css no tiene verdes: igual que el tema claro, se usa la paleta de Tailwind */
+    /* En oscuro el color es claro y el texto encima, oscuro (como M3) */
 
-    --semantic-success: var(--color-green-400);
+    --semantic-success: var(--color-success-400);
+    --semantic-on-success: var(--color-gray-950);
+    --semantic-success-container: var(--color-success-900);
+    --semantic-on-success-container: var(--color-success-100);
+
     --semantic-warning: var(--color-secondary-400);
+    --semantic-on-warning: var(--color-gray-950);
+    --semantic-warning-container: var(--color-warning-900);
+    --semantic-on-warning-container: var(--color-warning-100);
+
     --semantic-error: var(--color-tertiary-200);   /* 4.8:1 sobre surface */
+    --semantic-on-error: var(--color-gray-950);
+    --semantic-error-container: var(--color-tertiary-900);
+    --semantic-on-error-container: var(--color-tertiary-100);
+
+    --semantic-info: var(--color-info-400);
+    --semantic-on-info: var(--color-gray-950);
+    --semantic-info-container: var(--color-info-900);
+    --semantic-on-info-container: var(--color-info-100);
 }

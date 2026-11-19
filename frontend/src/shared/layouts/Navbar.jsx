@@ -26,13 +26,13 @@ export default function Navbar() {
 
 
   return (
-    <nav className="w-full bg-brand shadow-md relative z-50">
+    <nav className="w-full bg-brand shadow-elevation-2 relative z-50">
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center justify-between">
           
           <button 
             onClick={() => navigate("/home")}
-            className="flex items-center text-text-on-brand hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+            className="flex items-center justify-center size-touch rounded-full text-text-on-brand hover:opacity-80 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
             aria-label="Ir al home"
           >
             <Coffee className="w-8 h-8 stroke-[2.5]" />
@@ -43,7 +43,7 @@ export default function Navbar() {
               <NavLink
                 to="/userList"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
+                  `flex items-center gap-2 min-h-touch transition-colors duration-200 text-body font-body focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                     isActive 
                       ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
                       : "text-text-on-brand hover:text-text-on-brand/70"
@@ -59,7 +59,7 @@ export default function Navbar() {
               <NavLink
                 to="/inventoryList"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
+                  `flex items-center gap-2 min-h-touch transition-colors duration-200 text-body font-body focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                     isActive 
                       ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
                       : "text-text-on-brand hover:text-text-on-brand/70"
@@ -75,7 +75,7 @@ export default function Navbar() {
               <NavLink
                 to="/providerList"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
+                  `flex items-center gap-2 min-h-touch transition-colors duration-200 text-body font-body focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                     isActive 
                       ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
                       : "text-text-on-brand hover:text-text-on-brand/70"
@@ -91,7 +91,7 @@ export default function Navbar() {
               <NavLink
                 to="/menuList"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
+                  `flex items-center gap-2 min-h-touch transition-colors duration-200 text-body font-body focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                     isActive 
                       ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
                       : "text-text-on-brand hover:text-text-on-brand/70"
@@ -107,7 +107,7 @@ export default function Navbar() {
               <NavLink
                 to="/ordensList"
                 className={({ isActive }) =>
-                  `flex items-center gap-2 transition-colors duration-200 text-body font-body ${
+                  `flex items-center gap-2 min-h-touch transition-colors duration-200 text-body font-body focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
                     isActive 
                       ? "text-text-on-brand font-bold border-b-2 border-text-on-brand" 
                       : "text-text-on-brand hover:text-text-on-brand/70"
@@ -124,17 +124,19 @@ export default function Navbar() {
             <Dropdown>
               <DropdownTrigger>
                 <button
-                  className="p-2 rounded-md text-text-on-brand hover:bg-brand-hover transition-colors flex items-center gap-2 focus:outline-none cursor-pointer"
+                  className="size-touch rounded-full text-text-on-brand hover:bg-brand-hover transition-colors flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring cursor-pointer"
                   aria-label="Abrir Menú"
                 >
                   <Menu className="w-7 h-7" />
                 </button>
               </DropdownTrigger>
 
-              <DropdownContent className="right-0 w-52">
+              {/* w-64: "Modo oscuro" + switch caben en una línea. Sin márgenes extra en los
+                  ítems: todos los iconos alineados a 12px (padding de ítem de menú M3) */}
+              <DropdownContent className="right-0 w-64">
 
                 <DropdownItem onClick={() => navigate("/permits")}>
-                  <div className="flex items-center ml-6 gap-3">
+                  <div className="flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5" />
                     <span className="font-medium font-body text-base">Permisos</span>
                   </div>
@@ -143,9 +145,9 @@ export default function Navbar() {
                 {/* Fuera de DropdownItem a propósito: activar el switch no cierra el menú */}
                 <ThemeSwitch />
 
-                <DropdownItem className="p-0">
-                  <LogoutButton className="w-full px-3 py-2" />
-                </DropdownItem>
+                {/* Sin DropdownItem: era un <button> dentro de otro <button> (HTML inválido)
+                    y sumaba el padding de ambos, desalineando el icono */}
+                <LogoutButton role="menuitem" className="w-full min-h-touch px-3 text-left" />
                 
               </DropdownContent>
             </Dropdown>

@@ -52,11 +52,11 @@ export default function ProviderView() {
   const bgColor = colors[Number(provider.id) % colors.length] || colors[0];
 
   return (
-    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
-        <Ambulance className="w-9 h-9 text-text-primary/" />
-        <h1 className="text-main font-heading font-bold text-text-primary/ text-2xl">
+        <Ambulance className="w-9 h-9 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
           Visualizar Proveedor
         </h1>
       </div>
@@ -65,9 +65,9 @@ export default function ProviderView() {
       <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Columna 1: Avatar e Identificación */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
           <div
-            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-md border-2 border-white/20 select-none"
+            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-text-on-brand shadow-elevation-2 border-2 border-white/20 select-none"
             style={{ backgroundColor: bgColor }}
           >
             {initial}
@@ -83,12 +83,12 @@ export default function ProviderView() {
         </div>
 
         {/* Columna 2 y 3 (Central): Información General del Proveedor */}
-        <div className="lg:col-span-2 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col gap-6">
+        <div className="lg:col-span-2 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1 border border-border/50 flex flex-col gap-6">
           <h2 className="text-lg font-heading font-bold text-text-primary border-b border-border/40 pb-2">
             Información de Contacto
           </h2>
 
-          <div className="bg-surface rounded-2xl p-6 shadow-sm border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="NIT / Documento"
               name="nit"
@@ -139,7 +139,7 @@ export default function ProviderView() {
         </div>
 
         {/* Columna 4: Estado y Acciones */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-6 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">
           <div className="w-full flex flex-col items-center gap-2">
             <p className="text-text-primary font-heading font-bold text-lg">
               Estado

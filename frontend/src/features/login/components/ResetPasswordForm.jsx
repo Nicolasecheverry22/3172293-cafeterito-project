@@ -37,7 +37,7 @@ export default function ResetPasswordForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-6">
+    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
       <div className="flex flex-col gap-1 text-left">
         <Input
           type="password"
@@ -48,7 +48,7 @@ export default function ResetPasswordForm({ onSubmit }) {
           disabled={isSubmitting}
         />
         {errors.newPassword && (
-          <span className="text-xs text-error font-medium ml-1">
+          <span className="text-small text-error px-4">
             {errors.newPassword}
           </span>
         )}
@@ -64,13 +64,13 @@ export default function ResetPasswordForm({ onSubmit }) {
           disabled={isSubmitting}
         />
         {errors.confirmPassword && (
-          <span className="text-xs text-error font-medium ml-1">
+          <span className="text-small text-error px-4">
             {errors.confirmPassword}
           </span>
         )}
       </div>
 
-      <div className="flex justify-center mt-4 w-full">
+      <div className="flex justify-center w-full">
         <Button variant="primary" type="submit" size="md" disabled={isSubmitting}>
           {isSubmitting ? "Cambiando..." : "Cambiar Contraseña"}
         </Button>

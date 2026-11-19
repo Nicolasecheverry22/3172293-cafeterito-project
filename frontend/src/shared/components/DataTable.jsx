@@ -102,7 +102,7 @@ export default function DataTable({ data, columns }) {
             // Al cambiar la búsqueda se vuelve a la primera página
             setPagination(prev => ({ ...prev, pageIndex: 0 }))
           }}
-          className="border border-border-strong rounded px-3 py-2 w-64 bg-background text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-focus-ring"
+          className="h-12 border border-border-strong rounded-shape-xs px-4 w-full min-w-0 sm:w-64 bg-background text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-focus-ring"
         />
 
         {/* ================== SELECTOR DE FILAS ================== */}
@@ -110,7 +110,7 @@ export default function DataTable({ data, columns }) {
         <select
           value={table.getState().pagination.pageSize}
           onChange={(e) => table.setPageSize(Number(e.target.value))}
-          className="border border-border-strong rounded px-2 py-2 bg-background text-text-primary"
+          className="h-12 border border-border-strong rounded-shape-xs px-3 bg-background text-text-primary cursor-pointer focus:outline-none focus:ring-2 focus:ring-focus-ring"
         >
           {[5, 7, 10, 20, 50].map(size => (
             <option key={size} value={size}>
@@ -122,7 +122,7 @@ export default function DataTable({ data, columns }) {
       </div>
 
       {/* ================== TABLA ================== */}
-      <div className="overflow-x-auto border border-border-strong rounded bg-background">
+      <div className="overflow-x-auto border border-border-strong rounded-shape-md bg-background">
         <table className="w-full bg-background text-text-primary">
 
           {/* ================== CABECERA ================== */}
@@ -137,7 +137,7 @@ export default function DataTable({ data, columns }) {
 
                   <th
                     key={header.id}
-                    className="p-3 text-left border-b border-border-strong text-text-primary"
+                    className="px-4 py-3 text-left border-b border-border-strong text-text-primary"
                   >
 
                     {/* 
@@ -174,7 +174,7 @@ export default function DataTable({ data, columns }) {
 
                   <td
                     key={cell.id}
-                    className="p-3 border-b border-border-strong text-text-primary"
+                    className="px-4 py-2 border-b border-border-strong text-text-primary"
                   >
 
                     {/* Render dinámico del contenido de la celda */}
@@ -197,7 +197,8 @@ export default function DataTable({ data, columns }) {
       </div>
 
       {/* ================== FOOTER ================== */}
-      <div className="flex items-center justify-between">
+      {/* En móvil se apila: el contador arriba y la paginación debajo (antes se salía de la tarjeta) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
         {/* ================== INFORMACIÓN ================== */}
         {/* Cantidad de registros visibles */}
@@ -207,7 +208,7 @@ export default function DataTable({ data, columns }) {
         </span>
 
         {/* ================== CONTROLES DE PAGINACIÓN ================== */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
 
           {/* Ir a la primera página */}
           <Button
@@ -278,7 +279,7 @@ export default function DataTable({ data, columns }) {
             table.setPageIndex(page)
           }}
 
-          className="border border-border-strong rounded px-2 py-1 w-16 bg-background text-text-primary"
+          className="h-12 border border-border-strong rounded-shape-xs px-3 w-20 bg-background text-text-primary focus:outline-none focus:ring-2 focus:ring-focus-ring"
         />
 
       </div>

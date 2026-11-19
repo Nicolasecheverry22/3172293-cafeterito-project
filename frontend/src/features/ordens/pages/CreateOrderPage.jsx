@@ -89,7 +89,7 @@ export default function CreateOrderPage() {
   };
 
   return (
-    <div className="bg-surface/60 dark:bg-surface/90 rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/60 dark:bg-surface/90 rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
 
       <div className="max-w-3xl mx-auto space-y-8 p-4">
         <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function CreateOrderPage() {
           </h1>
         </div>
 
-        <div className="bg-surface/70 rounded-3xl p-8 shadow-sm">
+        <div className="bg-surface/70 rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1">
           <OrderForm
             mode="create"
             waiters={waiters}

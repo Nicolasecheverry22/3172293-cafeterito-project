@@ -17,9 +17,9 @@ export const showCreateErrorAlert = async ({
     icon: "warning",
     confirmButtonText: "Entendido",
     customClass: {
-      popup: "rounded-2xl",
+      popup: "!rounded-shape-xl",
       confirmButton:
-        "!bg-amber-500 hover:!bg-amber-600 text-white px-4 py-2 rounded-lg font-medium cursor-pointer",
+        "!bg-warning hover:!bg-warning/90 !text-on-warning px-4 py-2 rounded-md font-medium cursor-pointer",
     },
     buttonsStyling: false,
   });
@@ -43,12 +43,12 @@ export function showConfirmDeleteAlert({
     cancelButtonText,
     reverseButtons: true,
     customClass: {
-      popup: "rounded-2xl",
-      title: "!text-amber-600 font-bold",
+      popup: "!rounded-shape-xl",
+      title: "!text-warning font-bold",
       confirmButton:
-        "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg ml-2 font-medium",
+        "!bg-error hover:!bg-error/90 !text-on-error cursor-pointer px-4 py-2 rounded-md ml-2 font-medium",
       cancelButton:
-        "!bg-gray-500 hover:!bg-gray-600 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+        "!bg-surface-muted hover:!bg-border !text-text-primary cursor-pointer px-4 py-2 rounded-md font-medium",
     },
     buttonsStyling: false,
   });
@@ -71,10 +71,10 @@ export const showSuccessAlert = async ({
     timerProgressBar: true,
     confirmButtonText,
     customClass: {
-            popup: "rounded-2x1",
-            title: "text-green-600",  
-            confirmButton: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 cursor-pointer rounded-lg",
-            timerProgressBar: "!bg-green-600",
+            popup: "!rounded-shape-xl",
+            title: "!text-success",  
+            confirmButton: "!bg-success hover:!bg-success/90 !text-on-success px-4 py-2 cursor-pointer rounded-md",
+            timerProgressBar: "!bg-success",
         },
 
     buttonsStyling: false,
@@ -97,11 +97,11 @@ export function showDeleteCancelAlert({
     timer,
     timerProgressBar: true,
     customClass: {
-      popup: "rounded-2xl",
-      title: "!text-blue-600 font-bold",
+      popup: "!rounded-shape-xl",
+      title: "!text-info font-bold",
       confirmButton:
-        "!bg-blue-600 hover:!bg-blue-700 text-white cursor-pointer px-4 py-2 rounded-lg",
-      timerProgressBar: "!bg-blue-600",
+        "!bg-info hover:!bg-info/90 !text-on-info cursor-pointer px-4 py-2 rounded-md",
+      timerProgressBar: "!bg-info",
     },
     buttonsStyling: false,
   });
@@ -122,10 +122,10 @@ export function showSystemErrorAlert({
     footer,
     confirmButtonText: "Entendido",
     customClass: {
-      popup: "rounded-2xl",
-      title: "!text-red-600 font-bold",
+      popup: "!rounded-shape-xl",
+      title: "!text-error font-bold",
       confirmButton:
-        "!bg-red-600 hover:!bg-red-700 text-white cursor-pointer px-4 py-2 rounded-lg font-medium",
+        "!bg-error hover:!bg-error/90 !text-on-error cursor-pointer px-4 py-2 rounded-md font-medium",
       footer: "text-sm text-text-secondary",
     },
     buttonsStyling: false,

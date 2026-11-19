@@ -28,6 +28,21 @@ body {
   color: var(--semantic-text-primary);
 }
 
+/* Select de SweetAlert (p. ej. "Cambiar estado" en inventario): el preflight de
+   Tailwind deja select/option con color heredado y fondo transparente, y la lista
+   desplegable nativa se pinta con fondo del sistema -> opciones invisibles en modo
+   oscuro. Se fijan fondo y color explícitos para el select y sus opciones. */
+[data-theme="dark"] .swal2-popup .swal2-select,
+[data-theme="dark"] .swal2-popup .swal2-select option {
+  background-color: var(--semantic-surface);
+  color: var(--semantic-text-primary);
+}
+
+[data-theme="dark"] .swal2-popup .swal2-select {
+  color-scheme: dark;
+  border: 1px solid var(--semantic-border);
+}
+
 #root {
   min-height: 100vh;
 }
@@ -69,8 +84,24 @@ body {
     /* ============== STATE ================= */
 
     --color-success: var(--semantic-success);
+    --color-on-success: var(--semantic-on-success);
+    --color-success-container: var(--semantic-success-container);
+    --color-on-success-container: var(--semantic-on-success-container);
+
     --color-warning: var(--semantic-warning);
+    --color-on-warning: var(--semantic-on-warning);
+    --color-warning-container: var(--semantic-warning-container);
+    --color-on-warning-container: var(--semantic-on-warning-container);
+
     --color-error: var(--semantic-error);
+    --color-on-error: var(--semantic-on-error);
+    --color-error-container: var(--semantic-error-container);
+    --color-on-error-container: var(--semantic-on-error-container);
+
+    --color-info: var(--semantic-info);
+    --color-on-info: var(--semantic-on-info);
+    --color-info-container: var(--semantic-info-container);
+    --color-on-info-container: var(--semantic-on-info-container);
 
     /* ============== TYPOGRAPHY ================ */
 
@@ -85,7 +116,69 @@ body {
 
     /* ============== FONT WEIGHT ================= */
 
-    --font-heading: var(--semantic-font-weight-heading);
-    --font-body: var(--semantic-font-weight-body);
-    --font-label: var(--semantic-font-weight-label);
+    /* Namespace --font-weight-*: genera font-heading / font-body / font-label como
+       font-weight. Antes estaban en --font-*, que en Tailwind v4 es font-family:
+       producía "font-family: 800" (inválido) y el peso nunca se aplicaba. */
+    --font-weight-heading: var(--semantic-font-weight-heading);
+    --font-weight-body: var(--semantic-font-weight-body);
+    --font-weight-label: var(--semantic-font-weight-label);
+
+    /* ============== MATERIAL DESIGN 3 (tokens.css) ============== */
+    /* La escala de espaciado de Tailwind ya es de 4px (p-2 = 8dp, p-4 = 16dp…). */
+
+    --spacing-touch: var(--md-touch-target);        /* min-h-touch, size-touch */
+
+    --radius-shape-xs: var(--md-shape-xs);          /* rounded-shape-xs */
+    --radius-shape-sm: var(--md-shape-sm);
+    --radius-shape-md: var(--md-shape-md);
+    --radius-shape-lg: var(--md-shape-lg);
+    --radius-shape-xl: var(--md-shape-xl);
+    --radius-shape-full: var(--md-shape-full);
+
+    --shadow-elevation-1: var(--md-elevation-1);    /* shadow-elevation-1 */
+    --shadow-elevation-2: var(--md-elevation-2);
+    --shadow-elevation-3: var(--md-elevation-3);
+    --shadow-elevation-4: var(--md-elevation-4);
+    --shadow-elevation-5: var(--md-elevation-5);
+
+    --opacity-disabled: var(--md-disabled-content); /* disabled:opacity-disabled */
+}
+
+/* ============== ÁREA TÁCTIL INVISIBLE (M3: 48×48) ==============
+   Amplía la zona clicable con un ::before centrado, sin cambiar el
+   tamaño visible. Úsalo en elementos interactivos de menos de 48px
+   que no estén posicionados (absolute/fixed). Deja ≥ 8px entre
+   vecinos para que las áreas no se solapen. */
+@utility touch-target {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, var(--md-touch-target));
+    height: max(100%, var(--md-touch-target));
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ============== BEM: acciones por fila de tabla ============== */
+@layer components {
+  .row-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2); /* 8px: las áreas de 48px no se solapan */
+  }
+
+  .row-actions__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;  /* contenedor M3 de icon button */
+    height: 40px;
+    border-radius: var(--md-shape-full);
+    cursor: pointer;
+    transition: background-color 150ms, color 150ms;
+  }
 }

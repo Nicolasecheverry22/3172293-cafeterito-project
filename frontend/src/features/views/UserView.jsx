@@ -26,7 +26,7 @@ export default function UserView() {
 
   if (notFound) {
     return (
-      <div className="max-w-4xl mx-auto mt-12 p-8 bg-surface-muted rounded-3xl shadow-sm border border-border text-center">
+      <div className="max-w-4xl mx-auto mt-12 p-4 sm:p-6 md:p-8 bg-surface-muted rounded-shape-xl shadow-elevation-1 border border-border text-center">
         <UserRoundSearch className="w-12 h-12 text-error mx-auto mb-4" />
         <h1 className="text-main font-heading font-bold text-text-primary mb-2">
           Usuario no encontrado
@@ -55,11 +55,11 @@ export default function UserView() {
   const bgColor = AVATAR_COLORS[user.id % AVATAR_COLORS.length];
 
   return (
-    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-border/40 shadow-2xl">
+    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
 
       <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-12 flex items-center gap-3">
-        <UserRoundSearch className="w-9 h-9 text-text-primary/" />
-        <h1 className="text-main font-heading font-bold text-text-primary/ text-2xl">
+        <UserRoundSearch className="w-9 h-9 text-text-primary" />
+        <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
           Visualizar Usuario
         </h1>
       </div>
@@ -67,7 +67,7 @@ export default function UserView() {
       <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         {/* Estado */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
           <p className="text-text-primary font-heading font-bold text-lg">
             Estado
           </p>
@@ -75,16 +75,16 @@ export default function UserView() {
         </div>
 
         {/* Información del Usuario */}
-        <div className="lg:col-span-2 bg-surface-muted rounded-3xl p-8 shadow-sm border border-border/50 flex flex-col items-center gap-8">
+        <div className="lg:col-span-2 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-8">
 
           <div
-            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-md transition-transform hover:scale-105 select-none"
+            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-text-on-brand shadow-elevation-2 transition-transform hover:scale-105 select-none"
             style={{ backgroundColor: bgColor }}
           >
             {initial}
           </div>
 
-          <div className="bg-surface rounded-2xl p-6 shadow-sm w-full border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 w-full border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input label="Nombre Completo" name="nameInfo" type="text" value={userName} disabled />
             <Input
               label="Tipo de documento"
@@ -128,7 +128,7 @@ export default function UserView() {
         </div>
 
         {/* Acciones */}
-        <div className="bg-surface-muted rounded-3xl p-6 shadow-sm border border-border/50 flex flex-col items-center gap-4 text-center">
+        <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
           <p className="text-text-primary font-heading font-bold text-lg">
             Acciones
           </p>
