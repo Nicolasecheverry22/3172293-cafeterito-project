@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
 import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
-import { getProductById, updateProduct } from "@/services/productApi";
+import { getProductById, updateProduct, fileToDataUrl } from "@/services/productApi";
 import { createMenuSchema } from "../../menu/schemas/editMenuSchema";
 import menuCategoryTypes from "../../../data/selects/menuCategoryTypes.json";
 import {
@@ -82,6 +82,12 @@ export default function EditProduct() {
     setErrors({});
 
     try {
+      // Si se cargó una nueva imagen, se convierte a base64 (si no, se conserva la actual).
+      let productImage;
+      if (Array.isArray(formData.imagen) && formData.imagen[0] instanceof File) {
+        productImage = await fileToDataUrl(formData.imagen[0]);
+      }
+
       // PUT /api/products/:id
       await updateProduct(item.id, {
         productName: result.data.nombre,
@@ -89,6 +95,7 @@ export default function EditProduct() {
         price: Number(result.data.precio),
         description: result.data.descripcion,
         isAvailable: formData.estado,
+        productImage,
       });
 
       await showSuccessAlert({

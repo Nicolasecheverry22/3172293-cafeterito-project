@@ -103,9 +103,9 @@ export default function ProductView() {
           {/* Tarjeta Compacta del Platillo */}
           <div className="w-full max-w-xs bg-surface rounded-shape-lg p-4 flex flex-col items-center text-center shadow-elevation-2 border border-border/30">
             <div className="mb-2 flex items-center justify-center">
-              {product.productImage && product.productImage.length > 0 ? (
+              {product.productImage ? (
                 <img
-                  src={product.productImage[0]}
+                  src={product.productImage}
                   alt={productName}
                   className="w-14 h-14 object-cover rounded-full shadow-elevation-2 border-2 border-white/50"
                 />
