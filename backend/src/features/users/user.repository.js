@@ -53,7 +53,8 @@ async create(userData, db = pool) {
         userDocumentNumber,
         userAddress,
         userPassword,
-        userAvatarUrl,
+        userImage,
+        userImageThumb,
         isStaff,
         isActive,
         isSuperuser,
@@ -69,12 +70,13 @@ async create(userData, db = pool) {
     user_document_number,
     user_address,
     user_password,
-    user_avatar_url,
+    user_image,
     is_staff,
     is_active,
-    is_superuser
+    is_superuser,
+    user_image_thumb
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
     RETURNING id;
     `
     // Array de valores que pasan al query
@@ -88,10 +90,11 @@ async create(userData, db = pool) {
         userDocumentNumber,
         userAddress ?? null,
         userPassword,
-        userAvatarUrl ?? null,
+        userImage ?? null,
         isStaff,
         isActive,
         isSuperuser,
+        userImageThumb ?? null,
     ]
 
     // Ejecutuamoa la consulta usando el pool
@@ -158,6 +161,9 @@ async updateWithGroups(id, userData, groupNames) {
         userAddress,
         isActive,
         isSuperuser,
+        userImage,
+        userImageThumb,
+        removeImage,
     } = userData;
 
     const client = await pool.connect();
@@ -172,12 +178,18 @@ async updateWithGroups(id, userData, groupNames) {
                  failed_login_attempts = CASE WHEN $6 IS TRUE AND is_active = FALSE THEN 0 ELSE failed_login_attempts END,
                  locked_until = CASE WHEN $6 IS TRUE AND is_active = FALSE THEN NULL ELSE locked_until END,
                  is_active = COALESCE($6, is_active), is_superuser = $7,
-                 user_address = $8, user_personal_email = $9
+                 user_address = $8, user_personal_email = $9,
+                 -- Foto: nueva → se reemplaza; sin foto → se conserva; removeImage → NULL
+                 user_image       = CASE WHEN $13::boolean AND $11::text IS NULL THEN NULL
+                                         ELSE COALESCE($11::text, user_image) END,
+                 user_image_thumb = CASE WHEN $13::boolean AND $11::text IS NULL THEN NULL
+                                         ELSE COALESCE($12::text, user_image_thumb) END
              WHERE id = $10
              RETURNING id`,
             [
                 userName, userEmail, userPhone, userDocumentTypes, userDocumentNumber,
                 isActive ?? null, isSuperuser, userAddress ?? null, userPersonalEmail ?? null, id,
+                userImage ?? null, userImageThumb ?? null, Boolean(removeImage),
             ]
         );
 
@@ -287,10 +299,12 @@ async list({ search, isActive, page, limit } = {}) {
         user_email           AS "userEmail",
         user_phone           AS "userPhone",
         user_document_number AS "userDocument",
+        user_image_thumb     AS "userImageThumb",
         is_superuser,
         is_staff,
         is_active,
         ${USER_GROUPS_SUBQUERY} AS groups`,
+        // Solo la miniatura: la foto completa se lee en getById (rendimiento)
         from: "FROM users",
         filters,
         orderBy: `${alpha("user_name")}, id`,
@@ -311,7 +325,8 @@ async getById(id) {
         user_document_number AS "userDocument",
         user_address         AS "userAddress",
         user_personal_email  AS "userPersonalEmail",
-        user_avatar_url      AS "userAvatarUrl",
+        user_image           AS "userImage",
+        user_image_thumb     AS "userImageThumb",
         is_superuser,
         is_staff,
         is_active,

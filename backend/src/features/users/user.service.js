@@ -19,7 +19,8 @@ export const userService = {
       userDocumentNumber: data.userDocumentNumber,
       userAddress: data.userAddress ?? null,
       userPassword: await bcrypt.hash(data.userPassword, 10),
-      userAvatarUrl: data.userAvatarUrl ?? null,
+      userImage: data.userImage ?? null,
+      userImageThumb: data.userImageThumb ?? null,
       isStaff: false,
       isActive: true,
       // El rol Administrador = superusuario (mismo criterio que al editar)
@@ -38,6 +39,10 @@ export const userService = {
       userDocumentTypes: data.userDocumentTypes,
       userDocumentNumber: data.userDocumentNumber,
       userAddress: data.userAddress ?? null,
+      // Sin foto nueva se conserva la actual; removeImage la quita
+      userImage: data.userImage ?? null,
+      userImageThumb: data.userImageThumb ?? null,
+      removeImage: Boolean(data.removeImage),
       // undefined → se conserva el estado actual
       isActive: data.isActive,
       isSuperuser: data.groupNames.includes(ADMIN_GROUP),

@@ -5,13 +5,17 @@ import { createFilters, runList, likePattern, alpha } from "../../utils/listQuer
 // Consultas SQL del recurso products (platillos del menú).
 export const productRepository = {
   async create(data) {
-    const { productName, category, price, description, isAvailable, productImage } = data;
+    const { productName, category, price, description, isAvailable, productImage, productImageThumb } = data;
     const query = `
-      INSERT INTO products (product_name, category, price, description, is_available, product_image)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO products (product_name, category, price, description, is_available,
+                            product_image, product_image_thumb)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id;
     `;
-    const values = [productName, category, price, description, isAvailable ?? true, productImage ?? null];
+    const values = [
+      productName, category, price, description, isAvailable ?? true,
+      productImage ?? null, productImageThumb ?? null,
+    ];
     const result = await pool.query(query, values);
     return result.rows[0];
   },
@@ -30,7 +34,7 @@ export const productRepository = {
                price::float AS price,
                description,
                is_available AS "isAvailable",
-               product_image AS "productImage"`,
+               product_image_thumb AS "productImageThumb"`, // solo miniatura: la completa va en getById
       from: "FROM products",
       filters,
       orderBy: `${alpha("product_name")}, id`,
@@ -47,7 +51,8 @@ export const productRepository = {
              price::float AS price,
              description,
              is_available AS "isAvailable",
-             product_image AS "productImage"
+             product_image AS "productImage",
+             product_image_thumb AS "productImageThumb"
       FROM products
       WHERE id = $1;
     `;
@@ -72,15 +77,25 @@ export const productRepository = {
     return result.rows;
   },
 
+  // Imagen: nueva → se reemplaza; sin imagen → se conserva (COALESCE); removeImage → NULL.
   async update(id, data) {
-    const { productName, category, price, description, isAvailable, productImage } = data;
+    const {
+      productName, category, price, description, isAvailable,
+      productImage, productImageThumb, removeImage,
+    } = data;
     const result = await pool.query(
       `UPDATE products
        SET product_name = $1, category = $2, price = $3, description = $4, is_available = $5,
-           product_image = COALESCE($6, product_image)
-       WHERE id = $7
+           product_image       = CASE WHEN $8::boolean AND $6::text IS NULL THEN NULL
+                                      ELSE COALESCE($6::text, product_image) END,
+           product_image_thumb = CASE WHEN $8::boolean AND $6::text IS NULL THEN NULL
+                                      ELSE COALESCE($7::text, product_image_thumb) END
+       WHERE id = $9
        RETURNING id`,
-      [productName, category, price, description, isAvailable, productImage ?? null, id]
+      [
+        productName, category, price, description, isAvailable,
+        productImage ?? null, productImageThumb ?? null, Boolean(removeImage), id,
+      ]
     );
     return result.rows[0];
   },
@@ -116,11 +131,12 @@ export const productRepository = {
         p.price::float AS price,
         p.description,
         p.is_available AS "isAvailable",
+        p.product_image AS "productImage",
         COALESCE(SUM(CASE WHEN o.status != 'cancelada' THEN oi.quantity ELSE 0 END), 0)::int AS "totalSold"
       FROM products p
       LEFT JOIN order_items oi ON oi.product_id = p.id
       LEFT JOIN orders o ON o.id = oi.order_id
-      GROUP BY p.id, p.product_name, p.category, p.price, p.description, p.is_available
+      GROUP BY p.id
       ORDER BY "totalSold" DESC, p.id ASC
       LIMIT 4;
     `;

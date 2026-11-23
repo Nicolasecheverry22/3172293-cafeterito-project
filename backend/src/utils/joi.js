@@ -50,3 +50,39 @@ export const isoDate = () =>
     });
 
 export const email = () => Joi.string().trim().lowercase().email({ tlds: { allow: false } }).max(150);
+
+// ── Imágenes (data URL base64) ──────────────────────────────────
+// Solo PNG, JPEG y WEBP: NO se acepta SVG (puede llevar <script> → XSS al mostrarse).
+// El frontend redimensiona a ≈ 800 px y genera una miniatura de 96×96 antes de enviar.
+const IMAGE_DATA_URI = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+export const IMAGE_MAX_LENGTH = 1_500_000; // ≈ 1.1 MB binarios (2 MB de entrada ya comprimida)
+export const THUMB_MAX_LENGTH = 50_000;    // ≈ 37 KB binarios (96×96 ocupa ~3–8 KB)
+
+const imageDataUri = (max) =>
+  Joi.string()
+    .max(max)
+    .pattern(IMAGE_DATA_URI, { name: "debe ser una imagen PNG, JPG o WEBP codificada en base64" })
+    .messages({
+      "string.max": "{{#label}} es demasiado grande (máximo 2 MB)",
+      "any.required": "{{#label}} es un campo obligatorio",
+    });
+
+/**
+ * Campos de imagen de un recurso: <key>, <key>Thumb y, si se permite quitarla, removeImage.
+ * - required: la imagen es obligatoria (p. ej. insumo al crear, RFADMIN08).
+ * - removable: acepta removeImage=true para borrar la imagen guardada (solo en PUT).
+ * La miniatura es obligatoria cuando llega la imagen.
+ */
+export const imageFields = (key, label, { required = false, removable = false } = {}) => {
+  const image = imageDataUri(IMAGE_MAX_LENGTH).empty("").allow(null).label(label);
+  const thumb = imageDataUri(THUMB_MAX_LENGTH).empty("").allow(null).label(`La miniatura de ${label.toLowerCase()}`);
+  return {
+    [key]: required ? image.required() : image,
+    [`${key}Thumb`]: Joi.when(key, {
+      is: Joi.string().required(),
+      then: thumb.required(),
+      otherwise: thumb,
+    }),
+    ...(removable && { removeImage: Joi.boolean().default(false).label("Quitar imagen") }),
+  };
+};
