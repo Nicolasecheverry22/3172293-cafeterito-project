@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { UtensilsCrossed } from "lucide-react";
 import MenuForm from "../components/MenuForm";
-import { createProduct, fileToDataUrl } from "@/services/productApi";
+import { createProduct } from "@/services/productApi";
+import { buildImagePayload } from "@/shared/utils/image";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -23,12 +24,8 @@ export default function CreateMenuPage() {
     }
 
     try {
-      // Si se seleccionó una imagen, se convierte a base64 y se guarda en la BD.
-      let productImage;
-      const files = validatedData.imagen;
-      if (Array.isArray(files) && files[0] instanceof File) {
-        productImage = await fileToDataUrl(files[0]);
-      }
+      // Imagen comprimida (≈ 800 px) + miniatura 96×96, en base64 para la BD.
+      const imageFields = await buildImagePayload("productImage", validatedData.imagen);
 
       await createProduct({
         productName: validatedData.nombre,
@@ -36,7 +33,7 @@ export default function CreateMenuPage() {
         price: Number(validatedData.precio),
         description: validatedData.descripcion,
         isAvailable: validatedData.estado ?? true,
-        productImage,
+        ...imageFields,
       });
 
       await showSuccessAlert({
@@ -48,7 +45,7 @@ export default function CreateMenuPage() {
     } catch (error) {
       console.error("Error al crear el platillo:", error);
       await showSystemErrorAlert({
-        text: "Ocurrió un error inesperado al intentar registrar el platillo.",
+        text: error.message || "Ocurrió un error inesperado al intentar registrar el platillo.",
       });
     }
   };

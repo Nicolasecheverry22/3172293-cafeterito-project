@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
 import { Input, Button, StatusSwitch, Select, FileInput } from "@/shared";
-import { getProductById, updateProduct, fileToDataUrl } from "@/services/productApi";
+import { getProductById, updateProduct } from "@/services/productApi";
+import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 import { createMenuSchema } from "../../menu/schemas/editMenuSchema";
 import menuCategoryTypes from "../../../data/selects/menuCategoryTypes.json";
 import {
@@ -21,6 +22,8 @@ export default function EditProduct() {
 
   const [item, setItem] = useState(null);
   const [formData, setFormData] = useState(null);
+  // true si el usuario quitó la imagen guardada (se envía removeImage)
+  const [imageRemoved, setImageRemoved] = useState(false);
 
   // Carga el platillo real desde la BD
   useEffect(() => {
@@ -82,11 +85,10 @@ export default function EditProduct() {
     setErrors({});
 
     try {
-      // Si se cargó una nueva imagen, se convierte a base64 (si no, se conserva la actual).
-      let productImage;
-      if (Array.isArray(formData.imagen) && formData.imagen[0] instanceof File) {
-        productImage = await fileToDataUrl(formData.imagen[0]);
-      }
+      // Imagen nueva → se comprime; quitada → removeImage; sin cambios → se conserva la actual.
+      const imageFields = await buildImagePayload("productImage", formData.imagen, {
+        removed: imageRemoved,
+      });
 
       // PUT /api/products/:id
       await updateProduct(item.id, {
@@ -95,7 +97,7 @@ export default function EditProduct() {
         price: Number(result.data.precio),
         description: result.data.descripcion,
         isAvailable: formData.estado,
-        productImage,
+        ...imageFields,
       });
 
       await showSuccessAlert({
@@ -219,14 +221,14 @@ export default function EditProduct() {
                 setFormData((prev) => ({ ...prev, imagen: files }));
                 if (errors.imagen) setErrors((prev) => ({ ...prev, imagen: undefined }));
               }}
+              existingUrl={imageRemoved ? null : item.productImage}
+              onRemoveExisting={() => setImageRemoved(true)}
               multiple={false}
-              accept="image/*"
+              accept={IMAGE_ACCEPT}
+              validateFile={validateImageFile}
+              hint={IMAGE_HINT}
+              error={errors.imagen}
             />
-            {errors.imagen && (
-              <span className="text-error text-small block mt-1">
-                {errors.imagen}
-              </span>
-            )}
           </div>
 
           <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
