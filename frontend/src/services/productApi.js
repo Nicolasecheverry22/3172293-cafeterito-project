@@ -16,3 +16,13 @@ export const setProductStatus = (id, isAvailable) =>
 
 // Público (Home): no envía token
 export const getTopSellingProducts = () => api.get("/products/top-selling", { auth: false });
+
+// Convierte un File (imagen) a data URL base64 para guardarla en la BD.
+export function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}

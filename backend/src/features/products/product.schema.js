@@ -9,6 +9,8 @@ export const productSchema = Joi.object({
   price: Joi.number().positive().precision(2).max(9999999999).required().label("El precio"),
   description: Joi.string().trim().max(500).empty("").allow(null).label("La descripción"),
   isAvailable: Joi.boolean().default(true).label("El estado"),
+  // Imagen del platillo como data URL base64 (se guarda en la BD).
+  productImage: Joi.string().dataUri().allow(null, "").label("La imagen"),
 });
 
 // PATCH /api/products/:id/status

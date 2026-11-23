@@ -54,7 +54,7 @@ export default function MenuForm({
     setErrors({});
     setIsSubmitting(true);
     try {
-      await onSubmit(result.data);
+      await onSubmit({ ...result.data, imagen: formData.imagen });
     } finally {
       setIsSubmitting(false);
     }

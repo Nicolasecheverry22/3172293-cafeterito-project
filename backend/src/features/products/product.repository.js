@@ -5,13 +5,13 @@ import { createFilters, runList, likePattern, alpha } from "../../utils/listQuer
 // Consultas SQL del recurso products (platillos del menú).
 export const productRepository = {
   async create(data) {
-    const { productName, category, price, description, isAvailable } = data;
+    const { productName, category, price, description, isAvailable, productImage } = data;
     const query = `
-      INSERT INTO products (product_name, category, price, description, is_available)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO products (product_name, category, price, description, is_available, product_image)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id;
     `;
-    const values = [productName, category, price, description, isAvailable ?? true];
+    const values = [productName, category, price, description, isAvailable ?? true, productImage ?? null];
     const result = await pool.query(query, values);
     return result.rows[0];
   },
@@ -29,7 +29,8 @@ export const productRepository = {
                category,
                price::float AS price,
                description,
-               is_available AS "isAvailable"`,
+               is_available AS "isAvailable",
+               product_image AS "productImage"`,
       from: "FROM products",
       filters,
       orderBy: `${alpha("product_name")}, id`,
@@ -45,7 +46,8 @@ export const productRepository = {
              category,
              price::float AS price,
              description,
-             is_available AS "isAvailable"
+             is_available AS "isAvailable",
+             product_image AS "productImage"
       FROM products
       WHERE id = $1;
     `;
@@ -71,13 +73,14 @@ export const productRepository = {
   },
 
   async update(id, data) {
-    const { productName, category, price, description, isAvailable } = data;
+    const { productName, category, price, description, isAvailable, productImage } = data;
     const result = await pool.query(
       `UPDATE products
-       SET product_name = $1, category = $2, price = $3, description = $4, is_available = $5
-       WHERE id = $6
+       SET product_name = $1, category = $2, price = $3, description = $4, is_available = $5,
+           product_image = COALESCE($6, product_image)
+       WHERE id = $7
        RETURNING id`,
-      [productName, category, price, description, isAvailable, id]
+      [productName, category, price, description, isAvailable, productImage ?? null, id]
     );
     return result.rows[0];
   },

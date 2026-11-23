@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { UtensilsCrossed } from "lucide-react";
 import MenuForm from "../components/MenuForm";
-import { createProduct } from "@/services/productApi";
+import { createProduct, fileToDataUrl } from "@/services/productApi";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -23,12 +23,20 @@ export default function CreateMenuPage() {
     }
 
     try {
+      // Si se seleccionó una imagen, se convierte a base64 y se guarda en la BD.
+      let productImage;
+      const files = validatedData.imagen;
+      if (Array.isArray(files) && files[0] instanceof File) {
+        productImage = await fileToDataUrl(files[0]);
+      }
+
       await createProduct({
         productName: validatedData.nombre,
         category: validatedData.categoria,
         price: Number(validatedData.precio),
         description: validatedData.descripcion,
         isAvailable: validatedData.estado ?? true,
+        productImage,
       });
 
       await showSuccessAlert({
