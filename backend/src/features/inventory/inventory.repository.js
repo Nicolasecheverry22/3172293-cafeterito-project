@@ -16,8 +16,10 @@ const INVENTORY_COLUMNS = `
   i.barcode,
   TO_CHAR(i.expiration_date, 'YYYY-MM-DD') AS "expirationDate",
   i.provider_id AS "providerId",
-  p.provider_name AS "providerName"
+  p.provider_name AS "providerName",
+  i.provision_image_thumb AS "provisionImageThumb"
 `;
+// La imagen completa solo se devuelve en el detalle; los listados llevan la miniatura.
 const FROM_INVENTORY = `FROM inventory i LEFT JOIN providers p ON p.id = i.provider_id`;
 
 const values = (data) => [
@@ -32,10 +34,10 @@ export const inventoryRepository = {
     const result = await pool.query(
       `INSERT INTO inventory
          (provision_name, category, unit, stock, price, batch, min_stock, max_stock, status,
-          barcode, expiration_date, provider_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+          barcode, expiration_date, provider_id, provision_image, provision_image_thumb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
        RETURNING id`,
-      values(data)
+      [...values(data), data.provisionImage, data.provisionImageThumb ?? null]
     );
     return result.rows[0];
   },
@@ -62,7 +64,8 @@ export const inventoryRepository = {
 
   async getById(id) {
     const result = await pool.query(
-      `SELECT ${INVENTORY_COLUMNS} ${FROM_INVENTORY} WHERE i.id = $1`,
+      `SELECT ${INVENTORY_COLUMNS}, i.provision_image AS "provisionImage"
+       ${FROM_INVENTORY} WHERE i.id = $1`,
       [id]
     );
     return result.rows[0];
@@ -80,15 +83,18 @@ export const inventoryRepository = {
   },
 
   // Actualiza todos los campos editables. Retorna undefined si el id no existe.
+  // Sin imagen nueva se conserva la actual (COALESCE); el insumo no puede quedar sin imagen.
   async update(id, data) {
     const result = await pool.query(
       `UPDATE inventory
        SET provision_name = $1, category = $2, unit = $3, stock = $4, price = $5,
            batch = $6, min_stock = $7, max_stock = $8, status = $9,
-           barcode = $10, expiration_date = $11, provider_id = $12
+           barcode = $10, expiration_date = $11, provider_id = $12,
+           provision_image       = COALESCE($14::text, provision_image),
+           provision_image_thumb = COALESCE($15::text, provision_image_thumb)
        WHERE id = $13
        RETURNING id`,
-      [...values(data), id]
+      [...values(data), id, data.provisionImage ?? null, data.provisionImageThumb ?? null]
     );
     return result.rows[0];
   },

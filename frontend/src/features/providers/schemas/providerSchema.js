@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { providers as existingProviders } from "../data/providers";
+import { imageFilesField } from "@/shared/utils/image";
 
 export function createProviderSchema({ currentProviderId = null } = {}) {
   return z
@@ -43,7 +44,8 @@ export function createProviderSchema({ currentProviderId = null } = {}) {
       productFruits: z.boolean(),
       productOthers: z.boolean(),
 
-      images: z.array(z.instanceof(File)).optional(),
+      // Logo opcional: PNG/JPG/WEBP, máx. 2 MB (igual que Joi)
+      images: imageFilesField(),
     })
     // Solo el NIT admite dígito de verificación
     .refine(

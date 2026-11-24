@@ -4,6 +4,7 @@ import { PackagePlus } from "lucide-react";
 import InventoryForm from "../components/InventoryForm";
 import { getCategoryTypes } from "@/services/selectService";
 import { createInventoryItem } from "@/services/inventoryApi";
+import { buildImagePayload } from "@/shared/utils/image";
 
 import {
   showSuccessAlert,
@@ -31,7 +32,11 @@ export default function CreateInventoryPage() {
     }
 
     try {
+      // Imagen obligatoria (RFADMIN08): comprimida + miniatura en base64
+      const imageFields = await buildImagePayload("provisionImage", validatedData.provisionImage);
+
       await createInventoryItem({
+        ...imageFields,
         provisionName: validatedData.provisionName,
         category: validatedData.category,
         unit: validatedData.unit,
@@ -54,7 +59,7 @@ export default function CreateInventoryPage() {
     } catch (error) {
       console.error("Error al crear el suministro:", error);
       await showSystemErrorAlert({
-        text: "Ocurrió un error inesperado al intentar registrar el suministro.",
+        text: error.message || "Ocurrió un error inesperado al intentar registrar el suministro.",
       });
     }
   };

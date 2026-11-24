@@ -1,12 +1,11 @@
 // Validación de entrada del feature providers (RFADMIN14–17).
-import { Joi, email } from "../../utils/joi.js";
+import { Joi, email, imageFields } from "../../utils/joi.js";
 import { paginationFields } from "../../utils/listQuery.js";
 
 // Sin Tarjeta de identidad (TI): un proveedor no puede ser menor de edad.
 export const PROVIDER_DOCUMENT_TYPES = ["NIT", "CC", "CE", "PEP", "PPT"];
 
-// Usado en POST (crear) y PUT (actualizar).
-export const providerSchema = Joi.object({
+const providerFields = {
   documentType: Joi.string()
     .trim()
     .uppercase()
@@ -35,6 +34,18 @@ export const providerSchema = Joi.object({
   providerAddress: Joi.string().trim().max(255).empty("").allow(null).label("La dirección"),
   productService: Joi.string().trim().max(1000).empty("").allow(null).label("Los productos/servicios"),
   isActive: Joi.boolean().default(true).label("El estado"),
+};
+
+// POST /api/providers — logo opcional (PNG/JPEG/WEBP, sin SVG) + miniatura
+export const providerSchema = Joi.object({
+  ...providerFields,
+  ...imageFields("providerImage", "El logo"),
+});
+
+// PUT /api/providers/:id — sin logo nuevo se conserva el actual; removeImage lo quita
+export const updateProviderSchema = Joi.object({
+  ...providerFields,
+  ...imageFields("providerImage", "El logo", { removable: true }),
 });
 
 // PATCH /api/providers/:id/status

@@ -189,7 +189,7 @@ export default function OrderForm({
         </div>
       )}
 
-      <div className="flex justify-end gap-4 pt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+      <div className="flex justify-end gap-4 pt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
         <Button variant="secondary" type="button" onClick={onCancel}>
           Cancelar
         </Button>

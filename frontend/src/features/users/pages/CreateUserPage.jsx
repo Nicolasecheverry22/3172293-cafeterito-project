@@ -4,6 +4,7 @@ import { UserPlus } from "lucide-react";
 import UserForm from "../components/UserForm";
 import { getDocumentTypes } from "@/services/selectService";
 import { createUser } from "@/services/userApi";
+import { buildImagePayload } from "@/shared/utils/image";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
@@ -31,6 +32,9 @@ export default function CreateUserPage() {
     }
 
     try {
+      // Foto opcional: imagen comprimida + miniatura (base64)
+      const imageFields = await buildImagePayload("userImage", validatedData.userImage);
+
       // Mapeo de los campos del formulario al contrato del backend (POST /api/users)
       const payload = {
         userName: validatedData.userName,
@@ -40,7 +44,7 @@ export default function CreateUserPage() {
         userDocumentNumber: validatedData.userDocumentNumber,
         userPassword: validatedData.userPassword,
         userAddress: validatedData.address || null,
-        userAvatarUrl: null,
+        ...imageFields,
         // isSuperuser/isStaff/isActive NO se envían: el backend los calcula
         // (Administrador = superusuario; todo usuario nuevo queda activo).
         // Los checkboxes de "Tipo de Usuario" definen los grupos (y con ellos los permisos)

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { fileSchema } from "../schemas/fileSchema";
+import { imageFilesField } from "@/shared/utils/image";
 import { users as existingUsers } from "../data/users";
 
 // Alineado con el backend (user.schema.js): letras (con tildes y ñ) y espacios
@@ -28,7 +28,8 @@ export function createUserSchema({ currentUserId = null } = {}) {
         })
         .optional(),
 
-      userImage: fileSchema.shape.files.optional(),
+      // Foto de perfil opcional (RFADMIN02): PNG/JPG/WEBP, máx. 2 MB (igual que Joi)
+      userImage: imageFilesField(),
 
       userDocumentTypes: z.string().min(1, "Debe seleccionar un tipo de documento"),
 

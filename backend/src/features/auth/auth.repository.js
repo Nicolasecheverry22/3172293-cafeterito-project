@@ -8,7 +8,7 @@ export const authRepository = {
   // is_locked se calcula en SQL con now() de la BD (evita desfases de reloj)
   async findByEmail(email, db = pool) {
     const result = await db.query(
-      `SELECT id, user_email, user_password, is_active, failed_login_attempts,
+      `SELECT id, user_email, user_name, user_image_thumb, user_password, is_active, failed_login_attempts,
               (locked_until IS NOT NULL AND locked_until > now()) AS is_locked
        FROM users
        WHERE lower(user_email) = $1
@@ -24,6 +24,15 @@ export const authRepository = {
       `SELECT id, is_active,
               (locked_until IS NOT NULL AND locked_until > now()) AS is_locked
        FROM users WHERE id = $1`,
+      [id]
+    );
+    return result.rows[0];
+  },
+
+  // Datos visibles del usuario en sesión (nombre y miniatura para el avatar del navbar)
+  async findProfile(id) {
+    const result = await pool.query(
+      "SELECT user_name, user_image_thumb FROM users WHERE id = $1",
       [id]
     );
     return result.rows[0];

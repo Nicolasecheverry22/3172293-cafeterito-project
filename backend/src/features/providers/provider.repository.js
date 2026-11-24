@@ -11,8 +11,10 @@ const PROVIDER_COLUMNS = `
   provider_phone   AS "providerPhone",
   provider_address AS "providerAddress",
   product_service  AS "productService",
-  is_active
+  is_active,
+  provider_image_thumb AS "providerImageThumb"
 `;
+// El logo completo solo se devuelve en el detalle; los listados llevan la miniatura.
 
 // Consultas SQL del recurso providers (proveedores).
 export const providerRepository = {
@@ -20,16 +22,18 @@ export const providerRepository = {
     const {
       documentType, nit, providerName, providerEmail,
       providerPhone, providerAddress, productService, isActive,
+      providerImage, providerImageThumb,
     } = data;
     const result = await pool.query(
       `INSERT INTO providers
          (document_type, nit, provider_name, provider_email, provider_phone,
-          provider_address, product_service, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          provider_address, product_service, is_active, provider_image, provider_image_thumb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING id`,
       [
         documentType, nit, providerName, providerEmail, providerPhone,
         providerAddress ?? null, productService ?? null, isActive ?? true,
+        providerImage ?? null, providerImageThumb ?? null,
       ]
     );
     return result.rows[0];
@@ -56,7 +60,10 @@ export const providerRepository = {
   },
 
   async getById(id) {
-    const result = await pool.query(`SELECT ${PROVIDER_COLUMNS} FROM providers WHERE id = $1`, [id]);
+    const result = await pool.query(
+      `SELECT ${PROVIDER_COLUMNS}, provider_image AS "providerImage" FROM providers WHERE id = $1`,
+      [id]
+    );
     return result.rows[0];
   },
 
@@ -77,16 +84,23 @@ export const providerRepository = {
     const {
       documentType, nit, providerName, providerEmail,
       providerPhone, providerAddress, productService, isActive,
+      providerImage, providerImageThumb, removeImage,
     } = data;
+    // Logo: nuevo → se reemplaza; sin logo → se conserva (COALESCE); removeImage → NULL
     const result = await pool.query(
       `UPDATE providers
        SET document_type = $1, nit = $2, provider_name = $3, provider_email = $4,
-           provider_phone = $5, provider_address = $6, product_service = $7, is_active = $8
+           provider_phone = $5, provider_address = $6, product_service = $7, is_active = $8,
+           provider_image       = CASE WHEN $12::boolean AND $10::text IS NULL THEN NULL
+                                       ELSE COALESCE($10::text, provider_image) END,
+           provider_image_thumb = CASE WHEN $12::boolean AND $10::text IS NULL THEN NULL
+                                       ELSE COALESCE($11::text, provider_image_thumb) END
        WHERE id = $9
        RETURNING id`,
       [
         documentType, nit, providerName, providerEmail, providerPhone,
         providerAddress ?? null, productService ?? null, isActive, id,
+        providerImage ?? null, providerImageThumb ?? null, Boolean(removeImage),
       ]
     );
     return result.rows[0];

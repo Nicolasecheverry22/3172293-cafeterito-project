@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 text-xs font-medium">
 
         {/* 1. Estado Operativo del Sistema (Alto contraste) */}
-        <div className="flex items-center gap-2 text-text-primary">
+        <div className="flex flex-wrap items-center justify-center gap-2 text-text-primary">
           <span className="flex items-center gap-2 font-semibold">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
@@ -27,14 +27,14 @@ export default function Footer() {
         </div>
 
         {/* 2. Identidad Minimalista y Copyright */}
-        <div className="flex items-center gap-1 font-heading font-semibold text-text-primary">
+        <div className="flex flex-wrap items-center justify-center gap-1 font-heading font-semibold text-text-primary">
           <Coffee className="w-4 h-4 text-text-primary dark:text-brand" aria-hidden="true" />
           <span>Cafeterito Admin</span>
           <span className="text-text-primary font-normal">© {year}</span>
         </div>
 
         {/* 3. Soporte Técnico y Versión (Con contraste garantizado) */}
-        <div className="flex items-center gap-3 text-text-primary">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-text-primary">
           <a
             href="mailto:soporte@cafeterito.com"
             className="min-h-touch hover:underline transition-colors flex items-center gap-1 font-semibold"

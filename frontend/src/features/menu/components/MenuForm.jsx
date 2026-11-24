@@ -5,6 +5,7 @@ import { Input, Select, Button, FileInput, StatusSwitch } from "@/shared";
 import { createMenuSchema } from "../schemas/menuSchema";
 import { menuCategories } from "../data/categories";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
+import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 
 const DEFAULT_FORM_DATA = {
   nombre: "",
@@ -66,11 +67,16 @@ export default function MenuForm({
         <div className="flex flex-col items-center">
           <FileInput
             value={formData.imagen}
-            onChange={(files) => setFormData((prev) => ({ ...prev, imagen: files }))}
+            onChange={(files) => {
+              setFormData((prev) => ({ ...prev, imagen: files }));
+              setErrors((prev) => ({ ...prev, imagen: undefined }));
+            }}
             multiple={false}
-            accept="image/*"
+            accept={IMAGE_ACCEPT}
+            validateFile={validateImageFile}
+            hint={IMAGE_HINT}
+            error={errors.imagen}
           />
-          {errors.imagen && <span className="text-error text-small mt-1">{errors.imagen}</span>}
         </div>
 
         <div className="flex items-center gap-4 mt-2">
@@ -124,7 +130,7 @@ export default function MenuForm({
           />
         </div>
 
-        <div className="flex justify-end gap-4 mt-12 pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+        <div className="flex justify-end gap-4 mt-12 pt-6 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
           <Button type="button" variant="secondary" onClick={onCancel} className="px-10">
             Cancelar
           </Button>

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { menuCategories } from "../data/categories";
+import { imageFilesField } from "@/shared/utils/image";
 
 const VALID_CATEGORY_VALUES = menuCategories.map((c) => c.value);
 
@@ -30,6 +31,7 @@ export function createEditMenuSchema() {
 
       estado: z.boolean(),
 
+      imagen: imageFilesField(),
     });
 }
 

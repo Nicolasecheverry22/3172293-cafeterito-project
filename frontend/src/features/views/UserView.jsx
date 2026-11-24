@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input, Button, StatusSwitch } from "@/shared";
+import { Input, Button, StatusSwitch, ImageThumb } from "@/shared";
 import { SquarePen, UserRoundSearch, ArrowLeft } from "lucide-react";
 import { getUserById } from "@/services/userApi";
 import { getDocumentTypeLabel } from "@/services/selectService";
-
-const AVATAR_COLORS = [
-  "#E57373", "#F06292", "#BA68C8", "#9575CD",
-  "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
-  "#FFD54F", "#FF8A65",
-];
 
 export default function UserView() {
   const navigate = useNavigate();
@@ -51,20 +45,18 @@ export default function UserView() {
 
   const userName = user.userName ?? "";
   const roles = user.groups?.length ? user.groups.join(", ") : "Sin rol asignado";
-  const initial = userName ? userName.charAt(0).toUpperCase() : "U";
-  const bgColor = AVATAR_COLORS[user.id % AVATAR_COLORS.length];
 
   return (
     <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
 
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-12 flex items-center gap-3">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 mt-8 mb-12 flex items-center gap-3">
         <UserRoundSearch className="w-9 h-9 text-text-primary" />
         <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
           Visualizar Usuario
         </h1>
       </div>
 
-      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         {/* Estado */}
         <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
@@ -77,12 +69,15 @@ export default function UserView() {
         {/* Información del Usuario */}
         <div className="lg:col-span-2 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-8">
 
-          <div
-            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-text-on-brand shadow-elevation-2 transition-transform hover:scale-105 select-none"
-            style={{ backgroundColor: bgColor }}
-          >
-            {initial}
-          </div>
+          {/* Foto de perfil o, si no tiene, sus iniciales */}
+          <ImageThumb
+            src={user.userImage}
+            alt={`Foto de ${userName || "usuario"}`}
+            name={userName || "Usuario"}
+            size="lg"
+            round
+            className="shadow-elevation-2"
+          />
 
           <div className="bg-surface rounded-shape-lg p-4 sm:p-6 shadow-elevation-1 w-full border border-border/40 grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input label="Nombre Completo" name="nameInfo" type="text" value={userName} disabled />

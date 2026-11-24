@@ -1,7 +1,10 @@
 import { UtensilsCrossed } from "lucide-react";
 
 export default function Card({ product }) {
-  const { title, image, price, description, totalSold } = product;
+  // El endpoint de más vendidos devuelve productName / productImage
+  const { price, description, totalSold } = product;
+  const title = product.title ?? product.productName;
+  const image = product.image ?? product.productImage;
 
   return (
     // M3 elevated card: radio 12px, elevación 1 → 2 al pasar el cursor (sin scale, que desenfoca el texto)
@@ -17,7 +20,7 @@ export default function Card({ product }) {
       )}
 
       {image ? (
-        <img src={image} alt={title} className="w-full h-40 object-contain bg-surface-muted border-b border-border" />
+        <img src={image} alt={title} className="w-full h-40 object-cover bg-surface-muted border-b border-border" loading="lazy" />
       ) : (
         <div className="w-full h-40 flex items-center justify-center bg-surface-muted border-b border-border">
           <UtensilsCrossed className="w-10 h-10 text-text-secondary" />

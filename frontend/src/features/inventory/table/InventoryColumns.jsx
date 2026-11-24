@@ -1,6 +1,7 @@
 // src/inventory/table/InventoryColumns.js
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Package } from "lucide-react";
 import InventoryRowActions from "../components/InventoryRowActions";
+import { ImageThumb } from "@/shared";
 
 export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
   {
@@ -37,18 +38,27 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
         )}
       </button>
     ),
+    // Miniatura del insumo junto al nombre
+    cell: ({ row }) => (
+      <span className="name-cell">
+        <ImageThumb src={row.original.provisionImageThumb} alt="" icon={Package} size="sm" />
+        <span>{row.original.provisionName}</span>
+      </span>
+    ),
   },
 
   // Columna Categoría
   {
     accessorKey: "category",
     header: "Categoría",
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Lote
   {
     accessorKey: "batch",
     header: "Lote",
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Stock
@@ -61,12 +71,14 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "unit",
     header: "Unidad",
+    meta: { hideBelow: "xl" },
   },
 
   // Columna Precio
   {
     accessorKey: "price",
     header: "Precio",
+    meta: { hideBelow: "lg" },
     cell: ({ row }) => {
       const price = row.original.price ?? 0;
 

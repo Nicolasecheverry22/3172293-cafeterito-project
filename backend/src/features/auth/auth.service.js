@@ -36,6 +36,12 @@ const signToken = (user) =>
     expiresIn: process.env.JWT_EXPIRES || "10m",
   });
 
+// Solo lo que el frontend muestra (el token sigue llevando únicamente id y correo)
+const profileOf = (row) => ({
+  name: row?.user_name ?? null,
+  imageThumb: row?.user_image_thumb ?? null,
+});
+
 // Valida el código del usuario. Si es incorrecto suma un intento; tras
 // MAX_RESET_ATTEMPTS el código queda inutilizable. Devuelve { user, token } o lanza 400.
 async function verifyResetCode(email, code) {
@@ -73,13 +79,21 @@ export const authService = {
     if (user.failed_login_attempts > 0) await authRepository.resetLoginState(user.id);
 
     const sessionUser = { id: user.id, email: user.user_email };
-    return { token: signToken(sessionUser), user: sessionUser };
+    return {
+      token: signToken(sessionUser),
+      user: { ...sessionUser, ...profileOf(user) },
+    };
   },
 
   // El middleware ya verificó el token y que el usuario siga activo y sin bloqueo.
-  refresh(user) {
+  // Se reenvían nombre y miniatura para que el navbar refleje una foto recién cambiada.
+  async refresh(user) {
     const sessionUser = { id: user.id, email: user.email };
-    return { token: signToken(sessionUser), user: sessionUser };
+    const profile = await authRepository.findProfile(user.id);
+    return {
+      token: signToken(sessionUser),
+      user: { ...sessionUser, ...profileOf(profile) },
+    };
   },
 
   // Siempre responde lo mismo: no revela si el correo existe.

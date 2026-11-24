@@ -21,9 +21,29 @@ export class ApiError extends Error {
 // ── Sesión (sessionStorage: se borra al cerrar la pestaña) ──────
 export const getToken = () => sessionStorage.getItem(TOKEN_KEY);
 
+// Evento para que el navbar refresque el avatar cuando cambia el usuario en sesión
+export const SESSION_EVENT = "session-user-change";
+
+export function getSessionUser() {
+  try {
+    return JSON.parse(sessionStorage.getItem(USER_KEY)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function setSession({ token, user }) {
   if (token) sessionStorage.setItem(TOKEN_KEY, token);
-  if (user) sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+  if (user) {
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+    window.dispatchEvent(new Event(SESSION_EVENT));
+  }
+}
+
+// Actualiza datos visibles del usuario en sesión (p. ej. tras editar su propia foto)
+export function updateSessionUser(patch) {
+  const current = getSessionUser();
+  if (current) setSession({ user: { ...current, ...patch } });
 }
 
 export function clearSession() {

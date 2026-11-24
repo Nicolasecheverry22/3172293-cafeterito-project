@@ -9,7 +9,7 @@ export const authController = {
 
   // Requiere token válido (authenticateToken); devuelve uno nuevo de JWT_EXPIRES
   async refresh(req, res) {
-    res.json(authService.refresh(req.user));
+    res.json(await authService.refresh(req.user));
   },
 
   async forgotPassword(req, res) {

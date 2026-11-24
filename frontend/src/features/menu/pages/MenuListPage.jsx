@@ -76,7 +76,8 @@ export default function MenuListPage() {
             Listado de Menú
           </h1>
 
-          <div className="flex items-center gap-4">
+          {/* Móvil: botones apilados a ancho completo; desde sm, en fila */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
             <Button
               size="md"
               variant="tertiary"
@@ -95,7 +96,7 @@ export default function MenuListPage() {
           </p>
         )}
 
-        <div className="overflow-x-auto bg-surface/0 shadow-elevation-1">
+        <div className="min-w-0 bg-surface/0 shadow-elevation-1">
           <DataTable data={sortedMenu} columns={columns} />
         </div>
 

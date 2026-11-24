@@ -358,7 +358,7 @@ export default function PermissionsManagementPage() {
               ))}
             </div>
 
-            <div className="lg:col-span-4 mt-6 flex justify-end gap-4 border-t border-border pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+            <div className="lg:col-span-4 mt-6 flex justify-end gap-4 border-t border-border pt-6 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
               <Button variant="secondary" type="button" onClick={handleCancel}>
                 Cancelar
               </Button>

@@ -32,7 +32,10 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .filter(Boolean);
 app.use(cors({ origin: allowedOrigins }));
 
-app.use(express.json({ limit: "5mb" }));
+// 3 MB: el payload más grande es imagen (≤ 1.5 MB en base64, ya comprimida en el
+// frontend a ≈ 800 px) + miniatura (≤ 50 KB) + campos de texto ≈ 1.6 MB. 5 MB dejaba
+// margen de sobra para cuerpos abusivos; 3 MB conserva ~2× de holgura.
+app.use(express.json({ limit: "3mb" }));
 
 // ── Rutas públicas ──────────────────────────────────────────────
 app.use("/api/auth", authRoutes);

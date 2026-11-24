@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { menu as existingMenu } from "../data/menu";
 import { menuCategories } from "../data/categories";
+import { imageFilesField } from "@/shared/utils/image";
 
 const VALID_CATEGORY_VALUES = menuCategories.map((c) => c.value);
 
@@ -29,6 +30,9 @@ export function createMenuSchema({ currentMenuItemId = null } = {}) {
         .max(200, "La descripción es demasiado larga"),
 
       estado: z.boolean(),
+
+      // Opcional; si se elige: PNG/JPG/WEBP de máx. 2 MB (igual que Joi)
+      imagen: imageFilesField(),
     })
     
     .refine(

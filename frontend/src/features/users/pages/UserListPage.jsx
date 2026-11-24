@@ -72,7 +72,8 @@ export default function UserListPage() {
             Listado de Usuarios
           </h1>
 
-          <div className="flex items-center gap-4">
+          {/* Móvil: botones apilados a ancho completo; desde sm, en fila */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
             <Button
               size="md"
               variant="tertiary"
@@ -91,7 +92,7 @@ export default function UserListPage() {
           </p>
         )}
 
-        <div className="">
+        <div className="min-w-0">
           <DataTable data={sortedUsers} columns={columns} />
         </div>
 

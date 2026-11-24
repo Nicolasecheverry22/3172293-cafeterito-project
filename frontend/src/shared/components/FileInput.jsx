@@ -1,25 +1,38 @@
 import { useRef, useState, useEffect, useMemo } from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, X, RefreshCw } from "lucide-react";
 import { Infinity as InfinityLoader } from "ldrs/react";
 import "ldrs/react/Infinity.css";
 
+/**
+ * Selector de archivos con vista previa.
+ * - value / onChange: arreglo de File ([] si no hay).
+ * - existingUrl: imagen ya guardada (modo edición); se muestra si no hay archivo nuevo.
+ * - onRemoveExisting: si se pasa, permite quitar la imagen guardada.
+ * - validateFile(file) → mensaje de error | null: rechaza el archivo antes de aceptarlo.
+ * - error: error externo (Zod) a mostrar debajo.
+ * - hint: texto de ayuda bajo el área de carga.
+ */
 export default function FileInput({
   value = [],
   onChange,
   multiple = false,
   accept = "image/*,application/pdf",
+  existingUrl = null,
+  onRemoveExisting,
+  validateFile,
+  error,
+  hint,
+  label = "Subir imagen",
 }) {
   const inputRef = useRef();
   const [isLoading, setIsLoading] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
+  const [localError, setLocalError] = useState(null);
 
   const isImage = (file) => file.type.startsWith("image/");
 
   const previews = useMemo(
-    () =>
-      value.map((file) =>
-        isImage(file) ? URL.createObjectURL(file) : null
-      ),
+    () => value.map((file) => (isImage(file) ? URL.createObjectURL(file) : null)),
     [value]
   );
   useEffect(() => {
@@ -30,11 +43,24 @@ export default function FileInput({
     };
   }, [previews]);
 
+  const openPicker = () => {
+    if (!isLoading) inputRef.current?.click();
+  };
+
   const handleFiles = async (files) => {
     if (!files || files.length === 0) return;
-    setIsLoading(true);
     const list = Array.from(files);
-    await new Promise((r) => setTimeout(r, 400));
+
+    if (validateFile) {
+      const message = list.map(validateFile).find(Boolean);
+      if (message) {
+        setLocalError(message);
+        return;
+      }
+    }
+    setLocalError(null);
+    setIsLoading(true);
+    await new Promise((r) => setTimeout(r, 200));
     const data = multiple ? [...value, ...list] : [list[0]];
     onChange(data.slice(0, 12));
     setIsLoading(false);
@@ -43,6 +69,7 @@ export default function FileInput({
   const remove = (i) => {
     const copy = [...value];
     copy.splice(i, 1);
+    setLocalError(null);
     onChange(copy);
   };
 
@@ -54,26 +81,79 @@ export default function FileInput({
     onChange(copy);
   };
 
+  const shownError = localError || error;
+
+  // Vista previa grande de una sola imagen (archivo nuevo o la guardada)
+  const singlePreview = !multiple && (value[0] || existingUrl);
+  const singleSrc = value[0] ? previews[0] : existingUrl;
+  const singleIsImage = value[0] ? isImage(value[0]) : true;
+
+  const iconBtn =
+    "size-touch rounded-full flex items-center justify-center shadow-elevation-2 transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring cursor-pointer";
+
   return (
     <div className="flex flex-col items-center justify-center w-full">
-      {value.length === 0 ? (
+      {singlePreview ? (
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative w-48 h-48 overflow-hidden rounded-shape-lg border border-border bg-surface shadow-elevation-1">
+            {singleIsImage ? (
+              <img
+                src={singleSrc}
+                alt={value[0]?.name ?? "Imagen actual"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-surface-muted p-2 text-text-primary">
+                <span className="text-caption font-medium truncate w-full text-center">{value[0].name}</span>
+              </div>
+            )}
+
+            {/* Botones siempre visibles (no dependen del hover): usables con el dedo */}
+            <div className="absolute top-2 right-2 flex gap-2">
+              <button
+                type="button"
+                onClick={openPicker}
+                disabled={isLoading}
+                aria-label="Cambiar imagen"
+                title="Cambiar imagen"
+                className={`${iconBtn} bg-surface text-text-primary`}
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
+              {(value[0] || onRemoveExisting) && (
+                <button
+                  type="button"
+                  onClick={() => (value[0] ? remove(0) : onRemoveExisting())}
+                  aria-label="Quitar imagen"
+                  title="Quitar imagen"
+                  className={`${iconBtn} bg-error text-on-error`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
+          <span className="text-caption text-text-secondary">
+            {value[0] ? "Vista previa (aún no guardada)" : "Imagen actual"}
+          </span>
+        </div>
+      ) : value.length === 0 ? (
         // <button> (antes <div onClick>): se alcanza con Tab y se activa con Enter/Espacio
         <button
           type="button"
-          onClick={() => !isLoading && inputRef.current?.click()}
+          onClick={openPicker}
           disabled={isLoading}
-          className={`w-48 h-48 rounded-shape-lg bg-surface/40 border-2 border-dashed border-border-strong flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-surface/60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
-            isLoading ? "opacity-70 pointer-events-none" : ""
-          }`}
+          className={`w-48 h-48 max-w-full rounded-shape-lg bg-surface/40 border-2 border-dashed border-border-strong flex flex-col items-center justify-center p-4 cursor-pointer hover:bg-surface/60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
+            shownError ? "border-error" : ""
+          } ${isLoading ? "opacity-70 pointer-events-none" : ""}`}
         >
           {isLoading ? (
             <InfinityLoader size="45" color="var(--semantic-brand)" />
           ) : (
             <div className="flex flex-col items-center gap-2 text-text-primary text-center">
-              <span className="font-heading font-medium text-body">
-                Subir imagen
-              </span>
+              <span className="font-heading text-body">{label}</span>
               <Upload className="w-7 h-7" />
+              {hint && <span className="text-caption text-text-secondary">{hint}</span>}
             </div>
           )}
         </button>
@@ -107,24 +187,21 @@ export default function FileInput({
                   </div>
                 )}
 
-                {/* focus-within: el botón Quitar también aparece al llegar con Tab, no solo con el ratón */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex items-center justify-center transition-opacity">
-                  <button
-                    type="button"
-                    onClick={() => remove(i)}
-                    aria-label={`Quitar ${file.name}`}
-                    className="touch-target h-8 w-8 bg-error text-on-error rounded-full flex items-center justify-center hover:scale-110 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-text-inverse"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => remove(i)}
+                  aria-label={`Quitar ${file.name}`}
+                  className="absolute top-1 right-1 h-9 w-9 bg-error text-on-error rounded-full flex items-center justify-center shadow-elevation-2 hover:scale-110 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-text-inverse"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             ))}
 
             {multiple && value.length < 12 && (
               <button
                 type="button"
-                onClick={() => !isLoading && inputRef.current?.click()}
+                onClick={openPicker}
                 disabled={isLoading}
                 aria-label="Añadir imagen"
                 className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-shape-lg border-2 border-dashed border-border bg-surface-muted hover:border-border-strong cursor-pointer transition focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
@@ -134,9 +211,7 @@ export default function FileInput({
                 ) : (
                   <>
                     <Upload className="w-5 h-5 text-text-muted" />
-                    <span className="text-caption font-heading text-text-primary">
-                      Añadir
-                    </span>
+                    <span className="text-caption font-heading text-text-primary">Añadir</span>
                   </>
                 )}
               </button>
@@ -145,13 +220,23 @@ export default function FileInput({
         </div>
       )}
 
+      {shownError && (
+        <span role="alert" className="text-error text-small block mt-2 text-center">
+          {shownError}
+        </span>
+      )}
+
       <input
         ref={inputRef}
         type="file"
         hidden
         multiple={multiple}
         accept={accept}
-        onChange={(e) => handleFiles(e.target.files)}
+        onChange={(e) => {
+          handleFiles(Array.from(e.target.files ?? []));
+          // Permite volver a elegir el mismo archivo tras quitarlo
+          e.target.value = "";
+        }}
       />
     </div>
   );

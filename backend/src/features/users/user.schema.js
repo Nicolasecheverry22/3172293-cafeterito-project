@@ -1,5 +1,5 @@
 // Validación de entrada del feature users (RFADMIN02–05, RNF10).
-import { Joi, email } from "../../utils/joi.js";
+import { Joi, email, imageFields } from "../../utils/joi.js";
 import { paginationFields } from "../../utils/listQuery.js";
 import { PASSWORD_MIN, PASSWORD_MAX, PASSWORD_RULES } from "../../utils/passwordPolicy.js";
 
@@ -39,7 +39,6 @@ const userFields = {
     .required()
     .label("El número de documento"),
   userAddress: Joi.string().trim().min(10).max(100).empty("").allow(null).label("La dirección"),
-  userAvatarUrl: Joi.string().trim().max(2000).empty("").allow(null).label("La foto"),
   groupNames: Joi.array()
     .items(Joi.string().trim().min(1).max(100))
     .min(1)
@@ -50,14 +49,17 @@ const userFields = {
 };
 
 // POST /api/users — isSuperuser/isStaff/isActive no se aceptan (stripUnknown los elimina)
+// Foto de perfil opcional (RFADMIN02): PNG/JPEG/WEBP, sin SVG, ≤ 2 MB comprimida.
 export const createUserSchema = Joi.object({
   ...userFields,
+  ...imageFields("userImage", "La foto de perfil"),
   userPassword: passwordSchema().required(),
 });
 
-// PUT /api/users/:id — la contraseña no se cambia aquí
+// PUT /api/users/:id — la contraseña no se cambia aquí; removeImage quita la foto
 export const updateUserSchema = Joi.object({
   ...userFields,
+  ...imageFields("userImage", "La foto de perfil", { removable: true }),
   isActive: Joi.boolean().label("El estado"),
 });
 

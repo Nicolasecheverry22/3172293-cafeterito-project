@@ -1,6 +1,7 @@
 // src/menu/table/MenuColumns.js
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, UtensilsCrossed } from "lucide-react";
 import MenuRowActions from "../components/MenuRowActions";
+import { ImageThumb } from "@/shared";
 
 export const getMenuColumns = (sortConfig, onSort, onChanged) => [
   // Columna ID (Ordenable)
@@ -19,6 +20,21 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
           <ArrowUpDown size={16} className="opacity-50" />
         )}
       </button>
+    ),
+  },
+
+  // Columna Imagen (RFADMIN22): miniatura de tamaño uniforme; placeholder si no hay (RFADMIN21)
+  {
+    id: "image",
+    header: "Imagen",
+    enableGlobalFilter: false,
+    cell: ({ row }) => (
+      <ImageThumb
+        src={row.original.productImageThumb}
+        alt={`Imagen de ${row.original.productName}`}
+        icon={UtensilsCrossed}
+        size="md"
+      />
     ),
   },
 
@@ -58,6 +74,7 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
         )}
       </button>
     ),
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Precio (Ordenable)

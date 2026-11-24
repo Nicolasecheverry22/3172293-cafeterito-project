@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Input, StatusSwitch, Button } from "@/shared";
+import { Input, StatusSwitch, Button, ImageThumb } from "@/shared";
 import { UtensilsCrossed, SquarePen } from "lucide-react";
 import { getProductById } from "@/services/productApi";
 
@@ -41,27 +41,10 @@ export default function ProductView() {
 
   const productName = product.productName || "Platillo";
 
-  // Iniciales dinámicas para el avatar en caso de no tener imagen
-  const getInitials = (name) => {
-    if (!name) return "P";
-    const words = name.trim().split(" ");
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
-
-  const colors = [
-    "#E57373", "#F06292", "#BA68C8", "#9575CD",
-    "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
-    "#FFD54F", "#FF8A65",
-  ];
-  const bgColor = colors[product.id % colors.length];
-
   return (
     <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 mt-8 mb-6 flex items-center gap-3">
         <UtensilsCrossed className="w-9 h-9 text-text-primary" />
         <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
           Visualizar Producto del Menú
@@ -69,7 +52,7 @@ export default function ProductView() {
       </div>
 
       {/* Grid Responsivo Estandarizado */}
-      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Columna 1: Estado General y Acciones */}
         <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">
@@ -102,21 +85,15 @@ export default function ProductView() {
           
           {/* Tarjeta Compacta del Platillo */}
           <div className="w-full max-w-xs bg-surface rounded-shape-lg p-4 flex flex-col items-center text-center shadow-elevation-2 border border-border/30">
-            <div className="mb-2 flex items-center justify-center">
-              {product.productImage ? (
-                <img
-                  src={product.productImage}
-                  alt={productName}
-                  className="w-14 h-14 object-cover rounded-full shadow-elevation-2 border-2 border-white/50"
-                />
-              ) : (
-                <div
-                  style={{ backgroundColor: bgColor }}
-                  className="w-14 h-14 rounded-full text-text-on-brand font-black text-xl flex items-center justify-center shadow-elevation-2 uppercase select-none"
-                >
-                  {getInitials(productName)}
-                </div>
-              )}
+            {/* Imagen grande del platillo o placeholder (RFADMIN21) */}
+            <div className="mb-3 flex items-center justify-center w-full">
+              <ImageThumb
+                src={product.productImage}
+                alt={`Imagen de ${productName}`}
+                icon={UtensilsCrossed}
+                size="xl"
+                className="shadow-elevation-2"
+              />
             </div>
 
             <p className="text-xs font-bold text-text-primary/90 tracking-wide uppercase mt-1">
