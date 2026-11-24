@@ -1,11 +1,14 @@
-// Disponibilidad de mesas: una mesa está ocupada si tiene una orden abierta
-// (activa o lista para entrega). Se refresca cada TABLES_REFRESH_MS y al volver a la pestaña.
-// La BD sigue siendo la fuente de verdad (índice uq_orders_active_table → 409).
+// Disponibilidad de mesas: el total sale de la configuración del restaurante y una mesa
+// está ocupada si tiene una orden abierta (activa o lista para entrega).
+// Se refresca cada TABLES_REFRESH_MS y al volver a la pestaña, así un cambio del
+// administrador llega a los meseros sin recargar. La BD sigue siendo la fuente de verdad.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getOrders, OPEN_ORDER_STATUSES } from "@/services/orderApi";
-import { TABLE_COUNT, TABLES_REFRESH_MS } from "../config/orderConfig";
+import { getSettings } from "@/services/settingsApi";
+import { TABLES_REFRESH_MS } from "../config/orderConfig";
 
 export default function useTableAvailability() {
+  const [tableCount, setTableCount] = useState(0);
   const [occupied, setOccupied] = useState(() => new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,8 +16,9 @@ export default function useTableAvailability() {
   // setState solo dentro de .then/.catch: nunca de forma síncrona en el efecto
   const refresh = useCallback(
     () =>
-      Promise.all(OPEN_ORDER_STATUSES.map((status) => getOrders({ status })))
-        .then((lists) => {
+      Promise.all([getSettings(), ...OPEN_ORDER_STATUSES.map((status) => getOrders({ status }))])
+        .then(([settings, ...lists]) => {
+          setTableCount(settings.tableCount);
           setOccupied(new Set(lists.flat().map((order) => Number(order.tableNumber))));
           setError(null);
         })
@@ -34,14 +38,14 @@ export default function useTableAvailability() {
     };
   }, [refresh]);
 
-  // Incluye mesas por encima de TABLE_COUNT si tienen una orden abierta
-  const tables = useMemo(() => {
-    const total = Math.max(TABLE_COUNT, ...occupied);
-    return Array.from({ length: total }, (_, i) => ({
-      number: i + 1,
-      isOccupied: occupied.has(i + 1),
-    }));
-  }, [occupied]);
+  const tables = useMemo(
+    () =>
+      Array.from({ length: tableCount }, (_, i) => ({
+        number: i + 1,
+        isOccupied: occupied.has(i + 1),
+      })),
+    [tableCount, occupied]
+  );
 
   const freeCount = tables.filter((t) => !t.isOccupied).length;
 

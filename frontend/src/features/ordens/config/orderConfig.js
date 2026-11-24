@@ -1,7 +1,5 @@
 // Configuración del registro de órdenes.
-// Número de mesas del restaurante: se define en frontend/.env (VITE_TABLE_COUNT).
-const parsedTables = Number.parseInt(import.meta.env.VITE_TABLE_COUNT, 10);
-export const TABLE_COUNT = Number.isInteger(parsedTables) && parsedTables > 0 ? parsedTables : 12;
+// El número de mesas ya no vive aquí: lo define el administrador en Configuración (/settings).
 
 // Cada cuánto se refresca la disponibilidad de mesas (ms)
 export const TABLES_REFRESH_MS = 30_000;

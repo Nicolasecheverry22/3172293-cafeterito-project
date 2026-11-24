@@ -9,7 +9,8 @@ import {
   Receipt,
   Coffee,
   Menu,
-  ShieldCheck
+  ShieldCheck,
+  Settings
 } from "lucide-react";
 
 import {
@@ -133,6 +134,13 @@ export default function Navbar() {
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5" />
                     <span className="font-body text-base">Permisos</span>
+                  </div>
+                </DropdownItem>
+
+                <DropdownItem onClick={() => navigate("/settings")}>
+                  <div className="flex items-center gap-3">
+                    <Settings className="w-5 h-5" />
+                    <span className="font-body text-base">Configuración</span>
                   </div>
                 </DropdownItem>
 
