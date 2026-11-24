@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageFilesField } from "@/shared/utils/image";
 
 export function createEditProvisionsSchema() {
   return z
@@ -62,7 +63,8 @@ export function createEditProvisionsSchema() {
         .positive("El precio debe ser un número mayor a 0"),
 
       isActive: z.boolean().optional(),
-      provisionImage: z.any().optional(),
+      // En edición es opcional: sin imagen nueva se conserva la actual
+      provisionImage: imageFilesField(),
     })
 
     // Stock máximo >= Stock mínimo

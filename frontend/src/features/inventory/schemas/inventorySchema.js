@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { inventory as existingInventory } from "../data/inventory";
-
-const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+import { imageFilesField } from "@/shared/utils/image";
 
 export function createInventorySchema({ currentProvisionId = null } = {}) {
   return z
@@ -69,18 +68,8 @@ export function createInventorySchema({ currentProvisionId = null } = {}) {
 
       isActive: z.boolean().optional(),
 
-      provisionImage: z
-        .array(z.any())
-        .optional()
-        .refine(
-          (files) => {
-            if (!files || files.length === 0) return true;
-            return files.every(
-              (file) => file instanceof File && ALLOWED_IMAGE_TYPES.includes(file.type)
-            );
-          },
-          { message: "Formato no válido. Solo se permiten imágenes (PNG, JPG, JPEG, WEBP)" }
-        ),
+      // RFADMIN08: imagen obligatoria al crear (PNG/JPG/WEBP, máx. 2 MB, igual que Joi)
+      provisionImage: imageFilesField({ required: true }),
     })
 
     .refine(

@@ -10,6 +10,7 @@ import {
 import { createInventorySchema } from "../schemas/inventorySchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 import { INVENTORY_STATUSES } from "@/services/inventoryApi";
+import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 
 const DEFAULT_FORM_DATA = {
   provisionName: "",
@@ -226,20 +227,21 @@ export default function InventoryForm({
       {/* COLUMNA 3 */}
       <div className="flex flex-col justify-between h-full space-y-6">
         <div>
-          <span className="font-label text-text-primary text-small block mb-2 font-semibold">
-            Imagen del suministro
+          <span className="font-label text-text-primary text-small block mb-2 text-center">
+            Imagen del suministro <span className="text-error">*</span>
           </span>
           <FileInput
             value={formData.provisionImage}
-            onChange={(files) =>
-              setFormData((prev) => ({ ...prev, provisionImage: files }))
-            }
+            onChange={(files) => {
+              setFormData((prev) => ({ ...prev, provisionImage: files }));
+              setErrors((prev) => ({ ...prev, provisionImage: undefined }));
+            }}
+            multiple={false}
+            accept={IMAGE_ACCEPT}
+            validateFile={validateImageFile}
+            hint={IMAGE_HINT}
+            error={errors.provisionImage}
           />
-          {errors.provisionImage && (
-            <span className="text-error text-small block mt-1">
-              {errors.provisionImage}
-            </span>
-          )}
         </div>
 
         <div className="flex gap-4 items-center justify-end pt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">

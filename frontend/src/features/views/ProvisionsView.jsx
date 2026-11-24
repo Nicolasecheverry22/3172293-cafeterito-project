@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Input, Button, StatusSwitch } from "@/shared";
-import { SquarePen, UtensilsCrossed } from "lucide-react";
+import { Input, Button, StatusSwitch, ImageThumb } from "@/shared";
+import { SquarePen, UtensilsCrossed, Package } from "lucide-react";
 import { getInventoryItem } from "@/services/inventoryApi";
 
 export default function ProvisionsView() {
@@ -47,16 +47,6 @@ export default function ProvisionsView() {
   // La tabla inventory no tiene is_active: el estado vive en la columna status
   const isActive = provision.status === "Activo";
 
-  // Iniciales dinámicas para el avatar
-  const getInitials = (name) => {
-    if (!name) return "S";
-    const words = name.trim().split(" ");
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
-
   return (
     <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
@@ -101,22 +91,17 @@ export default function ProvisionsView() {
           
           {/* Tarjeta Compacta del Suministro */}
           <div className="w-full max-w-xs bg-surface rounded-shape-lg p-4 flex flex-col items-center text-center shadow-elevation-2 border border-border/30">
-            {/* Avatar / Imagen Dinámica Compacta */}
-            <div className="mb-2 flex items-center justify-center">
-              {provision.image || provision.imageUrl ? (
-                <img
-                  src={provision.image || provision.imageUrl}
-                  alt={provisionName}
-                  className="w-14 h-14 object-cover shadow-elevation-2 border-2 border-white/50"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-[#ec4899] text-text-on-brand font-black text-xl flex items-center justify-center shadow-elevation-2 uppercase select-none">
-                  {getInitials(provisionName)}
-                </div>
-              )}
+            {/* Imagen del insumo o placeholder (RFADMIN21) */}
+            <div className="mb-3 flex items-center justify-center w-full">
+              <ImageThumb
+                src={provision.provisionImage}
+                alt={`Imagen de ${provisionName}`}
+                icon={Package}
+                size="xl"
+                className="shadow-elevation-2"
+              />
             </div>
 
-            
 
             {/* Lote con alto contraste y visibilidad */}
             <p className="text-xs font-bold text-text-primary/90 tracking-wide uppercase mt-1">

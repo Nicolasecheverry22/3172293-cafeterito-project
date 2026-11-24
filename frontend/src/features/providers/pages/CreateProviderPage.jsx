@@ -4,6 +4,7 @@ import { Truck } from "lucide-react";
 import ProviderForm from "../components/ProviderForm";
 import { getProviderDocumentTypes } from "@/services/selectService";
 import { createProvider } from "@/services/providerApi";
+import { buildImagePayload } from "@/shared/utils/image";
 
 import {
   showSuccessAlert,
@@ -32,7 +33,11 @@ export default function CreateProviderPage() {
         .filter(Boolean)
         .join(", ");
 
+      // Logo opcional: comprimido + miniatura en base64
+      const imageFields = await buildImagePayload("providerImage", validatedData.images);
+
       await createProvider({
+        ...imageFields,
         documentType: validatedData.providerDocumentType,
         nit: validatedData.providerDocumentNumber,
         providerName: validatedData.providerName,
@@ -52,7 +57,7 @@ export default function CreateProviderPage() {
     } catch (error) {
       console.error("Error al crear el Proveedor:", error);
       await showSystemErrorAlert({
-        text: "Ocurrió un error inesperado al intentar registrar el proveedor.",
+        text: error.message || "Ocurrió un error inesperado al intentar registrar el proveedor.",
       });
     }
   };

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Input, Button, StatusSwitch } from "../../shared";
+import { Input, Button, StatusSwitch, ImageThumb } from "../../shared";
 import { SquarePen, Ambulance } from "lucide-react";
 import { getProviderById } from "@/services/providerApi";
 
@@ -39,18 +39,6 @@ export default function ProviderView() {
     );
   }
 
-  // Variables para la imagen/avatar con inicial
-  const initial = provider.providerName
-    ? provider.providerName.charAt(0).toUpperCase()
-    : "P";
-
-  const colors = [
-    "#E57373", "#F06292", "#BA68C8", "#9575CD",
-    "#7986CB", "#64B5F6", "#4DB6AC", "#81C784",
-    "#FFD54F", "#FF8A65",
-  ];
-  const bgColor = colors[Number(provider.id) % colors.length] || colors[0];
-
   return (
     <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
@@ -66,12 +54,15 @@ export default function ProviderView() {
         
         {/* Columna 1: Avatar e Identificación */}
         <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
-          <div
-            className="w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold text-text-on-brand shadow-elevation-2 border-2 border-white/20 select-none"
-            style={{ backgroundColor: bgColor }}
-          >
-            {initial}
-          </div>
+          {/* Logo o, si no tiene, sus iniciales (RFADMIN21) */}
+          <ImageThumb
+            src={provider.providerImage}
+            alt={`Logo de ${provider.providerName || "proveedor"}`}
+            name={provider.providerName || "Proveedor"}
+            size="lg"
+            round
+            className="shadow-elevation-2"
+          />
           <div>
             <h2 className="font-heading font-bold text-text-primary text-lg">
               {provider.providerName}

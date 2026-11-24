@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input, Select, Checkbox, Button, FileInput, StatusSwitch } from "@/shared";
 import { createProviderSchema } from "../schemas/providerSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
+import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 
 const PRODUCT_CHECKBOXES = [
   { name: "productFood", label: "Alimentos y/o Bebidas" },
@@ -176,10 +177,21 @@ export default function ProviderForm({
 
       <div className="flex flex-col justify-between space-y-4">
         <div>
+          <span className="font-label text-text-primary text-small block mb-2 text-center">
+            Logo del proveedor (opcional)
+          </span>
           <FileInput
             value={formData.images}
-            onChange={(files) => setFormData((prev) => ({ ...prev, images: files }))}
+            onChange={(files) => {
+              setFormData((prev) => ({ ...prev, images: files }));
+              setErrors((prev) => ({ ...prev, images: undefined }));
+            }}
             multiple={false}
+            accept={IMAGE_ACCEPT}
+            validateFile={validateImageFile}
+            hint={IMAGE_HINT}
+            label="Subir logo"
+            error={errors.images}
           />
         </div>
 

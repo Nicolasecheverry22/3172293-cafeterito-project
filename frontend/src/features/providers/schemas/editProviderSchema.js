@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageFilesField } from "@/shared/utils/image";
 
 // Sin validación de duplicados contra el mock: los datos reales están en la BD.
 export function createEditProviderSchema() {
@@ -37,7 +38,7 @@ export function createEditProviderSchema() {
         .min(1, "Debe especificar los productos suministrados"),
 
       isActive: z.boolean().optional(),
-      file: z.any().optional(),
+      file: imageFilesField(),
     });
 }
 

@@ -4,6 +4,8 @@ import { Input, Button, StatusSwitch, Select, FileInput, Checkbox } from "@/shar
 import { Pencil } from "lucide-react";
 import { getDocumentTypes } from "@/services/selectService";
 import { getUserById, updateUser } from "@/services/userApi";
+import { getSessionUser, updateSessionUser } from "@/services/apiClient";
+import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 import { getGroups } from "@/services/groupApi";
 import { createEditUserSchema } from "../../users/schemas/editUserSchema";
 import {
@@ -32,6 +34,8 @@ export default function EditUser() {
   const [documentTypes, setDocumentTypes] = useState([]);
   const [groups, setGroups] = useState([]);
   const [formData, setFormData] = useState(null);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -45,7 +49,10 @@ export default function EditUser() {
   // Carga el usuario real desde la BD
   useEffect(() => {
     getUserById(id)
-      .then((user) => setFormData(toFormData(user)))
+      .then((user) => {
+        setFormData(toFormData(user));
+        setCurrentImage(user.userImage ?? null);
+      })
       .catch(() =>
         showSystemErrorAlert({ text: "El usuario que intentas editar no existe." })
           .then(() => navigate("/userList", { replace: true }))
@@ -99,8 +106,21 @@ export default function EditUser() {
     setIsSaving(true);
 
     try {
+      // Foto nueva → comprimida + miniatura; quitada → removeImage; sin cambios → se conserva
+      const { userImage, ...fields } = result.data;
+      const imageFields = await buildImagePayload("userImage", userImage, { removed: imageRemoved });
+
       // PUT /api/users/:id -> actualiza datos y roles (grupos) en la BD
-      await updateUser(id, result.data);
+      await updateUser(id, { ...fields, ...imageFields });
+
+      // Si el usuario se editó a sí mismo, el avatar del navbar se actualiza de inmediato
+      if (String(getSessionUser()?.id) === String(id)) {
+        updateSessionUser({
+          name: fields.userName,
+          ...(imageFields.userImageThumb && { imageThumb: imageFields.userImageThumb }),
+          ...(imageFields.removeImage && { imageThumb: null }),
+        });
+      }
 
       await showSuccessAlert({
         title: "¡Usuario actualizado!",
@@ -179,10 +199,23 @@ export default function EditUser() {
         <div className="lg:col-span-3 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1 border border-border/50 flex flex-col gap-8">
 
           <div className="w-full flex flex-col items-center">
+            <span className="font-label text-text-primary text-small block mb-2">
+              Foto de perfil (opcional)
+            </span>
             <FileInput
               value={formData.userImage}
-              onChange={(files) => setFormData((prev) => ({ ...prev, userImage: files }))}
-              multiple={true}
+              onChange={(files) => {
+                setFormData((prev) => ({ ...prev, userImage: files }));
+                if (errors.userImage) setErrors((prev) => ({ ...prev, userImage: undefined }));
+              }}
+              existingUrl={imageRemoved ? null : currentImage}
+              onRemoveExisting={() => setImageRemoved(true)}
+              multiple={false}
+              accept={IMAGE_ACCEPT}
+              validateFile={validateImageFile}
+              hint={IMAGE_HINT}
+              label="Subir foto"
+              error={errors.userImage}
             />
           </div>
 

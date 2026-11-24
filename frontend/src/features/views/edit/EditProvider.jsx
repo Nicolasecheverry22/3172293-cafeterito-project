@@ -5,6 +5,7 @@ import { Pencil } from "lucide-react";
 import { Input, StatusSwitch, FileInput, Button } from "@/shared";
 import { getProviderById, updateProvider } from "@/services/providerApi";
 import { createEditProviderSchema } from "../../providers/schemas/editProviderSchema";
+import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 
 import {
   showSystemErrorAlert,
@@ -21,6 +22,7 @@ export default function EditProvider() {
 
   const [provider, setProvider] = useState(null);
   const [formData, setFormData] = useState(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
 
   // Carga el proveedor real desde la BD
   useEffect(() => {
@@ -93,8 +95,14 @@ export default function EditProvider() {
 
       setErrors({});
 
+      // Logo nuevo → comprimido + miniatura; quitado → removeImage; sin cambios → se conserva
+      const imageFields = await buildImagePayload("providerImage", formData.file, {
+        removed: imageRemoved,
+      });
+
       // PUT /api/providers/:id
       await updateProvider(provider.id, {
+        ...imageFields,
         // El formulario de edición no cambia el tipo de documento: se conserva el guardado
         documentType: provider.documentType ?? "NIT",
         nit: result.data.nit,
@@ -164,15 +172,22 @@ export default function EditProvider() {
         {/* Bloque Derecho: FileInput + Inputs del Formulario */}
         <div className="lg:col-span-9 bg-surface-muted rounded-shape-xl p-4 sm:p-6 md:p-8 flex flex-col items-center gap-6 shadow-elevation-2">
           {/* Subir imagen / FileInput centrado */}
-          <div className="w-full flex justify-center">
+          <div className="w-full flex flex-col items-center">
+            <span className="font-label text-text-primary text-small block mb-2">
+              Logo del proveedor (opcional)
+            </span>
             <FileInput
               value={formData.file}
               onChange={handleFileChange}
-              accept="image/*,.pdf"
+              existingUrl={imageRemoved ? null : provider.providerImage}
+              onRemoveExisting={() => setImageRemoved(true)}
+              multiple={false}
+              accept={IMAGE_ACCEPT}
+              validateFile={validateImageFile}
+              hint={IMAGE_HINT}
+              label="Subir logo"
+              error={errors.file}
             />
-            {errors.file && (
-              <span className="text-error text-xs mt-1 block">{errors.file}</span>
-            )}
           </div>
 
           {/* Sub-tarjeta contenedora de los campos de texto */}

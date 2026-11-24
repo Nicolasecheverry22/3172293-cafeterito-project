@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { imageFilesField } from "@/shared/utils/image";
 
 // La unicidad de correo/documento la valida la BD (UNIQUE) y el backend responde 409.
 // Formatos alineados con el backend (user.schema.js).
@@ -19,5 +20,6 @@ export function createEditUserSchema() {
     userEmail: z.string().min(1, "El correo es requerido").email("Debe ingresar un correo válido"),
     groupNames: z.array(z.string()).min(1, "Debe seleccionar al menos un tipo de usuario"),
     isActive: z.boolean(),
+    userImage: imageFilesField(),
   });
 }

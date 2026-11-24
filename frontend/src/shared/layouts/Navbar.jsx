@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
   User, 
@@ -18,12 +19,24 @@ import {
   ThemeSwitch
 } from "@/shared"; 
 
+import ImageThumb from "@/shared/components/ImageThumb";
 import LogoutButton from "@/features/login/components/LogoutButton";
+import { getSessionUser, SESSION_EVENT } from "@/services/apiClient";
+
+// Usuario en sesión; se actualiza al iniciar sesión, al refrescar el token o al editar su foto
+function useSessionUser() {
+  const [user, setUser] = useState(getSessionUser);
+  useEffect(() => {
+    const sync = () => setUser(getSessionUser());
+    window.addEventListener(SESSION_EVENT, sync);
+    return () => window.removeEventListener(SESSION_EVENT, sync);
+  }, []);
+  return user;
+}
 
 export default function Navbar() {
   const navigate = useNavigate();
-
-
+  const sessionUser = useSessionUser();
 
   return (
     <nav className="w-full bg-brand shadow-elevation-2 relative z-50">
@@ -123,11 +136,19 @@ export default function Navbar() {
   <div className="flex items-center">
             <Dropdown>
               <DropdownTrigger>
+                {/* Avatar del usuario en sesión (foto o iniciales) + icono de menú */}
                 <button
-                  className="size-touch rounded-full text-text-on-brand hover:bg-brand-hover transition-colors flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring cursor-pointer"
-                  aria-label="Abrir Menú"
+                  className="min-h-touch flex items-center gap-2 rounded-full pl-1 pr-3 text-text-on-brand hover:bg-brand-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring cursor-pointer"
+                  aria-label={`Abrir menú${sessionUser?.name ? ` de ${sessionUser.name}` : ""}`}
                 >
-                  <Menu className="w-7 h-7" />
+                  <ImageThumb
+                    src={sessionUser?.imageThumb}
+                    alt=""
+                    name={sessionUser?.name || sessionUser?.email || "Usuario"}
+                    size="sm"
+                    round
+                  />
+                  <Menu className="w-6 h-6" aria-hidden="true" />
                 </button>
               </DropdownTrigger>
 

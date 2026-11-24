@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { Input, Button, Select, FileInput } from "@/shared";
 import { getInventoryItem, updateInventoryItem, INVENTORY_STATUSES } from "@/services/inventoryApi";
 import { createEditProvisionsSchema } from "../../inventory/schemas/editProvisionsSchema";
+import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 import {
   showSystemErrorAlert,
   showDeleteCancelAlert,
@@ -122,8 +123,12 @@ export default function EditProvisions() {
     setErrors({});
 
     try {
+      // Imagen nueva → comprimida + miniatura; sin cambios → el backend conserva la actual
+      const imageFields = await buildImagePayload("provisionImage", formData.provisionImage);
+
       // PUT /api/inventory/:id
       await updateInventoryItem(item.id, {
+        ...imageFields,
         provisionName: result.data.provisionName,
         category: result.data.category,
         unit: result.data.unit,
@@ -320,18 +325,23 @@ export default function EditProvisions() {
         {/* COLUMNA 3 */}
         <div className="flex flex-col justify-between h-full space-y-6">
           <div>
-            
+            <span className="font-label text-text-primary text-small block mb-2 text-center">
+              Imagen del suministro
+            </span>
+            {/* Sin onRemoveExisting: el insumo siempre debe tener imagen (RFADMIN08), solo se cambia */}
             <FileInput
               value={formData.provisionImage}
-              onChange={(files) =>
-                setFormData((prev) => ({ ...prev, provisionImage: files }))
-              }
+              onChange={(files) => {
+                setFormData((prev) => ({ ...prev, provisionImage: files }));
+                if (errors.provisionImage) setErrors((prev) => ({ ...prev, provisionImage: undefined }));
+              }}
+              existingUrl={item.provisionImage}
+              multiple={false}
+              accept={IMAGE_ACCEPT}
+              validateFile={validateImageFile}
+              hint={IMAGE_HINT}
+              error={errors.provisionImage}
             />
-            {errors.provisionImage && (
-              <span className="text-error text-small block mt-1">
-                {errors.provisionImage}
-              </span>
-            )}
           </div>
 
           <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">

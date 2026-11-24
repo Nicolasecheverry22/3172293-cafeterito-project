@@ -1,6 +1,6 @@
 // src/providers/table/ProviderColumns.js
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { StatusSwitch } from "@/shared";
+import { StatusSwitch, ImageThumb } from "@/shared";
 import ProviderRowActions from "../components/ProviderRowActions";
 
 export const getProviderColumns = (sortConfig, onSort, onChanged) => [
@@ -40,18 +40,32 @@ export const getProviderColumns = (sortConfig, onSort, onChanged) => [
         )}
       </button>
     ),
+    // Miniatura del logo (o iniciales) junto al nombre
+    cell: ({ row }) => (
+      <span className="name-cell">
+        <ImageThumb
+          src={row.original.providerImageThumb}
+          alt=""
+          name={row.original.providerName}
+          size="sm"
+        />
+        <span>{row.original.providerName}</span>
+      </span>
+    ),
   },
 
   // Columna Email
   {
     accessorKey: "providerEmail",
     header: "Email",
+    meta: { hideBelow: "md" },
   },
 
   // Columna Teléfono
   {
     accessorKey: "providerPhone",
     header: "Teléfono",
+    meta: { hideBelow: "md" },
   },
 
   // Columna Estado

@@ -1,6 +1,7 @@
 // src/users/table/UserColumns.js
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import UserRowActions from "../components/UserRowActions";
+import { ImageThumb } from "@/shared";
 
 export const getUserColumns = (sortConfig, onSort, onChanged) => [
   {
@@ -36,22 +37,39 @@ export const getUserColumns = (sortConfig, onSort, onChanged) => [
         )}
       </button>
     ),
+    // Avatar (miniatura 96×96 o iniciales) junto al nombre
+    cell: ({ row }) => (
+      <span className="name-cell">
+        <ImageThumb
+          src={row.original.userImageThumb}
+          alt=""
+          name={row.original.userName}
+          size="sm"
+          round
+        />
+        <span>{row.original.userName}</span>
+      </span>
+    ),
   },
   {
     accessorKey: "userRole",
     header: "Rol",
+    meta: { hideBelow: "lg" },
   },
   {
     accessorKey: "userDocument",
     header: "Documento",
+    meta: { hideBelow: "md" },
   },
   {
     accessorKey: "userEmail",
     header: "Correo",
+    meta: { hideBelow: "md" },
   },
   {
     accessorKey: "userPhone",
     header: "Teléfono",
+    meta: { hideBelow: "md" },
   },
   {
     accessorKey: "is_active",

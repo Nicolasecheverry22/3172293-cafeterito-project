@@ -8,6 +8,7 @@ import { Input,
 } from "@/shared";
 import { createUserSchema } from "../schemas/userSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
+import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 
 // Cada checkbox de "Tipo de Usuario" corresponde a un grupo de la BD (tabla groups).
 // `group` debe coincidir EXACTO con groups.group_name (ver migración 0028).
@@ -198,14 +199,22 @@ export default function UserForm({
 
       <div className="flex flex-col justify-between space-y-4">
         <div>
+          <span className="font-label text-text-primary text-small block mb-2 text-center">
+            Foto de perfil (opcional)
+          </span>
           <FileInput
             value={formData.userImage}
-            onChange={(files) => setFormData((prev) => ({ ...prev, userImage: files }))}
-            multiple
+            onChange={(files) => {
+              setFormData((prev) => ({ ...prev, userImage: files }));
+              setErrors((prev) => ({ ...prev, userImage: undefined }));
+            }}
+            multiple={false}
+            accept={IMAGE_ACCEPT}
+            validateFile={validateImageFile}
+            hint={IMAGE_HINT}
+            label="Subir foto"
+            error={errors.userImage}
           />
-          {errors.userImage && (
-            <span className="text-error text-small block mt-1">{errors.userImage}</span>
-          )}
         </div>
 
         <div className="space-y-4">
