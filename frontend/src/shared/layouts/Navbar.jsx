@@ -6,9 +6,11 @@ import {
   Truck,
   UtensilsCrossed,
   ClipboardList,
+  Receipt,
   Coffee,
   Menu,
-  ShieldCheck
+  ShieldCheck,
+  Settings
 } from "lucide-react";
 
 import {
@@ -30,6 +32,7 @@ const NAV_LINKS = [
   { to: "/providerList", label: "Proveedores", icon: Truck },
   { to: "/menuList", label: "Menú", icon: UtensilsCrossed },
   { to: "/ordensList", label: "Órdenes", icon: ClipboardList },
+  { to: "/invoiceList", label: "Comprobantes", icon: Receipt },
 ];
 
 // Usuario en sesión; se actualiza al iniciar sesión, al refrescar el token o al editar su foto
@@ -62,8 +65,8 @@ export default function Navbar() {
             <Coffee className="w-8 h-8 stroke-[2.5]" />
           </button>
 
-          {/* Escritorio (≥ md). En md se ocultan los iconos para que los 5 enlaces quepan en 768px */}
-          <ul className="hidden md:flex items-center gap-4 lg:gap-6 min-w-0">
+          {/* Escritorio (≥ md). En md se ocultan los iconos para que los 6 enlaces quepan en 768px */}
+          <ul className="hidden md:flex items-center gap-3 lg:gap-5 min-w-0">
             {NAV_LINKS.map(({ to, label, icon: Icon }) => (
               <li key={to}>
                 <NavLink
@@ -131,6 +134,13 @@ export default function Navbar() {
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5" />
                     <span className="font-body text-base">Permisos</span>
+                  </div>
+                </DropdownItem>
+
+                <DropdownItem onClick={() => navigate("/settings")}>
+                  <div className="flex items-center gap-3">
+                    <Settings className="w-5 h-5" />
+                    <span className="font-body text-base">Configuración</span>
                   </div>
                 </DropdownItem>
 

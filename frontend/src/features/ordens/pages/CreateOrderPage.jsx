@@ -4,70 +4,50 @@ import { Utensils } from "lucide-react";
 
 import OrderForm from "../components/OrderForm";
 import { createOrder } from "@/services/orderApi";
-import { getUsers } from "@/services/userApi";
 import { getProducts } from "@/services/productApi";
 
 import {
   showSuccessAlert,
   showSystemErrorAlert,
   showDeleteCancelAlert,
-  showConfirmDeleteAlert
+  showConfirmDeleteAlert,
 } from "@/shared/services/alertService";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
-
-  // Opciones reales: empleados activos y platillos disponibles
-  const [waiters, setWaiters] = useState([]);
   const [dishes, setDishes] = useState([]);
+  const [isLoadingDishes, setIsLoadingDishes] = useState(true);
 
+  // Ya no se cargan usuarios: un mesero sin permiso list_user recibía error al abrir esta pantalla
   useEffect(() => {
-    Promise.all([getUsers(), getProducts()])
-      .then(([users, products]) => {
-        setWaiters(
-          users
-            .filter((u) => u.is_active)
-            .map((u) => ({ value: String(u.id), label: u.userName }))
-        );
-        setDishes(
-          products
-            .filter((p) => p.isAvailable)
-            .map((p) => ({ value: String(p.id), label: p.productName, price: p.price }))
-        );
-      })
+    getProducts()
+      .then((products) => setDishes(products.filter((p) => p.isAvailable)))
       .catch((error) => {
-        console.error("Error cargando empleados/platillos:", error);
+        console.error("Error cargando el menú:", error);
         showSystemErrorAlert({
-          text: "No se pudieron cargar los empleados o el menú. Verifica que el backend esté corriendo.",
+          text: "No se pudo cargar el menú. Verifica que el backend esté corriendo.",
         });
-      });
+      })
+      .finally(() => setIsLoadingDishes(false));
   }, []);
 
-  const handleCreateOrder = async (validatedData) => {
+  // Devuelve true si se creó; false para que el formulario refresque las mesas
+  const handleCreateOrder = async ({ tableNumber, observations, items }) => {
     try {
-      // Solo se envían ids y cantidades: el precio lo pone el backend desde la BD
-      await createOrder({
-        tableNumber: validatedData.tableNumber,
-        waiterId: Number(validatedData.waiterId),
-        observations: validatedData.observations ?? "",
-        items: validatedData.items.map((item) => ({
-          productId: Number(item.dishId),
-          quantity: item.quantity,
-        })),
-      });
-
+      // Solo ids y cantidades: precio y mesero los pone el backend
+      await createOrder({ tableNumber, observations: observations ?? "", items });
       await showSuccessAlert({
         title: "¡Orden creada!",
-        text: "La orden fue registrada correctamente.",
+        text: `La orden de la mesa ${tableNumber} fue enviada a cocina.`,
       });
-
       navigate(-1);
+      return true;
     } catch (error) {
       console.error("Error al crear la orden:", error);
-
       await showSystemErrorAlert({
         text: error.message || "La orden no pudo ser registrada correctamente.",
       });
+      return false;
     }
   };
 
@@ -90,25 +70,18 @@ export default function CreateOrderPage() {
 
   return (
     <div className="bg-surface/60 dark:bg-surface/90 rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
-
-      <div className="max-w-3xl mx-auto space-y-8 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <Utensils className="w-8 h-8 text-text-primary" />
-
-          <h1 className="text-title font-heading font-bold text-text-primary">
-            Registrar orden nueva
-          </h1>
+          <h1 className="text-title font-heading font-bold text-text-primary">Registrar orden nueva</h1>
         </div>
 
-        <div className="bg-surface/70 rounded-shape-xl p-4 sm:p-6 md:p-8 shadow-elevation-1">
-          <OrderForm
-            mode="create"
-            waiters={waiters}
-            dishes={dishes}
-            onSubmit={handleCreateOrder}
-            onCancel={handleCancel}
-          />
-        </div>
+        <OrderForm
+          dishes={dishes}
+          isLoadingDishes={isLoadingDishes}
+          onSubmit={handleCreateOrder}
+          onCancel={handleCancel}
+        />
       </div>
     </div>
   );

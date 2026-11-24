@@ -1,5 +1,6 @@
 import { orderRepository } from "./order.repository.js";
 import { userRepository } from "../users/user.repository.js";
+import { settingsRepository } from "../settings/settings.repository.js";
 import { httpError } from "../../utils/httpError.js";
 import { OPEN_ORDER_STATUSES, FINAL_ORDER_STATUSES, ORDER_TRANSITIONS } from "./order.constants.js";
 
@@ -33,6 +34,14 @@ async function assertActiveWaiter(waiterId) {
   }
 }
 
+// La mesa debe existir según la configuración del restaurante (1..table_count)
+async function assertTableExists(tableNumber) {
+  const { tableCount } = await settingsRepository.get();
+  if (tableNumber > tableCount) {
+    throw httpError(400, `La mesa ${tableNumber} no existe: el restaurante tiene ${tableCount} mesas`);
+  }
+}
+
 export const orderService = {
   // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
   async list(query) {
@@ -49,6 +58,7 @@ export const orderService = {
 
   // currentUserId: usuario autenticado (req.user.id). Si no se indica mesero, es él.
   async create({ tableNumber, waiterId, observations, items }, currentUserId) {
+    await assertTableExists(tableNumber);
     if (waiterId != null) {
       await assertActiveWaiter(waiterId);
     }
@@ -72,8 +82,16 @@ export const orderService = {
     if (FINAL_ORDER_STATUSES.includes(current.status)) {
       throw httpError(409, `No se puede modificar una orden en estado "${current.status}"`);
     }
+    if (status === "pagada") {
+      throw httpError(409, "Para pagar una orden genera su comprobante de venta");
+    }
     if (!ORDER_TRANSITIONS[current.status]?.includes(status)) {
       throw httpError(409, `No se puede pasar una orden de "${current.status}" a "${status}"`);
+    }
+
+    // Solo se valida si cambia la mesa: una orden antigua en una mesa retirada sigue editable
+    if (tableNumber !== current.tableNumber) {
+      await assertTableExists(tableNumber);
     }
 
     // Si no se envía mesero se conserva el actual (o el usuario autenticado si no tenía).

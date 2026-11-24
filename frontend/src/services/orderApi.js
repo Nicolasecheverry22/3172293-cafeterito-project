@@ -13,7 +13,8 @@ export const getOrderById = (id) => api.get(`/orders/${id}`);
 // Si no se envía waiterId, el backend asigna al usuario autenticado.
 export const createOrder = (payload) => api.post("/orders", payload);
 
-// PUT /api/orders/:id — 409 si la orden está pagada o cancelada
+// PUT /api/orders/:id — 409 si la orden está pagada o cancelada, o si se envía "pagada":
+// una orden solo se paga generando su comprobante de venta (invoiceApi.createInvoice)
 export const updateOrder = (id, payload) => api.put(`/orders/${id}`, payload);
 
 // PATCH /api/orders/:id/cancel — anular (solo órdenes activas o listas para entrega)

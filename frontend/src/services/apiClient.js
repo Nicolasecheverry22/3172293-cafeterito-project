@@ -40,6 +40,10 @@ export function setSession({ token, user }) {
   }
 }
 
+// ¿El usuario en sesión tiene el rol? Solo para mostrar u ocultar acciones: el backend
+// vuelve a verificarlo (p. ej. anular un comprobante exige Administrador).
+export const hasSessionGroup = (group) => Boolean(getSessionUser()?.groups?.includes(group));
+
 // Actualiza datos visibles del usuario en sesión (p. ej. tras editar su propia foto)
 export function updateSessionUser(patch) {
   const current = getSessionUser();

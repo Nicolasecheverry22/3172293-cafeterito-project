@@ -17,6 +17,7 @@ export {default as FileInput } from "./components/FileInput";
 export {default as ImageThumb } from "./components/ImageThumb";
 export {default as FormNavbar } from "./components/FormNavbar";
 export {default as Card } from "./components/Card";
+export {default as QuantityStepper } from "./components/QuantityStepper";
 export {
     Dropdown,
     DropdownTrigger,

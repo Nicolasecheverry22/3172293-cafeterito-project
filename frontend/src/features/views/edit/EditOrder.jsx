@@ -14,11 +14,11 @@ import {
   showCreateErrorAlert
 } from "@/shared/services/alertService";
 
-// Deben coincidir con el CHECK chk_orders_status de la BD
+// Estados destino permitidos al editar (ORDER_TRANSITIONS del backend). "Pagada" no está:
+// una orden solo se paga con "Cobrar", que genera su comprobante de venta.
 const ORDER_STATUS_OPTIONS = [
   { value: "activa", label: "Activa" },
   { value: "lista para entrega", label: "Lista para entrega" },
-  { value: "pagada", label: "Pagada" },
   { value: "cancelada", label: "Cancelada" },
 ];
 

@@ -12,6 +12,8 @@ import productRoutes from "./features/products/product.routes.js";
 import inventoryRoutes from "./features/inventory/inventory.routes.js";
 import providerRoutes from "./features/providers/provider.routes.js";
 import orderRoutes from "./features/orders/order.routes.js";
+import settingsRoutes from "./features/settings/settings.routes.js";
+import invoiceRoutes from "./features/invoices/invoice.routes.js";
 import { productController } from "./features/products/product.controller.js";
 
 import { authenticateToken } from "./middlewares/auth.middleware.js";
@@ -51,6 +53,8 @@ app.use("/api/products", authenticateToken, productRoutes);
 app.use("/api/inventory", authenticateToken, inventoryRoutes);
 app.use("/api/providers", authenticateToken, providerRoutes);
 app.use("/api/orders", authenticateToken, orderRoutes);
+app.use("/api/settings", authenticateToken, settingsRoutes);
+app.use("/api/invoices", authenticateToken, invoiceRoutes);
 
 // ── 404 y errores (siempre al final) ────────────────────────────
 app.use(notFoundHandler);

@@ -37,8 +37,13 @@ import EditProduct from "@/features/views/edit/EditProduct";
 
 // Orders
 import { OrdensListPage, CreateOrderPage } from "@/features/ordens";
+import { SettingsPage } from "@/features/settings";
 import OrderView from "@/features/views/OrderView";
 import EditOrder from "@/features/views/edit/EditOrder";
+
+// Invoices (comprobantes de venta)
+import { InvoiceListPage } from "@/features/invoices";
+import InvoiceView from "@/features/views/InvoiceView";
 
 const router = createBrowserRouter([
   {
@@ -72,6 +77,8 @@ const router = createBrowserRouter([
       { path: "/inventoryList", element: <InventoryListPage /> },
       { path: "/menuList", element: <MenuListPage /> },
       { path: "/ordensList", element: <OrdensListPage /> },
+      { path: "/settings", element: <SettingsPage /> },
+      { path: "/invoiceList", element: <InvoiceListPage /> },
     ],
   },
 
@@ -103,6 +110,8 @@ const router = createBrowserRouter([
       { path: "/ordensCreate", element: <CreateOrderPage /> },
       { path: "/OrderView/:id", element: <OrderView /> },
       { path: "/EditOrder/:id", element: <EditOrder /> },
+
+      { path: "/InvoiceView/:id", element: <InvoiceView /> },
     ],
   },
 
