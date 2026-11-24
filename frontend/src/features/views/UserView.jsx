@@ -4,8 +4,10 @@ import { Input, Button, StatusSwitch, ImageThumb } from "@/shared";
 import { SquarePen, UserRoundSearch, ArrowLeft } from "lucide-react";
 import { getUserById } from "@/services/userApi";
 import { getDocumentTypeLabel } from "@/services/selectService";
+import usePermission from "@/shared/hooks/usePermission";
 
 export default function UserView() {
+  const { guard } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -133,6 +135,7 @@ export default function UserView() {
             size="md"
             className="w-full flex items-center justify-center gap-2"
             onClick={() => navigate(`/EditUser/${user.id}`)}
+              {...guard("update_user", "editar usuarios")}
           >
             <SquarePen className="w-5 h-5" />
             Editar Perfil

@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { authRepository } from "./auth.repository.js";
+import { accessService } from "../access/access.service.js";
 import { httpError } from "../../utils/httpError.js";
 import { sendMail } from "../../utils/mailer.js";
 
@@ -36,11 +37,18 @@ const signToken = (user) =>
     expiresIn: process.env.JWT_EXPIRES || "10m",
   });
 
-// Solo lo que el frontend muestra (el token sigue llevando únicamente id y correo)
+// Solo lo que el frontend muestra (el token sigue llevando únicamente id y correo).
+// isSuperuser y permissions son SOLO para la interfaz: cada endpoint vuelve a verificarlos.
 const profileOf = (row) => ({
   name: row?.user_name ?? null,
   imageThumb: row?.user_image_thumb ?? null,
   groups: row?.groups ?? [],
+});
+
+export const sessionUserOf = async (sessionUser, row) => ({
+  ...sessionUser,
+  ...profileOf(row),
+  ...(await accessService.getSessionAccess(sessionUser.id)),
 });
 
 // Valida el código del usuario. Si es incorrecto suma un intento; tras
@@ -82,7 +90,7 @@ export const authService = {
     const sessionUser = { id: user.id, email: user.user_email };
     return {
       token: signToken(sessionUser),
-      user: { ...sessionUser, ...profileOf(user) },
+      user: await sessionUserOf(sessionUser, user),
     };
   },
 
@@ -93,7 +101,7 @@ export const authService = {
     const profile = await authRepository.findProfile(user.id);
     return {
       token: signToken(sessionUser),
-      user: { ...sessionUser, ...profileOf(profile) },
+      user: await sessionUserOf(sessionUser, profile),
     };
   },
 

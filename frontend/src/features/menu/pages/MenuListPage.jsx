@@ -1,6 +1,7 @@
 // src/menu/pages/MenuListPage.js
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
+import usePermission from "@/shared/hooks/usePermission";
 import { Link } from "react-router-dom";
 
 import { getMenuColumns } from "../table/MenuColumns";
@@ -8,6 +9,7 @@ import { getProducts } from "@/services/productApi";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function MenuListPage() {
+  const { guard } = usePermission();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menu, setMenu] = useState([]);
   const [loadError, setLoadError] = useState(null);
@@ -82,11 +84,12 @@ export default function MenuListPage() {
               size="md"
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
+              {...guard("report_product", "generar reportes del menú")}
             >
               Reportar menú
             </Button>
 
-            <Button as={Link} to="/menuCreate" size="md" variant="primary">Crear platillo</Button>
+            <Button as={Link} to="/menuCreate" size="md" variant="primary" {...guard("create_product", "crear platillos")}>Crear platillo</Button>
           </div>
         </div>
 

@@ -131,7 +131,7 @@ export function DropdownItem({
       {...props}
       onClick={handleClick}
       className={`
-        w-full min-h-touch flex items-center text-left px-3
+        w-full min-h-touch flex items-center text-left px-3 cursor-pointer
         hover:bg-surface-muted focus:bg-surface-muted focus:outline-none
         transition-colors
         ${className}

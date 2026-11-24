@@ -150,7 +150,8 @@ async createWithGroups(userData, groupNames) {
 
 // Actualiza los datos del usuario y reemplaza sus grupos en UNA transacción.
 // La contraseña no se toca aquí. Retorna undefined si el id no existe.
-async updateWithGroups(id, userData, groupNames) {
+// afterChange(client): verificaciones anti-bloqueo antes del COMMIT (si lanza → ROLLBACK).
+async updateWithGroups(id, userData, groupNames, afterChange) {
     const {
         userName,
         userEmail,
@@ -200,6 +201,7 @@ async updateWithGroups(id, userData, groupNames) {
 
         await client.query("DELETE FROM user_groups WHERE user_id = $1", [id]);
         await assignGroups(client, id, groupNames);
+        await afterChange?.(client);
 
         await client.query("COMMIT");
         return rows[0];
@@ -211,35 +213,29 @@ async updateWithGroups(id, userData, groupNames) {
     }
 },
 
-// Permisos de un usuario: directos (user_permissions) y heredados de sus grupos.
-// Un permiso puede ser directo y heredado al mismo tiempo.
+// Permisos de un usuario: directos (user_permissions) y heredados de sus grupos ACTIVOS
+// (inherited_from: nombres de esos grupos). Un permiso puede ser directo y heredado a la vez.
 async getPermissionsByUserId(userId) {
     const query = `
+    WITH inherited AS (
+        SELECT gp.permission_id, ARRAY_AGG(g.group_name ORDER BY g.group_name) AS groups
+        FROM user_groups ug
+        JOIN groups g             ON g.group_id = ug.group_id AND g.is_active
+        JOIN group_permissions gp ON gp.group_id = ug.group_id
+        WHERE ug.user_id = $1
+        GROUP BY gp.permission_id
+    )
     SELECT
         p.permission_id,
         p.permission_name,
         p.permission_codename,
-        EXISTS (
-            SELECT 1 FROM user_permissions up
-            WHERE up.user_id = $1 AND up.permission_id = p.permission_id
-        ) AS is_direct,
-        EXISTS (
-            SELECT 1
-            FROM user_groups ug
-            INNER JOIN group_permissions gp ON gp.group_id = ug.group_id
-            WHERE ug.user_id = $1 AND gp.permission_id = p.permission_id
-        ) AS is_inherited
+        (up.permission_id IS NOT NULL)          AS is_direct,
+        (inh.permission_id IS NOT NULL)         AS is_inherited,
+        COALESCE(inh.groups, '{}')              AS inherited_from
     FROM permissions p
-    WHERE EXISTS (
-            SELECT 1 FROM user_permissions up
-            WHERE up.user_id = $1 AND up.permission_id = p.permission_id
-        )
-       OR EXISTS (
-            SELECT 1
-            FROM user_groups ug
-            INNER JOIN group_permissions gp ON gp.group_id = ug.group_id
-            WHERE ug.user_id = $1 AND gp.permission_id = p.permission_id
-        )
+    LEFT JOIN user_permissions up ON up.permission_id = p.permission_id AND up.user_id = $1
+    LEFT JOIN inherited inh       ON inh.permission_id = p.permission_id
+    WHERE up.permission_id IS NOT NULL OR inh.permission_id IS NOT NULL
     ORDER BY p.permission_name;
     `;
 
@@ -248,7 +244,8 @@ async getPermissionsByUserId(userId) {
 },
 
 // Reemplaza los permisos DIRECTOS del usuario (no toca los heredados de grupos).
-async updatePermissions(userId, permissionIds) {
+// afterChange(client): verificaciones anti-bloqueo antes del COMMIT.
+async updatePermissions(userId, permissionIds, afterChange) {
     const client = await pool.connect();
 
     try {
@@ -267,6 +264,7 @@ async updatePermissions(userId, permissionIds) {
                 [userId, permissionIds]
             );
         }
+        await afterChange?.(client);
 
         await client.query("COMMIT");
     } catch (error) {
@@ -341,18 +339,53 @@ async getById(id) {
     return result.rows[0];
 },
 
-// Habilita/deshabilita un usuario (no existe borrado físico, RFADMIN05).
-// Al reactivarlo se reinicia el bloqueo por intentos fallidos (RNF11).
-async setStatus(id, isActive) {
+// Mi perfil: solo datos personales (nunca correo de acceso, documento, rol ni estado).
+// Foto: nueva → se reemplaza; sin foto → se conserva; removeImage → NULL.
+async updateProfile(id, { userName, userPhone, userAddress, userPersonalEmail, userImage, userImageThumb, removeImage }) {
     const result = await pool.query(
         `UPDATE users
-         SET is_active = $2,
-             failed_login_attempts = CASE WHEN $2 THEN 0 ELSE failed_login_attempts END,
-             locked_until          = CASE WHEN $2 THEN NULL ELSE locked_until END
+         SET user_name = $2, user_phone = $3, user_address = $4, user_personal_email = $5,
+             user_image       = CASE WHEN $8::boolean AND $6::text IS NULL THEN NULL
+                                     ELSE COALESCE($6::text, user_image) END,
+             user_image_thumb = CASE WHEN $8::boolean AND $6::text IS NULL THEN NULL
+                                     ELSE COALESCE($7::text, user_image_thumb) END
          WHERE id = $1
-         RETURNING id, is_active`,
-        [id, isActive]
+         RETURNING id, user_name AS "userName", user_image_thumb AS "userImageThumb"`,
+        [id, userName, userPhone, userAddress ?? null, userPersonalEmail ?? null,
+         userImage ?? null, userImageThumb ?? null, Boolean(removeImage)]
     );
     return result.rows[0];
+},
+
+async getPasswordHash(id) {
+    const result = await pool.query("SELECT user_password FROM users WHERE id = $1", [id]);
+    return result.rows[0]?.user_password;
+},
+
+// Habilita/deshabilita un usuario (no existe borrado físico, RFADMIN05).
+// Al reactivarlo se reinicia el bloqueo por intentos fallidos (RNF11).
+// afterChange(client): verificaciones anti-bloqueo antes del COMMIT.
+async setStatus(id, isActive, afterChange) {
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const result = await client.query(
+            `UPDATE users
+             SET is_active = $2,
+                 failed_login_attempts = CASE WHEN $2 THEN 0 ELSE failed_login_attempts END,
+                 locked_until          = CASE WHEN $2 THEN NULL ELSE locked_until END
+             WHERE id = $1
+             RETURNING id, is_active`,
+            [id, isActive]
+        );
+        if (result.rows[0]) await afterChange?.(client);
+        await client.query("COMMIT");
+        return result.rows[0];
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 }

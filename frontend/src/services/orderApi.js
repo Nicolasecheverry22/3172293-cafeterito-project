@@ -5,6 +5,22 @@ import { api } from "./apiClient";
 export const ORDER_STATUSES = ["activa", "lista para entrega", "pagada", "cancelada"];
 export const OPEN_ORDER_STATUSES = ["activa", "lista para entrega"];
 
+export const ORDER_STATUS_LABELS = {
+  activa: "Activa",
+  "lista para entrega": "Lista para entrega",
+  pagada: "Pagada",
+  cancelada: "Cancelada",
+};
+
+// Transiciones permitidas al editar (igual que ORDER_TRANSITIONS de order.constants.js).
+// "pagada" nunca es destino: una orden se paga generando su comprobante (Cobrar).
+export const ORDER_TRANSITIONS = {
+  activa: ["activa", "lista para entrega", "cancelada"],
+  "lista para entrega": ["lista para entrega", "activa", "cancelada"],
+  pagada: [],
+  cancelada: [],
+};
+
 export const getOrders = (query) => api.get("/orders", { query });
 
 export const getOrderById = (id) => api.get(`/orders/${id}`);

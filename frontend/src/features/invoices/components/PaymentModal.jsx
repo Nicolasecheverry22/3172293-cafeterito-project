@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button, Input, Select } from "@/shared";
 import useDialogA11y from "@/shared/hooks/useDialogA11y";
+import usePermission from "@/shared/hooks/usePermission";
 import { getOrderById } from "@/services/orderApi";
 import {
   createInvoice, getInvoiceSettings, formatCOP, CUSTOMER_DOCUMENT_TYPES, DEFAULT_CUSTOMER,
@@ -43,6 +44,7 @@ const customerSchema = z
   });
 
 export default function PaymentModal({ orderId, onClose, onPaid }) {
+  const { guard } = usePermission();
   const [order, setOrder] = useState(null);
   const [settings, setSettings] = useState({ taxRate: 0, maxTipRatio: 0.2 });
   const [loadError, setLoadError] = useState(null);
@@ -385,7 +387,7 @@ export default function PaymentModal({ orderId, onClose, onPaid }) {
           ) : (
             <>
               <Button variant="secondary" onClick={close} disabled={submitting}>Cancelar</Button>
-              <Button variant="primary" onClick={handleConfirm} disabled={!canConfirm}>
+              <Button variant="primary" onClick={handleConfirm} disabled={!canConfirm} {...guard("create_invoice", "cobrar órdenes")}>
                 {submitting ? "Cobrando..." : order ? `Confirmar cobro · ${formatCOP(fromCents(totals.total))}` : "Confirmar cobro"}
               </Button>
             </>

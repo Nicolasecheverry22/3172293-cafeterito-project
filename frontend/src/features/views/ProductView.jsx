@@ -3,8 +3,10 @@ import { useState, useEffect } from "react";
 import { Input, StatusSwitch, Button, ImageThumb } from "@/shared";
 import { UtensilsCrossed, SquarePen } from "lucide-react";
 import { getProductById } from "@/services/productApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 export default function ProductView() {
+  const { guard } = usePermission();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -73,6 +75,7 @@ export default function ProductView() {
               size="md"
               className="w-full flex items-center justify-center gap-2"
               onClick={() => navigate(`/EditProduct/${product.id}`)}
+              {...guard("update_product", "editar platillos")}
             >
               <SquarePen className="w-5 h-5" />
               Editar Info

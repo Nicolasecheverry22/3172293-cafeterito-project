@@ -17,6 +17,7 @@ import invoiceRoutes from "./features/invoices/invoice.routes.js";
 import { productController } from "./features/products/product.controller.js";
 
 import { authenticateToken } from "./middlewares/auth.middleware.js";
+import { loadPermissions } from "./middlewares/permission.middleware.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -45,16 +46,19 @@ app.use("/api/auth", authRoutes);
 app.get("/api/products/top-selling", productController.getTopSelling);
 
 // ── Rutas privadas: todas exigen un JWT válido ──────────────────
-app.use("/api/users", authenticateToken, userRoutes);
-app.use("/api/access", authenticateToken, accessRoutes);
-app.use("/api/groups", authenticateToken, groupsRoutes);
-app.use("/api/permissions", authenticateToken, permissionsRoutes);
-app.use("/api/products", authenticateToken, productRoutes);
-app.use("/api/inventory", authenticateToken, inventoryRoutes);
-app.use("/api/providers", authenticateToken, providerRoutes);
-app.use("/api/orders", authenticateToken, orderRoutes);
-app.use("/api/settings", authenticateToken, settingsRoutes);
-app.use("/api/invoices", authenticateToken, invoiceRoutes);
+// loadPermissions carga una sola vez por petición req.auth = { isSuperuser, permissions }
+// y cada ruta declara su permiso con requirePermission (ver *.routes.js).
+const privateRoute = [authenticateToken, loadPermissions];
+app.use("/api/users", privateRoute, userRoutes);
+app.use("/api/access", privateRoute, accessRoutes);
+app.use("/api/groups", privateRoute, groupsRoutes);
+app.use("/api/permissions", privateRoute, permissionsRoutes);
+app.use("/api/products", privateRoute, productRoutes);
+app.use("/api/inventory", privateRoute, inventoryRoutes);
+app.use("/api/providers", privateRoute, providerRoutes);
+app.use("/api/orders", privateRoute, orderRoutes);
+app.use("/api/settings", privateRoute, settingsRoutes);
+app.use("/api/invoices", privateRoute, invoiceRoutes);
 
 // ── 404 y errores (siempre al final) ────────────────────────────
 app.use(notFoundHandler);

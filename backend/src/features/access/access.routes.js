@@ -1,16 +1,12 @@
 // backend/src/features/access/access.routes.js
-// Ruta protegida con JWT - permiso dinámico obtenido por codename
+// Montado en app.js bajo /api/access con authenticateToken + loadPermissions.
+// Solo autenticación: cada usuario consulta sus propios permisos.
 
 import { Router } from "express";
 import { accessController } from "./access.controller.js";
-import { authenticateToken } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get(
-  "/check/:permissionCode",
-  authenticateToken,
-  accessController.testPermission,
-);
+router.get("/check/:permissionCode", accessController.testPermission);
 
 export default router;

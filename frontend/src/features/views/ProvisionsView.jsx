@@ -3,8 +3,10 @@ import { useState, useEffect } from "react";
 import { Input, Button, StatusSwitch, ImageThumb } from "@/shared";
 import { SquarePen, UtensilsCrossed, Package } from "lucide-react";
 import { getInventoryItem } from "@/services/inventoryApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 export default function ProvisionsView() {
+  const { guard } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -79,6 +81,7 @@ export default function ProvisionsView() {
               size="md"
               className="w-full flex items-center justify-center gap-2"
               onClick={() => navigate(`/editInventory/${provision.id}`)}
+              {...guard("update_inventory", "editar suministros")}
             >
               <SquarePen className="w-5 h-5" />
               Editar Info

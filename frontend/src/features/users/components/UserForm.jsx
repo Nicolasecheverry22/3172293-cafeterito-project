@@ -8,6 +8,7 @@ import { Input,
 } from "@/shared";
 import { createUserSchema } from "../schemas/userSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
+import usePermission from "@/shared/hooks/usePermission";
 import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 
 // Cada checkbox de "Tipo de Usuario" corresponde a un grupo de la BD (tabla groups).
@@ -61,6 +62,8 @@ export default function UserForm({
   onSubmit,
   onCancel,
 }) {
+  // El rol Administrador (= superusuario) solo lo asigna otro superusuario (backend: 403)
+  const { isSuperuser } = usePermission();
   const [formData, setFormData] = useState(initialData ?? DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -245,7 +248,14 @@ export default function UserForm({
           <h3 className="font-heading text-subtitle mb-2">Tipo de Usuario:</h3>
 
           {ROLE_CHECKBOXES.map(({ name, label }) => (
-            <Checkbox key={name} name={name} label={label} checked={formData[name]} onChange={handleChange} />
+            <Checkbox
+              key={name}
+              name={name}
+              label={name === "isSuperUser" && !isSuperuser ? `${label} (solo un superusuario puede asignarlo)` : label}
+              checked={formData[name]}
+              onChange={handleChange}
+              disabled={name === "isSuperUser" && !isSuperuser}
+            />
           ))}
 
           {errors.isSuperUser && (

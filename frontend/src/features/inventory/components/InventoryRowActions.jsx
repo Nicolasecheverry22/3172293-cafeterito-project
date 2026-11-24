@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
 import { setInventoryStatus, INVENTORY_STATUSES } from "@/services/inventoryApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 // Acciones por fila. No existe "Eliminar": se cambia el estado del insumo
 // (Disponible / Vencido / Avería / Agotado) (RFADMIN10).
 export default function InventoryRowActions({ provision, onChanged }) {
+  const { guard } = usePermission();
   const navigate = useNavigate();
 
   const handleChangeStatus = async () => {
@@ -49,6 +51,7 @@ export default function InventoryRowActions({ provision, onChanged }) {
         onClick={() => provision.id && navigate(`/InventoryView/${provision.id}`)}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Ver detalles"
+        {...guard("view_inventory", "ver el detalle de suministros")}
       >
         <Eye size={20} />
       </button>
@@ -57,6 +60,7 @@ export default function InventoryRowActions({ provision, onChanged }) {
         onClick={() => provision.id && navigate(`/editInventory/${provision.id}`)}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar suministro"
+        {...guard("update_inventory", "editar suministros")}
       >
         <Pencil size={20} />
       </button>
@@ -65,6 +69,7 @@ export default function InventoryRowActions({ provision, onChanged }) {
         onClick={handleChangeStatus}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Cambiar estado"
+        {...guard("change_status_inventory", "cambiar el estado de suministros")}
       >
         <RefreshCw size={20} />
       </button>

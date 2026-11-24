@@ -3,6 +3,8 @@ import { userRepository } from "../users/user.repository.js";
 import { settingsRepository } from "../settings/settings.repository.js";
 import { httpError } from "../../utils/httpError.js";
 import { OPEN_ORDER_STATUSES, FINAL_ORDER_STATUSES, ORDER_TRANSITIONS } from "./order.constants.js";
+import { can, MANAGE_PERMISSIONS } from "../access/access.service.js";
+import { FORBIDDEN_MESSAGE } from "../../middlewares/permission.middleware.js";
 
 // La entrada llega validada por order.schema.js (mesa, items y cantidades enteras > 0,
 // estado válido). Aquí solo quedan las reglas de negocio que requieren la BD.
@@ -25,6 +27,22 @@ const priceNewItem = (item, productsById) => {
   }
   return { ...item, unitPrice: product.price, dispatched: false };
 };
+
+// ¿El PUT solo cambia el estado entre los dos estados abiertos? (permiso prepare_order)
+// Mesa, mesero, observaciones y platillos deben llegar iguales a los guardados.
+function isOnlyPrepareChange(current, { tableNumber, waiterId, status, observations, items }) {
+  const sameItems = (list, map) =>
+    list.length === map.size &&
+    list.every(({ productId, quantity }) => map.get(productId) === quantity);
+  const currentItems = new Map(mergeItems(current.items).map((i) => [i.productId, i.quantity]));
+  return (
+    OPEN_ORDER_STATUSES.includes(status) &&
+    tableNumber === current.tableNumber &&
+    (waiterId == null || waiterId === current.waiterId) &&
+    (observations ?? "") === (current.observations ?? "") &&
+    sameItems(mergeItems(items), currentItems)
+  );
+}
 
 // El mesero indicado debe existir y estar activo (H51).
 async function assertActiveWaiter(waiterId) {
@@ -74,7 +92,8 @@ export const orderService = {
     );
   },
 
-  async update(id, { tableNumber, waiterId, status, observations, items }, currentUserId) {
+  // auth: req.auth ({ isSuperuser, permissions }). La ruta ya exige update_order o prepare_order.
+  async update(id, { tableNumber, waiterId, status, observations, items }, currentUserId, auth) {
     const current = await orderRepository.getById(id);
     if (!current) return undefined;
 
@@ -87,6 +106,21 @@ export const orderService = {
     }
     if (!ORDER_TRANSITIONS[current.status]?.includes(status)) {
       throw httpError(409, `No se puede pasar una orden de "${current.status}" a "${status}"`);
+    }
+
+    // Solo prepare_order (cocina): únicamente el estado activa ↔ lista para entrega
+    const canUpdate = can(auth, "update_order");
+    if (!canUpdate && !isOnlyPrepareChange(current, { tableNumber, waiterId, status, observations, items })) {
+      throw httpError(403, 'Solo puedes cambiar el estado entre "activa" y "lista para entrega"');
+    }
+    // Anular por PUT exige el mismo permiso que PATCH /:id/cancel
+    if (status === "cancelada" && !can(auth, "cancel_order")) {
+      throw httpError(403, FORBIDDEN_MESSAGE);
+    }
+    // Reasignar el mesero es una decisión de administración
+    if (waiterId != null && waiterId !== current.waiterId &&
+        !(canUpdate && can(auth, MANAGE_PERMISSIONS))) {
+      throw httpError(403, "Solo un administrador puede cambiar el mesero de una orden");
     }
 
     // Solo se valida si cambia la mesa: una orden antigua en una mesa retirada sigue editable

@@ -2,9 +2,11 @@ import { Pencil, Eye, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { confirmAction } from "@/shared/services/confirmAction";
 import { setProviderStatus } from "@/services/providerApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 // Acciones por fila. No existe "Eliminar": el proveedor se habilita/inhabilita (RFADMIN17).
 export default function ProviderRowActions({ provider, onChanged }) {
+  const { guard } = usePermission();
   const navigate = useNavigate();
   const isActive = provider.is_active ?? provider.isActive ?? true;
   const name = provider.providerName || provider.nombre || "este proveedor";
@@ -28,6 +30,7 @@ export default function ProviderRowActions({ provider, onChanged }) {
         onClick={() => navigate(`/ProviderView/${provider.id}`)}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Visualizar proveedor"
+        {...guard("view_provider", "ver el detalle de proveedores")}
       >
         <Eye size={20} />
       </button>
@@ -36,6 +39,7 @@ export default function ProviderRowActions({ provider, onChanged }) {
         onClick={() => navigate(`/EditProvider/${provider.id}`)}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar proveedor"
+        {...guard("update_provider", "editar proveedores")}
       >
         <Pencil size={20} />
       </button>
@@ -48,6 +52,7 @@ export default function ProviderRowActions({ provider, onChanged }) {
             : "text-error"
         }`}
         title={isActive ? "Activo — clic para inhabilitar" : "Inactivo — clic para habilitar"}
+        {...guard("disable_provider", "cambiar el estado de proveedores")}
       >
         {isActive ? <Power size={20} /> : <PowerOff size={20} />}
       </button>

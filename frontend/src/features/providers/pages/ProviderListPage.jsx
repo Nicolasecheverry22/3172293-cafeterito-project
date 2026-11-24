@@ -1,12 +1,14 @@
 // src/providers/pages/ProviderListPage.js
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
+import usePermission from "@/shared/hooks/usePermission";
 import { getProviderColumns } from "../table/ProviderColumns";
 import { getProviders } from "@/services/providerApi";
 import { Link } from "react-router-dom";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function ProviderListPage() {
+  const { guard } = usePermission();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [providers, setProviders] = useState([]);
   const [loadError, setLoadError] = useState(null);
@@ -73,11 +75,12 @@ export default function ProviderListPage() {
               size="md"
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
+              {...guard("report_provider", "generar reportes de proveedores")}
             >
               Reportar proveedores
             </Button>
 
-            <Button as={Link} to="/providerCreate" size="md" variant="primary">Crear proveedor</Button>
+            <Button as={Link} to="/providerCreate" size="md" variant="primary" {...guard("create_provider", "crear proveedores")}>Crear proveedor</Button>
           </div>
         </div>
 

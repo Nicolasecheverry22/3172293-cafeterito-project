@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   User,
@@ -10,7 +9,8 @@ import {
   Coffee,
   Menu,
   ShieldCheck,
-  Settings
+  Settings,
+  UserCircle
 } from "lucide-react";
 
 import {
@@ -23,33 +23,25 @@ import {
 
 import ImageThumb from "@/shared/components/ImageThumb";
 import LogoutButton from "@/features/login/components/LogoutButton";
-import { getSessionUser, SESSION_EVENT } from "@/services/apiClient";
+import { MODULE_ROUTES } from "@/services/apiClient";
+import usePermission from "@/shared/hooks/usePermission";
 
-// Módulos principales: barra superior desde md y menú hamburguesa por debajo de md
-const NAV_LINKS = [
-  { to: "/userList", label: "Usuarios", icon: User },
-  { to: "/inventoryList", label: "Inventario", icon: ClipboardCheck },
-  { to: "/providerList", label: "Proveedores", icon: Truck },
-  { to: "/menuList", label: "Menú", icon: UtensilsCrossed },
-  { to: "/ordensList", label: "Órdenes", icon: ClipboardList },
-  { to: "/invoiceList", label: "Comprobantes", icon: Receipt },
-];
-
-// Usuario en sesión; se actualiza al iniciar sesión, al refrescar el token o al editar su foto
-function useSessionUser() {
-  const [user, setUser] = useState(getSessionUser);
-  useEffect(() => {
-    const sync = () => setUser(getSessionUser());
-    window.addEventListener(SESSION_EVENT, sync);
-    return () => window.removeEventListener(SESSION_EVENT, sync);
-  }, []);
-  return user;
-}
+// Módulos principales: barra superior desde md y menú hamburguesa por debajo de md.
+// Solo se muestran los que el rol puede listar (list_*).
+const NAV_ICONS = {
+  "/userList": User,
+  "/inventoryList": ClipboardCheck,
+  "/providerList": Truck,
+  "/menuList": UtensilsCrossed,
+  "/ordensList": ClipboardList,
+  "/invoiceList": Receipt,
+};
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const sessionUser = useSessionUser();
+  const { user: sessionUser, can } = usePermission();
+  const navLinks = MODULE_ROUTES.filter((m) => can(m.permission)).map((m) => ({ ...m, icon: NAV_ICONS[m.to] }));
   const displayName = sessionUser?.name || sessionUser?.email || "Usuario";
 
   return (
@@ -67,7 +59,7 @@ export default function Navbar() {
 
           {/* Escritorio (≥ md). En md se ocultan los iconos para que los 6 enlaces quepan en 768px */}
           <ul className="hidden md:flex items-center gap-3 lg:gap-5 min-w-0">
-            {NAV_LINKS.map(({ to, label, icon: Icon }) => (
+            {navLinks.map(({ to, label, icon: Icon }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -101,18 +93,34 @@ export default function Navbar() {
 
               {/* max-w: en 360px el menú no se sale de la pantalla */}
               <DropdownContent className="right-0 w-64 max-w-[calc(100vw-2rem)]">
+                {/* Encabezado: avatar, nombre y rol(es); debajo, "Mi perfil" */}
                 {sessionUser && (
-                  <div className="px-3 pb-2 mb-1 border-b border-border">
-                    <p className="text-small font-heading text-text-primary truncate">{displayName}</p>
-                    {sessionUser.name && sessionUser.email && (
-                      <p className="text-caption text-text-secondary truncate">{sessionUser.email}</p>
-                    )}
+                  <div className="border-b border-border pb-1 mb-1">
+                    <div className="user-menu__header">
+                      <ImageThumb src={sessionUser.imageThumb} alt="" name={displayName} size="sm" round />
+                      <div className="user-menu__text">
+                        <span className="user-menu__name">{displayName}</span>
+                        <span className="user-menu__roles">
+                          {sessionUser.groups?.length ? sessionUser.groups.join(" · ") : "Sin rol"}
+                        </span>
+                      </div>
+                    </div>
+                    <DropdownItem
+                      onClick={() => navigate("/profile")}
+                      className={pathname === "/profile" ? "bg-brand-soft font-bold" : ""}
+                      aria-current={pathname === "/profile" ? "page" : undefined}
+                    >
+                      <span className="flex items-center gap-3">
+                        <UserCircle className="w-5 h-5" aria-hidden="true" />
+                        <span className="font-body text-base">Mi perfil</span>
+                      </span>
+                    </DropdownItem>
                   </div>
                 )}
 
                 {/* Módulos: solo por debajo de md (en escritorio están en la barra) */}
-                <div className="md:hidden border-b border-border pb-1 mb-1">
-                  {NAV_LINKS.map(({ to, label, icon: Icon }) => {
+                {navLinks.length > 0 && <div className="md:hidden border-b border-border pb-1 mb-1">
+                  {navLinks.map(({ to, label, icon: Icon }) => {
                     const isActive = pathname === to || pathname.startsWith(`${to}/`);
                     return (
                       <DropdownItem
@@ -128,14 +136,16 @@ export default function Navbar() {
                       </DropdownItem>
                     );
                   })}
-                </div>
+                </div>}
 
-                <DropdownItem onClick={() => navigate("/permits")}>
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5" />
-                    <span className="font-body text-base">Permisos</span>
-                  </div>
-                </DropdownItem>
+                {can("manage_permissions") && (
+                  <DropdownItem onClick={() => navigate("/permits")}>
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck className="w-5 h-5" />
+                      <span className="font-body text-base">Permisos</span>
+                    </div>
+                  </DropdownItem>
+                )}
 
                 <DropdownItem onClick={() => navigate("/settings")}>
                   <div className="flex items-center gap-3">

@@ -2,6 +2,33 @@
 
 import Swal from "sweetalert2";
 
+// Alerta de "sin permiso" (403) abierta: la muestra apiClient. Mientras esté visible, las
+// alertas de error genéricas que muestre el llamador en su catch no la reemplazan.
+let forbiddenAlert = null;
+
+/**
+ * 0. Sin permiso (403 de la API). No cierra la sesión.
+ */
+export function showForbiddenAlert(text = "No tienes permiso para realizar esta acción") {
+  if (forbiddenAlert) return forbiddenAlert;
+  forbiddenAlert = Swal.fire({
+    title: "Acción no permitida",
+    text,
+    icon: "info",
+    confirmButtonText: "Entendido",
+    customClass: {
+      popup: "!rounded-shape-xl",
+      title: "!text-info font-bold",
+      confirmButton:
+        "!bg-info hover:!bg-info/90 !text-on-info cursor-pointer px-4 py-2 rounded-md font-medium",
+    },
+    buttonsStyling: false,
+  }).finally(() => {
+    forbiddenAlert = null;
+  });
+  return forbiddenAlert;
+}
+
 /**
  * 1. Error al crear (usuario, proveedor, producto, etc.)
  * Se dispara al presionar crear si falta un campo o falla la validación del schema.
@@ -11,6 +38,7 @@ export const showCreateErrorAlert = async ({
   title = "Campos incompletos",
   text,
 } = {}) => {
+  if (forbiddenAlert) return forbiddenAlert;
   return await Swal.fire({
     title,
     text: text || `Por favor completa los campos requeridos para el ${entity}.`,
@@ -115,6 +143,7 @@ export function showSystemErrorAlert({
   text = "¡Ocurrió un fallo inesperado en el sistema!",
   footer,
 } = {}) {
+  if (forbiddenAlert) return forbiddenAlert;
   return Swal.fire({
     icon: "error",
     title,

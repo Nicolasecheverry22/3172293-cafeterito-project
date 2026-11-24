@@ -7,7 +7,8 @@ import { ALL_CATEGORIES, MAX_QTY_PER_DISH } from "../config/orderConfig";
 const formatCOP = (value) => `$${value.toLocaleString("es-CO")}`;
 const normalize = (text) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
-export default function MenuPicker({ dishes, isLoading, cart }) {
+// disabled: menú en solo lectura (el rol no puede cambiar los platillos)
+export default function MenuPicker({ dishes, isLoading, cart, disabled = false }) {
   const [category, setCategory] = useState(ALL_CATEGORIES);
   const [search, setSearch] = useState("");
 
@@ -87,6 +88,7 @@ export default function MenuPicker({ dishes, isLoading, cart }) {
                     type="button"
                     className="dish-card__add touch-target"
                     onClick={() => cart.increment(dish.id)}
+                    disabled={disabled}
                     aria-label={`Agregar ${dish.productName}`}
                   >
                     <Plus aria-hidden="true" />
@@ -97,6 +99,7 @@ export default function MenuPicker({ dishes, isLoading, cart }) {
                     value={qty}
                     max={MAX_QTY_PER_DISH}
                     itemLabel={dish.productName}
+                    disabled={disabled}
                     onIncrement={() => cart.increment(dish.id)}
                     onDecrement={() => cart.decrement(dish.id)}
                   />

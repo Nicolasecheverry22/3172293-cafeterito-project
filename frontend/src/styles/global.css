@@ -146,6 +146,35 @@ body {
     --opacity-disabled: var(--md-disabled-content); /* disabled:opacity-disabled */
 }
 
+/* ============== CURSOR DE ELEMENTOS INTERACTIVOS ==============
+   Tailwind v4 dejó el cursor de <button> en "default" (preflight): los botones sin la
+   utilidad cursor-pointer (DropdownItem, IconButton, chips...) mostraban la flecha.
+   Base global: manito en todo lo clicable; "prohibido" en lo deshabilitado.
+   El !important de la regla de deshabilitado gana a cualquier utilidad cursor-pointer
+   (en capas, un !important de @layer base pesa más que uno normal de utilities). */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  [role="switch"]:not(:disabled),
+  [role="tab"]:not([aria-disabled="true"]),
+  a[href],
+  summary,
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"],
+  label:has(> input:disabled) {
+    cursor: not-allowed !important;
+  }
+}
+
 /* ============== ÁREA TÁCTIL INVISIBLE (M3: 48×48) ==============
    Amplía la zona clicable con un ::before centrado, sin cambiar el
    tamaño visible. Úsalo en elementos interactivos de menos de 48px
@@ -185,8 +214,112 @@ body {
     cursor: pointer;
     transition: background-color 150ms, color 150ms;
   }
+  /* Acción sin permiso: visible pero deshabilitada (usePermission().guard) */
+  .row-actions__btn:disabled {
+    opacity: var(--md-disabled-content);
+    /* !important: ganan a las utilidades cursor-pointer / hover:bg-* del botón */
+    cursor: not-allowed !important;
+    background-color: transparent !important;
+  }
 
   /* ============== BEM: miniatura / avatar (ImageThumb) ============== */
+  /* ---------- Mi perfil (BEM: profile) — solo tokens semánticos ---------- */
+  .profile { display: flex; flex-direction: column; gap: var(--md-space-5); }
+  .profile__header {
+    display: flex; align-items: center; gap: var(--md-space-3);
+    padding: var(--md-space-4) var(--md-space-5);
+    border-radius: var(--md-shape-xl);
+    background: var(--semantic-background);
+    border: 1px solid var(--semantic-border);
+    box-shadow: var(--md-elevation-1);
+  }
+  .profile__header-icon { width: 40px; height: 40px; flex-shrink: 0; color: var(--semantic-text-primary); }
+  .profile__title { font-size: var(--semantic-font-size-h2); font-weight: var(--semantic-font-weight-heading); color: var(--semantic-text-primary); line-height: 1.2; }
+  .profile__subtitle { font-size: var(--semantic-font-size-small); color: var(--semantic-text-secondary); }
+  .profile__layout { display: grid; gap: var(--md-space-5); grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 1024px) {
+    .profile__layout { grid-template-columns: 320px minmax(0, 1fr); }
+    .profile__card { position: sticky; top: var(--md-space-4); }
+  }
+  .profile__card,
+  .profile__section {
+    background: var(--semantic-background);
+    border: 1px solid var(--semantic-border);
+    border-radius: var(--md-shape-xl);
+    box-shadow: var(--md-elevation-1);
+    padding: var(--md-space-5);
+  }
+  .profile__card { display: flex; flex-direction: column; align-items: center; gap: var(--md-space-3); text-align: center; }
+  .profile__name { font-size: var(--semantic-font-size-h3); font-weight: var(--semantic-font-weight-heading); color: var(--semantic-text-primary); overflow-wrap: anywhere; }
+  .profile__roles { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--md-space-2); }
+  .profile__role {
+    padding: 2px var(--md-space-3);
+    border-radius: var(--md-shape-full);
+    background: var(--semantic-brand-soft);
+    color: var(--semantic-text-primary);
+    border: 1px solid var(--semantic-border-strong);
+    font-size: var(--semantic-font-size-small);
+    font-weight: 600;
+  }
+  .profile__role--super { background: var(--semantic-info-container); color: var(--semantic-on-info-container); border-color: var(--semantic-info); }
+  .profile__note { font-size: var(--semantic-font-size-small); color: var(--semantic-text-secondary); }
+  .profile__facts { width: 100%; display: flex; flex-direction: column; gap: var(--md-space-3); text-align: left; padding-top: var(--md-space-3); border-top: 1px solid var(--semantic-border); }
+  .profile__fact dt { display: flex; align-items: center; gap: var(--md-space-2); font-size: var(--semantic-font-size-small); color: var(--semantic-text-secondary); }
+  .profile__fact dt svg { width: 16px; height: 16px; }
+  .profile__fact dd { color: var(--semantic-text-primary); font-weight: 600; overflow-wrap: anywhere; }
+  .profile__main { display: flex; flex-direction: column; gap: var(--md-space-5); min-width: 0; }
+  .profile__section { display: flex; flex-direction: column; gap: var(--md-space-4); }
+  .profile__section-title { display: flex; align-items: center; gap: var(--md-space-2); font-size: var(--semantic-font-size-h3); font-weight: var(--semantic-font-weight-heading); color: var(--semantic-text-primary); }
+  .profile__section-title svg { width: 22px; height: 22px; }
+  .profile__grid { display: grid; gap: var(--md-space-4); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 768px) { .profile__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .profile__spacer { display: none; }
+  @media (min-width: 768px) { .profile__spacer { display: block; } }
+  .profile__label { font-size: var(--semantic-font-size-small); color: var(--semantic-text-secondary); margin-bottom: var(--md-space-2); }
+  .profile__rules { display: flex; flex-wrap: wrap; gap: var(--md-space-2); }
+  .profile__rule {
+    padding: 2px var(--md-space-3);
+    border-radius: var(--md-shape-full);
+    background: var(--semantic-surface-muted);
+    color: var(--semantic-text-secondary);
+    font-size: var(--semantic-font-size-small);
+  }
+  .profile__rule--met { background: var(--semantic-success-container); color: var(--semantic-on-success-container); }
+  .profile__actions { display: flex; justify-content: flex-end; }
+  @media (max-width: 639px) { .profile__actions > * { width: 100%; } }
+  .profile__loading, .profile__error { padding: var(--md-space-5); border-radius: var(--md-shape-xl); background: var(--semantic-background); }
+  .profile__loading { color: var(--semantic-text-secondary); }
+  .profile__error { color: var(--semantic-error); }
+
+  /* ---------- Encabezado del menú de usuario (BEM: user-menu) ---------- */
+  .user-menu__header { display: flex; align-items: center; gap: var(--md-space-3); padding: 0 var(--md-space-3) var(--md-space-2); }
+  .user-menu__text { min-width: 0; display: flex; flex-direction: column; }
+  .user-menu__name { font-weight: var(--semantic-font-weight-heading); font-size: var(--semantic-font-size-small); color: var(--semantic-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-menu__roles { font-size: var(--semantic-font-size-caption); color: var(--semantic-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Origen de un permiso en Gestión de Permisos (BEM: perm-badge) */
+  .perm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--md-space-2);
+    border-radius: var(--md-shape-full);
+    border: 1px solid transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .perm-badge--direct {
+    background: var(--semantic-success-container);
+    color: var(--semantic-on-success-container);
+    border-color: var(--semantic-success);
+  }
+  .perm-badge--inherited {
+    background: var(--semantic-info-container);
+    color: var(--semantic-on-info-container);
+    border-color: var(--semantic-info);
+  }
+
   .image-thumb {
     display: inline-flex;
     flex-shrink: 0;

@@ -31,7 +31,7 @@ export const orderController = {
   }),
 
   update: withOrderErrors(async (req, res) => {
-    const updated = await orderService.update(Number(req.params.id), req.body, req.user.id);
+    const updated = await orderService.update(Number(req.params.id), req.body, req.user.id, req.auth);
     if (!updated) {
       return res.status(404).json({ error: "Orden no encontrada" });
     }

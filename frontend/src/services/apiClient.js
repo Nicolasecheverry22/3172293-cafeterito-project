@@ -2,9 +2,12 @@
 // - Base URL desde VITE_API_URL (ver frontend/.env.example).
 // - Agrega "Authorization: Bearer <token>" en cada petición autenticada.
 // - Ante un 401 en una ruta autenticada: limpia la sesión y redirige al login.
+// - Ante un 403 (sin permiso): alerta con el mensaje del servidor, sin cerrar la sesión.
 // - Lanza ApiError con el mensaje del backend ({ error }) y su código HTTP.
 
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import { showForbiddenAlert } from "@/shared/services/alertService";
+
+export const API_URL =import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
@@ -40,9 +43,30 @@ export function setSession({ token, user }) {
   }
 }
 
-// ¿El usuario en sesión tiene el rol? Solo para mostrar u ocultar acciones: el backend
-// vuelve a verificarlo (p. ej. anular un comprobante exige Administrador).
-export const hasSessionGroup = (group) => Boolean(getSessionUser()?.groups?.includes(group));
+// ¿El usuario en sesión tiene alguno de los permisos? (login/refresh guardan isSuperuser y
+// permissions). Es SOLO para la interfaz: el backend vuelve a verificar cada petición.
+// Para componentes React usar el hook usePermission (se actualiza con SESSION_EVENT).
+export function sessionCan(codes) {
+  const user = getSessionUser();
+  if (user?.isSuperuser) return true;
+  const granted = user?.permissions ?? [];
+  return [].concat(codes).some((code) => granted.includes(code));
+}
+
+// Módulos principales en orden de navegación (Navbar y redirección tras el login).
+// El Navbar les agrega el icono.
+export const MODULE_ROUTES = [
+  { to: "/userList", label: "Usuarios", permission: "list_user" },
+  { to: "/inventoryList", label: "Inventario", permission: "list_inventory" },
+  { to: "/providerList", label: "Proveedores", permission: "list_provider" },
+  { to: "/menuList", label: "Menú", permission: "list_product" },
+  { to: "/ordensList", label: "Órdenes", permission: "list_order" },
+  { to: "/invoiceList", label: "Comprobantes", permission: "list_invoice" },
+];
+
+// Primer módulo permitido para el usuario en sesión, o /home si no tiene ninguno
+export const firstAllowedPath = () =>
+  MODULE_ROUTES.find((module) => sessionCan(module.permission))?.to ?? "/home";
 
 // Actualiza datos visibles del usuario en sesión (p. ej. tras editar su propia foto)
 export function updateSessionUser(patch) {
@@ -100,6 +124,14 @@ export async function apiRequest(path, { method = "GET", body, query, auth = tru
     clearSession();
     redirectToLogin();
     throw new ApiError(data.error || "Tu sesión expiró. Inicia sesión de nuevo.", 401);
+  }
+
+  // 403: falta un permiso. Alerta amigable con el mensaje del servidor; la sesión sigue abierta.
+  // Las alertas de error que el llamador muestre después no la reemplazan (alertService).
+  if (res.status === 403) {
+    const message = data.error || "No tienes permiso para realizar esta acción";
+    showForbiddenAlert(message);
+    throw new ApiError(message, 403, data.details);
   }
 
   if (!res.ok) {
