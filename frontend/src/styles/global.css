@@ -146,6 +146,35 @@ body {
     --opacity-disabled: var(--md-disabled-content); /* disabled:opacity-disabled */
 }
 
+/* ============== CURSOR DE ELEMENTOS INTERACTIVOS ==============
+   Tailwind v4 dejó el cursor de <button> en "default" (preflight): los botones sin la
+   utilidad cursor-pointer (DropdownItem, IconButton, chips...) mostraban la flecha.
+   Base global: manito en todo lo clicable; "prohibido" en lo deshabilitado.
+   El !important de la regla de deshabilitado gana a cualquier utilidad cursor-pointer
+   (en capas, un !important de @layer base pesa más que uno normal de utilities). */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  [role="switch"]:not(:disabled),
+  [role="tab"]:not([aria-disabled="true"]),
+  a[href],
+  summary,
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"],
+  label:has(> input:disabled) {
+    cursor: not-allowed !important;
+  }
+}
+
 /* ============== ÁREA TÁCTIL INVISIBLE (M3: 48×48) ==============
    Amplía la zona clicable con un ::before centrado, sin cambiar el
    tamaño visible. Úsalo en elementos interactivos de menos de 48px
