@@ -20,3 +20,14 @@ export const getUserPermissions = (id) => api.get(`/users/${id}/permissions`);
 // Reemplaza los permisos directos del usuario
 export const updateUserPermissions = (id, permissionIds) =>
   api.put(`/users/${id}/permissions`, { permissionIds });
+
+// ── Mi perfil (solo autenticación) ──────────────────────────────
+// GET /api/users/me → datos propios + roles (groups) + isSuperuser/permissions
+export const getMe = () => api.get("/users/me");
+
+// PUT /api/users/me — solo nombre, teléfono, dirección, correo personal y foto.
+// Correo de acceso, documento, rol y estado → 400 (solo un administrador los cambia).
+export const updateMe = (payload) => api.put("/users/me", payload);
+
+// PUT /api/users/me/password { currentPassword, newPassword }
+export const changeMyPassword = (payload) => api.put("/users/me/password", payload);

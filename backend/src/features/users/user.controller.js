@@ -62,6 +62,22 @@ export const userController = {
     });
   },
 
+  // ── Mi perfil (solo autenticación, sin permisos) ──────────────
+  async getMe(req, res) {
+    res.json(await userService.getMe(req.user.id));
+  },
+
+  async updateMe(req, res) {
+    const user = await userService.updateMe(req.user.id, req.body);
+    // name e imageThumb: el frontend actualiza el Navbar con ellos (SESSION_EVENT)
+    res.json({ message: "Perfil actualizado correctamente", name: user.userName, imageThumb: user.userImageThumb });
+  },
+
+  async changeMyPassword(req, res) {
+    await userService.changeMyPassword(req.user.id, req.body);
+    res.json({ message: "Contraseña actualizada correctamente" });
+  },
+
   // Permisos del usuario (directos + heredados de grupos)
   async getPermissions(req, res) {
     res.json(await userService.getPermissions(Number(req.params.id)));

@@ -339,6 +339,29 @@ async getById(id) {
     return result.rows[0];
 },
 
+// Mi perfil: solo datos personales (nunca correo de acceso, documento, rol ni estado).
+// Foto: nueva → se reemplaza; sin foto → se conserva; removeImage → NULL.
+async updateProfile(id, { userName, userPhone, userAddress, userPersonalEmail, userImage, userImageThumb, removeImage }) {
+    const result = await pool.query(
+        `UPDATE users
+         SET user_name = $2, user_phone = $3, user_address = $4, user_personal_email = $5,
+             user_image       = CASE WHEN $8::boolean AND $6::text IS NULL THEN NULL
+                                     ELSE COALESCE($6::text, user_image) END,
+             user_image_thumb = CASE WHEN $8::boolean AND $6::text IS NULL THEN NULL
+                                     ELSE COALESCE($7::text, user_image_thumb) END
+         WHERE id = $1
+         RETURNING id, user_name AS "userName", user_image_thumb AS "userImageThumb"`,
+        [id, userName, userPhone, userAddress ?? null, userPersonalEmail ?? null,
+         userImage ?? null, userImageThumb ?? null, Boolean(removeImage)]
+    );
+    return result.rows[0];
+},
+
+async getPasswordHash(id) {
+    const result = await pool.query("SELECT user_password FROM users WHERE id = $1", [id]);
+    return result.rows[0]?.user_password;
+},
+
 // Habilita/deshabilita un usuario (no existe borrado físico, RFADMIN05).
 // Al reactivarlo se reinicia el bloqueo por intentos fallidos (RNF11).
 // afterChange(client): verificaciones anti-bloqueo antes del COMMIT.

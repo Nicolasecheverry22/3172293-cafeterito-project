@@ -2,6 +2,7 @@ import { userRepository } from "./user.repository.js";
 import { normalizePermissionIds } from "../permissions/permissions.service.js";
 import { httpError } from "../../utils/httpError.js";
 import { accessService, can, MANAGE_PERMISSIONS } from "../access/access.service.js";
+import { authRepository } from "../auth/auth.repository.js";
 import bcrypt from "bcrypt";
 
 export const ADMIN_GROUP = "Administrador";
@@ -116,6 +117,38 @@ export const userService = {
     if (!user) throw httpError(404, "Usuario no encontrado");
 
     return await userRepository.getPermissionsByUserId(userId);
+  },
+
+  // ── Mi perfil ──────────────────────────────────────────────────
+  // Datos propios + roles (solo lectura) + permisos efectivos para la interfaz
+  async getMe(userId) {
+    const user = await userRepository.getById(userId);
+    if (!user) throw httpError(404, "Usuario no encontrado");
+    return { ...user, ...(await accessService.getSessionAccess(userId)) };
+  },
+
+  async updateMe(userId, data) {
+    const current = await userRepository.getById(userId);
+    if (!current) throw httpError(404, "Usuario no encontrado");
+    if (data.userPersonalEmail && data.userPersonalEmail === current.userEmail.toLowerCase()) {
+      throw httpError(400, "El correo personal debe ser distinto del correo empresarial");
+    }
+    return await userRepository.updateProfile(userId, data);
+  },
+
+  // Verifica la contraseña actual; la nueva cumple RNF10 (Joi). Reinicia los intentos fallidos.
+  async changeMyPassword(userId, { currentPassword, newPassword }) {
+    const hash = await userRepository.getPasswordHash(userId);
+    if (!hash || !(await bcrypt.compare(currentPassword, hash))) {
+      throw httpError(400, "La contraseña actual no es correcta");
+    }
+    if (await bcrypt.compare(newPassword, hash)) {
+      throw httpError(400, "La nueva contraseña debe ser distinta de la actual");
+    }
+    await authRepository.withTransaction(async (client) => {
+      await authRepository.updatePassword(userId, await bcrypt.hash(newPassword, 10), client);
+      await authRepository.resetLoginState(userId, client);
+    });
   },
 
   async getReportData(documentNumber) {

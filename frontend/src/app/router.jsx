@@ -16,6 +16,7 @@ import {
   UserListPage,
   CreateUserPage,
   PermissionsManagementPage,
+  ProfilePage,
 } from "@/features/users";
 import UserView from "@/features/views/UserView";
 import EditUser from "@/features/views/edit/EditUser";
@@ -80,6 +81,8 @@ const router = createBrowserRouter([
       { path: "/menuList", element: <ProtectedRoute permission="list_product"><MenuListPage /></ProtectedRoute> },
       { path: "/ordensList", element: <ProtectedRoute permission="list_order"><OrdensListPage /></ProtectedRoute> },
       { path: "/settings", element: <SettingsPage /> },
+      // Mi perfil: cualquier usuario autenticado
+      { path: "/profile", element: <ProfilePage /> },
       { path: "/invoiceList", element: <ProtectedRoute permission="list_invoice"><InvoiceListPage /></ProtectedRoute> },
     ],
   },

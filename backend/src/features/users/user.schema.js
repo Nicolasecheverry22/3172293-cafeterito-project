@@ -78,3 +78,34 @@ export const userListQuery = Joi.object({
   isActive: Joi.boolean().label("El estado"),
   ...paginationFields,
 });
+
+// ── Mi perfil (/api/users/me) ───────────────────────────────────────────
+// Solo datos personales. Los campos administrativos (correo de acceso, documento, rol,
+// estado, flags, fechas laborales) los cambia un administrador: si llegan → 400.
+// No basta con stripUnknown: se declaran prohibidos para responder el error explícito.
+const NOT_EDITABLE = "No puedes modificar este campo";
+const FORBIDDEN_PROFILE_FIELDS = [
+  "groupNames", "groups", "isActive", "is_active", "isSuperuser", "is_superuser",
+  "isStaff", "is_staff", "userEmail", "userDocumentTypes", "userDocumentNumber",
+  "userDocument", "userPassword", "hireDate", "startDate", "endDate", "createdAt",
+];
+
+export const updateMeSchema = Joi.object({
+  userName: userFields.userName,
+  userPhone: userFields.userPhone,
+  userAddress: userFields.userAddress,
+  userPersonalEmail: email().empty("").allow(null).label("El correo personal"),
+  ...imageFields("userImage", "La foto de perfil", { removable: true }),
+  ...Object.fromEntries(
+    FORBIDDEN_PROFILE_FIELDS.map((key) => [
+      key,
+      Joi.any().forbidden().messages({ "any.unknown": `${NOT_EDITABLE} (${key})` }),
+    ])
+  ),
+});
+
+// PUT /api/users/me/password — política RNF10 para la nueva
+export const changeMyPasswordSchema = Joi.object({
+  currentPassword: Joi.string().min(1).max(128).required().label("La contraseña actual"),
+  newPassword: passwordSchema().required().label("La nueva contraseña"),
+});

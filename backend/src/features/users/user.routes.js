@@ -4,10 +4,20 @@ import { validate } from "../../middlewares/validate.middleware.js";
 import { requirePermission } from "../../middlewares/permission.middleware.js";
 import { MANAGE_PERMISSIONS } from "../access/access.service.js";
 import { idParam } from "../../utils/joi.js";
-import { createUserSchema, updateUserSchema, userStatusSchema, userReportQuery, userListQuery } from "./user.schema.js";
+import {
+  createUserSchema, updateUserSchema, userStatusSchema, userReportQuery, userListQuery,
+  updateMeSchema, changeMyPasswordSchema,
+} from "./user.schema.js";
+import { loginLimiter } from "../../middlewares/rateLimit.middleware.js";
 
 // Montado en app.js bajo /api/users con authenticateToken + loadPermissions.
 const router = Router();
+
+// ── Mi perfil: solo autenticación (sin permisos). Antes de /:id para no chocar con él.
+router.get("/me", userController.getMe);
+router.put("/me", validate({ body: updateMeSchema }), userController.updateMe);
+// Limitado por IP como el login: evita adivinar la contraseña actual por fuerza bruta
+router.put("/me/password", loginLimiter, validate({ body: changeMyPasswordSchema }), userController.changeMyPassword);
 
 router.get("/", requirePermission("list_user"), validate({ query: userListQuery }), userController.getAll);
 

@@ -9,7 +9,8 @@ import {
   Coffee,
   Menu,
   ShieldCheck,
-  Settings
+  Settings,
+  UserCircle
 } from "lucide-react";
 
 import {
@@ -92,12 +93,28 @@ export default function Navbar() {
 
               {/* max-w: en 360px el menú no se sale de la pantalla */}
               <DropdownContent className="right-0 w-64 max-w-[calc(100vw-2rem)]">
+                {/* Encabezado: avatar, nombre y rol(es); debajo, "Mi perfil" */}
                 {sessionUser && (
-                  <div className="px-3 pb-2 mb-1 border-b border-border">
-                    <p className="text-small font-heading text-text-primary truncate">{displayName}</p>
-                    {sessionUser.name && sessionUser.email && (
-                      <p className="text-caption text-text-secondary truncate">{sessionUser.email}</p>
-                    )}
+                  <div className="border-b border-border pb-1 mb-1">
+                    <div className="user-menu__header">
+                      <ImageThumb src={sessionUser.imageThumb} alt="" name={displayName} size="sm" round />
+                      <div className="user-menu__text">
+                        <span className="user-menu__name">{displayName}</span>
+                        <span className="user-menu__roles">
+                          {sessionUser.groups?.length ? sessionUser.groups.join(" · ") : "Sin rol"}
+                        </span>
+                      </div>
+                    </div>
+                    <DropdownItem
+                      onClick={() => navigate("/profile")}
+                      className={pathname === "/profile" ? "bg-brand-soft font-bold" : ""}
+                      aria-current={pathname === "/profile" ? "page" : undefined}
+                    >
+                      <span className="flex items-center gap-3">
+                        <UserCircle className="w-5 h-5" aria-hidden="true" />
+                        <span className="font-body text-base">Mi perfil</span>
+                      </span>
+                    </DropdownItem>
                   </div>
                 )}
 
