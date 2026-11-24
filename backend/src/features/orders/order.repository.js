@@ -10,6 +10,8 @@ const ORDER_COLUMNS = `
     o.status,
     o.observations,
     TO_CHAR(o.created_at, 'YYYY-MM-DD')  AS "createdAt",
+    inv.id                              AS "invoiceId",
+    inv.invoice_number                  AS "invoiceNumber",
     COALESCE(SUM(oi.quantity * oi.unit_price), 0)::float AS total,
     COALESCE(
       JSON_AGG(
@@ -30,7 +32,10 @@ const ORDER_FROM = `
   LEFT JOIN users u        ON u.id = o.waiter_id
   LEFT JOIN order_items oi ON oi.order_id = o.id
   LEFT JOIN products p     ON p.id = oi.product_id
+  LEFT JOIN invoices inv   ON inv.order_id = o.id
 `;
+// inv.id es PK: agruparlo permite seleccionar inv.invoice_number
+const ORDER_GROUP_BY = "GROUP BY o.id, u.user_name, inv.id";
 const ORDER_SELECT = `SELECT ${ORDER_COLUMNS} ${ORDER_FROM}`;
 
 export const orderRepository = {
@@ -46,7 +51,7 @@ export const orderRepository = {
       select: ORDER_COLUMNS,
       from: ORDER_FROM,
       filters,
-      groupBy: "GROUP BY o.id, u.user_name",
+      groupBy: ORDER_GROUP_BY,
       orderBy: "o.created_at DESC, o.id DESC",
       page,
       limit,
@@ -54,7 +59,7 @@ export const orderRepository = {
   },
 
   async getById(id) {
-    const query = `${ORDER_SELECT} WHERE o.id = $1 GROUP BY o.id, u.user_name;`;
+    const query = `${ORDER_SELECT} WHERE o.id = $1 ${ORDER_GROUP_BY};`;
     const result = await pool.query(query, [id]);
     return result.rows[0];
   },
@@ -63,7 +68,7 @@ export const orderRepository = {
     const query = `
       ${ORDER_SELECT}
       WHERE ($1::int IS NULL OR o.table_number = $1)
-      GROUP BY o.id, u.user_name
+      ${ORDER_GROUP_BY}
       ORDER BY o.id;
     `;
     const result = await pool.query(query, [tableNumber || null]);

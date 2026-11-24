@@ -72,6 +72,9 @@ export const orderService = {
     if (FINAL_ORDER_STATUSES.includes(current.status)) {
       throw httpError(409, `No se puede modificar una orden en estado "${current.status}"`);
     }
+    if (status === "pagada") {
+      throw httpError(409, "Para pagar una orden genera su comprobante de venta");
+    }
     if (!ORDER_TRANSITIONS[current.status]?.includes(status)) {
       throw httpError(409, `No se puede pasar una orden de "${current.status}" a "${status}"`);
     }

@@ -40,6 +40,7 @@ const signToken = (user) =>
 const profileOf = (row) => ({
   name: row?.user_name ?? null,
   imageThumb: row?.user_image_thumb ?? null,
+  groups: row?.groups ?? [],
 });
 
 // Valida el código del usuario. Si es incorrecto suma un intento; tras

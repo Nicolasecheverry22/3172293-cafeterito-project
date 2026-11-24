@@ -4,12 +4,20 @@
 
 import { pool } from "../../config/db.js";
 
+// Roles activos del usuario (el frontend los usa solo para mostrar u ocultar acciones;
+// cada endpoint sensible vuelve a verificarlos en el servidor)
+const GROUPS_SUBQUERY = `
+  COALESCE((SELECT ARRAY_AGG(g.group_name ORDER BY g.group_name)
+            FROM user_groups ug JOIN groups g ON g.group_id = ug.group_id
+            WHERE ug.user_id = users.id AND g.is_active), '{}') AS groups`;
+
 export const authRepository = {
   // is_locked se calcula en SQL con now() de la BD (evita desfases de reloj)
   async findByEmail(email, db = pool) {
     const result = await db.query(
       `SELECT id, user_email, user_name, user_image_thumb, user_password, is_active, failed_login_attempts,
-              (locked_until IS NOT NULL AND locked_until > now()) AS is_locked
+              (locked_until IS NOT NULL AND locked_until > now()) AS is_locked,
+              ${GROUPS_SUBQUERY}
        FROM users
        WHERE lower(user_email) = $1
        LIMIT 1`,
@@ -32,7 +40,7 @@ export const authRepository = {
   // Datos visibles del usuario en sesión (nombre y miniatura para el avatar del navbar)
   async findProfile(id) {
     const result = await pool.query(
-      "SELECT user_name, user_image_thumb FROM users WHERE id = $1",
+      `SELECT user_name, user_image_thumb, ${GROUPS_SUBQUERY} FROM users WHERE id = $1`,
       [id]
     );
     return result.rows[0];
