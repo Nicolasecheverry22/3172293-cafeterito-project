@@ -170,19 +170,6 @@ export const invoiceRepository = {
     );
   },
 
-  // Rol Administrador (grupo activo) del usuario autenticado
-  async isAdministrator(userId) {
-    const { rows } = await pool.query(
-      `SELECT EXISTS (
-         SELECT 1 FROM user_groups ug
-         JOIN groups g ON g.group_id = ug.group_id
-         WHERE ug.user_id = $1 AND g.group_name = 'Administrador' AND g.is_active
-       ) AS ok`,
-      [userId]
-    );
-    return rows[0].ok;
-  },
-
   // ── Consultas ──────────────────────────────────────────────────
   // Más recientes primero; paginación solo con ?page&limit (utils/listQuery.js)
   async list({ page, limit, ...query } = {}) {

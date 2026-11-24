@@ -36,8 +36,17 @@ export const groupsRepository = {
     return result.rows;
   },
 
-  // Actualizar (reemplazar) los permisos de un grupo dentro de una transacción
-  async updatePermissions(groupId, permissionIds) {
+  async getById(groupId) {
+    const result = await pool.query(
+      "SELECT group_id, group_name, is_active FROM groups WHERE group_id = $1",
+      [groupId],
+    );
+    return result.rows[0];
+  },
+
+  // Actualizar (reemplazar) los permisos de un grupo dentro de una transacción.
+  // afterChange(client): verificaciones anti-bloqueo antes del COMMIT.
+  async updatePermissions(groupId, permissionIds, afterChange) {
     const client = await pool.connect();
 
     try {
@@ -61,6 +70,7 @@ export const groupsRepository = {
           [groupId, permissionIds],
         );
       }
+      await afterChange?.(client);
 
       await client.query("COMMIT");
     } catch (error) {

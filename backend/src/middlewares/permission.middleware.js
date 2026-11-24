@@ -1,20 +1,21 @@
 // backend/src/middlewares/permission.middleware.js
-// Middleware de autorización reutilizable: verifica que el usuario tenga un permiso
+// Autorización por permisos.
+// - loadPermissions: va justo después de authenticateToken (app.js). Carga UNA vez por
+//   petición req.auth = { isSuperuser, permissions: Set<codename> }.
+// - requirePermission(code | [codes]): basta con tener uno de los permisos. No consulta la BD.
 
-import { accessService } from "../features/access/access.service.js";
+import { accessService, can } from "../features/access/access.service.js";
+import { httpError } from "../utils/httpError.js";
 
-export const requirePermission = (permissionCode) => {
-  return async (req, res, next) => {
-    const userId = req.user.id;
+export const FORBIDDEN_MESSAGE = "No tienes permiso para realizar esta acción";
 
-    const granted = await accessService.hasPermission(userId, permissionCode);
+export const loadPermissions = async (req, res, next) => {
+  req.auth = await accessService.getContext(req.user.id);
+  next();
+};
 
-    if (!granted) {
-      return res.status(403).json({
-        message: "No tiene permisos para realizar esta acción",
-      });
-    }
-
-    next();
-  };
+export const requirePermission = (codes) => (req, res, next) => {
+  if (!req.auth) return next(new Error("requirePermission requiere loadPermissions antes"));
+  if (!can(req.auth, codes)) return next(httpError(403, FORBIDDEN_MESSAGE));
+  next();
 };

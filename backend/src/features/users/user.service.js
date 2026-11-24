@@ -1,14 +1,36 @@
 import { userRepository } from "./user.repository.js";
 import { normalizePermissionIds } from "../permissions/permissions.service.js";
 import { httpError } from "../../utils/httpError.js";
+import { accessService, can, MANAGE_PERMISSIONS } from "../access/access.service.js";
 import bcrypt from "bcrypt";
 
-const ADMIN_GROUP = "Administrador";
+export const ADMIN_GROUP = "Administrador";
+
+const ONLY_SUPERUSER = "Solo un superusuario puede modificar a otro superusuario";
+
+// Reglas comunes al modificar a OTRO usuario: solo un superusuario toca a un superusuario.
+async function loadTarget(id, auth) {
+  const target = await userRepository.getById(id);
+  if (target?.is_superuser && !auth?.isSuperuser) throw httpError(403, ONLY_SUPERUSER);
+  return target;
+}
+
+// Verificación dentro de la transacción: el que edita no se queda sin acceso
+// y el sistema conserva al menos un superusuario activo.
+const antiLockout = (currentUserId, targetId, auth) => async (client) => {
+  if (currentUserId === targetId) await accessService.assertKeepsOwnAccess(client, currentUserId, auth);
+  await accessService.assertActiveSuperuserRemains(client);
+};
 
 // La entrada llega validada y normalizada por user.schema.js
 // (correo en minúsculas, documento/teléfono numéricos, contraseña RNF10, ≥ 1 grupo).
 export const userService = {
-  async createUser(data) {
+  // auth: req.auth del usuario que crea. El rol Administrador (= superusuario) solo lo
+  // asigna otro superusuario.
+  async createUser(data, auth) {
+    if (data.groupNames.includes(ADMIN_GROUP) && !auth?.isSuperuser) {
+      throw httpError(403, "Solo un superusuario puede crear usuarios Administrador");
+    }
     // userData se arma campo por campo: los flags de privilegios NUNCA vienen del cliente.
     const userData = {
       userName: data.userName,
@@ -30,7 +52,24 @@ export const userService = {
     return await userRepository.createWithGroups(userData, data.groupNames);
   },
 
-  async updateUser(id, data) {
+  async updateUser(id, data, auth, currentUserId) {
+    const target = await loadTarget(id, auth);
+    if (!target) return undefined;
+
+    if (id === currentUserId && data.isActive === false) {
+      throw httpError(400, "No puede desactivar su propia cuenta");
+    }
+    // Cambiar el rol es asignar permisos: requiere manage_permissions (o ser superusuario)
+    const sameGroups =
+      target.groups.length === data.groupNames.length &&
+      data.groupNames.every((name) => target.groups.includes(name));
+    if (!sameGroups && !can(auth, MANAGE_PERMISSIONS)) {
+      throw httpError(403, "No tienes permiso para cambiar el rol de un usuario");
+    }
+    if (data.groupNames.includes(ADMIN_GROUP) && !target.is_superuser && !auth?.isSuperuser) {
+      throw httpError(403, "Solo un superusuario puede asignar el rol Administrador");
+    }
+
     const userData = {
       userName: data.userName,
       userEmail: data.userEmail,
@@ -48,7 +87,9 @@ export const userService = {
       isSuperuser: data.groupNames.includes(ADMIN_GROUP),
     };
 
-    return await userRepository.updateWithGroups(id, userData, data.groupNames);
+    return await userRepository.updateWithGroups(
+      id, userData, data.groupNames, antiLockout(currentUserId, id, auth)
+    );
   },
 
   // Listado con filtros opcionales y paginación opcional (ver utils/listQuery.js)
@@ -61,11 +102,13 @@ export const userService = {
   },
 
   // Habilitar/deshabilitar (no hay borrado físico). Un usuario no puede desactivarse a sí mismo.
-  async setStatus(id, isActive, currentUserId) {
+  async setStatus(id, isActive, currentUserId, auth) {
     if (!isActive && id === currentUserId) {
       throw httpError(400, "No puede desactivar su propia cuenta");
     }
-    return await userRepository.setStatus(id, isActive);
+    const target = await loadTarget(id, auth);
+    if (!target) return undefined;
+    return await userRepository.setStatus(id, isActive, antiLockout(currentUserId, id, auth));
   },
 
   async getPermissions(userId) {
@@ -79,13 +122,13 @@ export const userService = {
     return await userRepository.getByDocument(documentNumber);
   },
 
-  async updatePermissions(userId, permissionIds) {
+  async updatePermissions(userId, permissionIds, auth, currentUserId) {
     const ids = normalizePermissionIds(permissionIds);
     if (!ids) throw httpError(400, "permissionIds debe ser un arreglo de ids numéricos");
 
-    const user = await userRepository.getById(userId);
+    const user = await loadTarget(userId, auth);
     if (!user) throw httpError(404, "Usuario no encontrado");
 
-    return await userRepository.updatePermissions(userId, ids);
+    return await userRepository.updatePermissions(userId, ids, antiLockout(currentUserId, userId, auth));
   },
 };

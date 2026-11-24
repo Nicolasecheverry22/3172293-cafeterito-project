@@ -129,13 +129,10 @@ export const invoiceService = {
     return await invoiceRepository.getById(invoiceId);
   },
 
-  // Anular: solo Administrador y solo comprobantes 'emitida'. La orden pasa a 'cancelada'.
-  // El comprobante nunca se borra ni se edita; su número no se reutiliza.
+  // Anular: requiere void_invoice (la ruta lo verifica) y solo comprobantes 'emitida'.
+  // La orden pasa a 'cancelada'. El comprobante nunca se borra ni se edita; su número
+  // no se reutiliza.
   async void(id, { reason }, userId) {
-    if (!(await invoiceRepository.isAdministrator(userId))) {
-      throw httpError(403, "Solo un Administrador puede anular comprobantes de venta");
-    }
-
     const found = await invoiceRepository.withTransaction(async (client) => {
       const invoice = await invoiceRepository.lockInvoice(client, id);
       if (!invoice) return false;

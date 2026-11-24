@@ -150,7 +150,8 @@ async createWithGroups(userData, groupNames) {
 
 // Actualiza los datos del usuario y reemplaza sus grupos en UNA transacción.
 // La contraseña no se toca aquí. Retorna undefined si el id no existe.
-async updateWithGroups(id, userData, groupNames) {
+// afterChange(client): verificaciones anti-bloqueo antes del COMMIT (si lanza → ROLLBACK).
+async updateWithGroups(id, userData, groupNames, afterChange) {
     const {
         userName,
         userEmail,
@@ -200,6 +201,7 @@ async updateWithGroups(id, userData, groupNames) {
 
         await client.query("DELETE FROM user_groups WHERE user_id = $1", [id]);
         await assignGroups(client, id, groupNames);
+        await afterChange?.(client);
 
         await client.query("COMMIT");
         return rows[0];
@@ -248,7 +250,8 @@ async getPermissionsByUserId(userId) {
 },
 
 // Reemplaza los permisos DIRECTOS del usuario (no toca los heredados de grupos).
-async updatePermissions(userId, permissionIds) {
+// afterChange(client): verificaciones anti-bloqueo antes del COMMIT.
+async updatePermissions(userId, permissionIds, afterChange) {
     const client = await pool.connect();
 
     try {
@@ -267,6 +270,7 @@ async updatePermissions(userId, permissionIds) {
                 [userId, permissionIds]
             );
         }
+        await afterChange?.(client);
 
         await client.query("COMMIT");
     } catch (error) {
@@ -343,16 +347,28 @@ async getById(id) {
 
 // Habilita/deshabilita un usuario (no existe borrado físico, RFADMIN05).
 // Al reactivarlo se reinicia el bloqueo por intentos fallidos (RNF11).
-async setStatus(id, isActive) {
-    const result = await pool.query(
-        `UPDATE users
-         SET is_active = $2,
-             failed_login_attempts = CASE WHEN $2 THEN 0 ELSE failed_login_attempts END,
-             locked_until          = CASE WHEN $2 THEN NULL ELSE locked_until END
-         WHERE id = $1
-         RETURNING id, is_active`,
-        [id, isActive]
-    );
-    return result.rows[0];
+// afterChange(client): verificaciones anti-bloqueo antes del COMMIT.
+async setStatus(id, isActive, afterChange) {
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const result = await client.query(
+            `UPDATE users
+             SET is_active = $2,
+                 failed_login_attempts = CASE WHEN $2 THEN 0 ELSE failed_login_attempts END,
+                 locked_until          = CASE WHEN $2 THEN NULL ELSE locked_until END
+             WHERE id = $1
+             RETURNING id, is_active`,
+            [id, isActive]
+        );
+        if (result.rows[0]) await afterChange?.(client);
+        await client.query("COMMIT");
+        return result.rows[0];
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 }

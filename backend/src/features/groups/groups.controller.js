@@ -35,7 +35,7 @@ export const groupsController = {
       const groupId = Number(req.params.groupId);
       const { permissionIds } = req.body;
 
-      await groupsService.updatePermissions(groupId, permissionIds);
+      await groupsService.updatePermissions(groupId, permissionIds, req.auth, req.user.id);
 
       res.status(200).json({
         message: "Permisos actualizados correctamente",
