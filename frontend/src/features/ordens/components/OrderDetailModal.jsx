@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { X, Receipt } from "lucide-react";
 import useDialogA11y from "@/shared/hooks/useDialogA11y";
 
 export default function OrderDetailModal({ isOpen, onClose, order }) {
@@ -75,6 +76,18 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
               {order.status}
             </span>
           </div>
+          {order.invoiceNumber && (
+            <div className="col-span-2 sm:col-span-3">
+              <span className="block text-xs text-text-secondary font-medium">Comprobante de venta</span>
+              <Link
+                to={`/InvoiceView/${order.invoiceId}`}
+                onClick={onClose}
+                className="inline-flex items-center gap-1 min-h-touch font-semibold text-text-primary underline underline-offset-4 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring rounded-sm"
+              >
+                <Receipt size={16} aria-hidden="true" /> {order.invoiceNumber}
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Listado de ítems */}

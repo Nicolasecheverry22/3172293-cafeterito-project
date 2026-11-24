@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Input, Button } from "@/shared";
-import { ClipboardList, SquarePen } from "lucide-react";
-import { getOrderById } from "@/services/orderApi";
+import { ClipboardList, SquarePen, HandCoins, Receipt } from "lucide-react";
+import { getOrderById, OPEN_ORDER_STATUSES } from "@/services/orderApi";
+import PaymentModal from "@/features/invoices/components/PaymentModal";
 
 const STATUS_STYLES = {
   activa: "bg-warning-container text-on-warning-container border-warning/30",
+  "lista para entrega": "bg-info-container text-on-info-container border-info/30",
   pagada: "bg-success-container text-on-success-container border-success/30",
   cancelada: "bg-error-container text-on-error-container border-error/30",
 };
@@ -25,12 +27,17 @@ export default function OrderView() {
 
   const [order, setOrder] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [paying, setPaying] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     getOrderById(id)
       .then(setOrder)
       .catch(() => setNotFound(true));
   }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (notFound) {
     return (
@@ -55,6 +62,7 @@ export default function OrderView() {
   }
 
   const status = order.status?.toLowerCase() ?? "";
+  const isOpen = OPEN_ORDER_STATUSES.includes(status);
 
   return (
     <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
@@ -79,21 +87,43 @@ export default function OrderView() {
             >
               {order.status}
             </span>
+            {/* Orden cobrada: enlace a su comprobante de venta */}
+            {order.invoiceNumber && (
+              <Link
+                to={`/InvoiceView/${order.invoiceId}`}
+                className="inline-flex items-center gap-2 min-h-touch font-semibold text-text-primary underline underline-offset-4 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring rounded-sm"
+              >
+                <Receipt className="w-4 h-4" aria-hidden="true" />
+                Comprobante {order.invoiceNumber}
+              </Link>
+            )}
           </div>
 
-          <div className="w-full flex flex-col gap-3">
-            <p className="text-text-primary font-heading font-bold text-md">Acciones</p>
-            <Button
-              variant="tertiary"
-              type="button"
-              size="md"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => navigate(`/EditOrder/${order.id}`)}
-            >
-              <SquarePen className="w-5 h-5" />
-              Editar Orden
-            </Button>
-          </div>
+          {isOpen && (
+            <div className="w-full flex flex-col gap-3">
+              <p className="text-text-primary font-heading font-bold text-md">Acciones</p>
+              <Button
+                variant="primary"
+                type="button"
+                size="md"
+                className="w-full flex items-center justify-center gap-2"
+                onClick={() => setPaying(true)}
+              >
+                <HandCoins className="w-5 h-5" />
+                Cobrar
+              </Button>
+              <Button
+                variant="tertiary"
+                type="button"
+                size="md"
+                className="w-full flex items-center justify-center gap-2"
+                onClick={() => navigate(`/EditOrder/${order.id}`)}
+              >
+                <SquarePen className="w-5 h-5" />
+                Editar Orden
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Columnas 2-4: Información Detallada */}
@@ -158,6 +188,16 @@ export default function OrderView() {
 
         </div>
       </div>
+
+      {paying && (
+        <PaymentModal
+          orderId={order.id}
+          onClose={() => {
+            setPaying(false);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }

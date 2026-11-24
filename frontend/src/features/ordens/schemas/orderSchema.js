@@ -42,9 +42,9 @@ export const updateOrderSchema = () =>
   z.object({
     tableNumber: tableNumberSchema,
     waiterId: z.string().min(1, "Debe seleccionar un empleado encargado"),
-    // Deben coincidir con el backend (order.constants.js)
-    status: z.enum(["activa", "lista para entrega", "pagada", "cancelada"], {
-      message: "Debe seleccionar un estado válido",
+    // Destinos de ORDER_TRANSITIONS (order.constants.js): "pagada" solo vía comprobante de venta
+    status: z.enum(["activa", "lista para entrega", "cancelada"], {
+      message: "Debe seleccionar un estado válido (para pagar, use Cobrar)",
     }),
     observations: observationsSchema,
     items: z.array(orderItemSchema).min(1, "La orden debe tener al menos un platillo"),
