@@ -1,6 +1,7 @@
 @import url(tokens.css);
 @import url(semantic.css);
 @import "tailwindcss";
+@import "./components/order-composer.css";
 
 /* Variante dark: basada en el atributo data-theme del <html> (lo gestiona ThemeProvider) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

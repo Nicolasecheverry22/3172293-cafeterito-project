@@ -21,20 +21,23 @@ const observationsSchema = z
   .max(300, "Las observaciones son demasiado largas")
   .optional();
 
-// Esquema para CREAR: solo los campos que tiene el formulario.
-// (Antes exigía clientName y status, que el formulario no envía -> siempre fallaba.)
+// Esquema para CREAR. Sin waiterId: el backend asigna al usuario del token.
 // "Una mesa = una orden activa" la valida la BD (índice uq_orders_active_table).
 export const createOrderSchema = () =>
   z.object({
-    tableNumber: tableNumberSchema,
-    waiterId: z.string().min(1, "Debe seleccionar un empleado encargado"),
+    tableNumber: z
+      .number({ message: "Selecciona una mesa disponible" })
+      .int()
+      .positive("Selecciona una mesa disponible"),
     observations: observationsSchema,
     items: z
-      .array(orderItemSchema)
-      .min(1, "La orden debe tener al menos un platillo")
-      .refine((items) => items.every((item) => item.dishId), {
-        message: "Seleccione un platillo en cada fila o elimine las vacías",
-      }),
+      .array(
+        z.object({
+          productId: z.number().int().positive(),
+          quantity: z.number().int().positive().max(99, "Máximo 99 por platillo"),
+        })
+      )
+      .min(1, "Agrega al menos un platillo a la orden"),
   });
 
 // Esquema para EDITAR: mismos campos que guarda la tabla orders

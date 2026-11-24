@@ -1,205 +1,107 @@
-import { useState, useMemo } from "react";
-import { Plus, Trash2 } from "lucide-react";
-import { Input, Select, Button } from "@/shared";
+// Registrar orden (BEM: order-composer): mesa → platillos → resumen.
+// El empleado encargado no se elige: el backend asigna al usuario del token.
+import { useState } from "react";
+import { Button } from "@/shared";
+import { getSessionUser } from "@/services/apiClient";
 import { createOrderSchema } from "../schemas/orderSchema";
-import { showCreateErrorAlert } from "@/shared/services/alertService";
+import useTableAvailability from "../hooks/useTableAvailability";
+import useOrderCart from "../hooks/useOrderCart";
+import TablePicker from "./TablePicker";
+import WaiterBadge from "./WaiterBadge";
+import MenuPicker from "./MenuPicker";
+import OrderSummary from "./OrderSummary";
 
-const DEFAULT_FORM_DATA = { tableNumber: "", waiterId: "", observations: "" };
+const formatCOP = (value) => `$${value.toLocaleString("es-CO")}`;
 
-export default function OrderForm({
-  mode = "create", // "create" | "edit"
-  initialData = null,
-  initialItems = null,
-  currentOrderId = null,
-  // Opciones desde la BD: [{ value, label }] y [{ value, label, price }]
-  waiters = [],
-  dishes = [],
-  onSubmit,
-  onCancel,
-}) {
-  const menuDishesData = dishes;
-  const waitersData = waiters;
-  const [formData, setFormData] = useState(initialData ?? DEFAULT_FORM_DATA);
-  const [orderItems, setOrderItems] = useState(
-    initialItems ?? [{ id: crypto.randomUUID(), dishId: "", quantity: 1 }]
-  );
+export default function OrderForm({ dishes = [], isLoadingDishes = false, onSubmit, onCancel }) {
+  const [tableNumber, setTableNumber] = useState(null);
+  const [observations, setObservations] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const availability = useTableAvailability();
+  const cart = useOrderCart(dishes);
+  const sessionUser = getSessionUser();
+
+  // Si otro mesero ocupa la mesa elegida mientras se arma la orden, la selección se anula.
+  // Se deriva en el render (sin useEffect) para no provocar renders en cascada.
+  const selectedTaken = availability.tables.some((t) => t.number === tableNumber && t.isOccupied);
+  const selectedTable = selectedTaken ? null : tableNumber;
+  const visibleErrors = selectedTaken
+    ? { ...errors, tableNumber: "La mesa que elegiste acaba de ocuparse. Elige otra." }
+    : errors;
+
+  const selectTable = (number) => {
+    setTableNumber(number);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.tableNumber;
+      return next;
+    });
   };
-
-  const handleItemChange = (id, field, value) => {
-    setOrderItems((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
-  };
-
-  const addDishRow = () => {
-    setOrderItems((prev) => [...prev, { id: crypto.randomUUID(), dishId: "", quantity: 1 }]);
-  };
-
-  const removeDishRow = (id) => {
-    setOrderItems((prev) => (prev.length > 1 ? prev.filter((item) => item.id !== id) : prev));
-  };
-
-  // Resumen y total en vivo — RFADMIN26
-  const summary = useMemo(() => {
-    return orderItems
-      .filter((item) => item.dishId)
-      .map((item) => {
-        const dish = menuDishesData.find((d) => d.value === item.dishId);
-        const quantity = Number(item.quantity) || 0;
-        const price = dish?.price ?? 0;
-        return { id: item.id, label: dish?.label ?? "—", quantity, subtotal: price * quantity };
-      });
-  }, [orderItems, menuDishesData]);
-
-  const total = summary.reduce((sum, row) => sum + row.subtotal, 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const schema = createOrderSchema({ currentOrderId });
-    const result = schema.safeParse({ ...formData, items: orderItems });
+    const result = createOrderSchema().safeParse({ tableNumber: selectedTable, observations, items: cart.lines });
 
     if (!result.success) {
-      const fieldErrors = {};
-      result.error.issues.forEach((issue) => {
-        const key = issue.path[0] === "items" ? "items" : issue.path[0];
-        fieldErrors[key] = issue.message;
-      });
-      setErrors(fieldErrors);
-
-      await showCreateErrorAlert({
-        entity: "orden",
-        text: "Por favor completa todos los campos requeridos antes de guardar la orden.",
-      });
+      setErrors(Object.fromEntries(result.error.issues.map((i) => [i.path[0], i.message])));
       return;
     }
 
     setErrors({});
     setIsSubmitting(true);
     try {
-      await onSubmit({ ...result.data, total });
+      const ok = await onSubmit(result.data);
+      // Si falló (p. ej. 409 mesa ocupada) se refresca el mapa para que el mesero vea el estado real
+      if (!ok) availability.refresh();
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const submitLabel = isSubmitting ? "Guardando..." : `Crear orden · ${formatCOP(cart.total)}`;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Input
-        label="Número de mesa"
-        name="tableNumber"
-        type="number"
-        value={formData.tableNumber}
-        onChange={handleChange}
-        placeholder="No. Mesa"
-        error={errors.tableNumber}
-      />
-
-      <Select
-        label="Empleado encargado"
-        name="waiterId"
-        value={formData.waiterId}
-        onChange={handleChange}
-        options={waitersData}
-        error={errors.waiterId}
-      />
-
-      <div className="space-y-4">
-        <label className="block text-small text-text-primary font-medium">
-          Platillos del Menú
-        </label>
-
-        {orderItems.map((item) => (
-          // En móvil el select de platillo ocupa toda la fila y cantidad + eliminar van debajo
-          <div key={item.id} className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
-            <div className="basis-full sm:basis-auto sm:flex-1 min-w-0">
-              <Select
-                name={`dish-${item.id}`}
-                value={item.dishId}
-                onChange={(e) => handleItemChange(item.id, "dishId", e.target.value)}
-                options={menuDishesData}
-              />
-            </div>
-            <div className="flex-1 sm:flex-none sm:w-24">
-              <Input
-                name={`qty-${item.id}`}
-                type="number"
-                min="1"
-                value={item.quantity}
-                onChange={(e) => handleItemChange(item.id, "quantity", e.target.value)}
-                placeholder="Cant"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => removeDishRow(item.id)}
-              className="size-touch shrink-0 text-text-primary hover:text-error hover:bg-error/20 transition-colors rounded-shape-sm flex items-center justify-center border border-border cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
-              aria-label="Eliminar platillo"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        ))}
-
-        {errors.items && <span className="text-error text-small block">{errors.items}</span>}
-
-        <Button
-          variant="secondary"
-          size= "md"
-          type="button"
-          onClick={addDishRow}
-          className="flex items-center justify-center gap-2 w-full md:w-auto bg-brand/50 hover:bg-brand/80 text-text-primary dark:text-text-on-brand dark:bg-brand dark:hover:bg-brand-hover font-medium"
-        >
-          Agregar producto <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-
-      <div>
-        <label className="block text-small text-text-primary font-medium mb-1">Observaciones</label>
-        <textarea
-          name="observations"
-          value={formData.observations}
-          onChange={handleChange}
-          rows={3}
-          placeholder="Ej: sin cebolla, para llevar, alergias..."
-          className="w-full rounded-shape-sm border border-border bg-background p-3 text-body text-text-primary focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-focus-border"
+    <form onSubmit={handleSubmit} className="order-composer" noValidate>
+      <div className="order-composer__main">
+        <WaiterBadge user={sessionUser} />
+        <TablePicker
+          tables={availability.tables}
+          value={selectedTable}
+          onChange={selectTable}
+          freeCount={availability.freeCount}
+          isLoading={availability.isLoading}
+          error={availability.error}
+          onRefresh={availability.refresh}
         />
-        {errors.observations && (
-          <span className="text-error text-small block mt-1">{errors.observations}</span>
-        )}
+        <MenuPicker dishes={dishes} isLoading={isLoadingDishes} cart={cart} />
       </div>
 
-      {summary.length > 0 && (
-        <div className="border-t border-border pt-4 space-y-2">
-          <h3 className="font-heading font-bold text-text-primary text-body">Resumen del pedido</h3>
-          {summary.map((row) => (
-            <div key={row.id} className="flex justify-between text-small text-text-primary">
-              <span>{row.label} × {row.quantity}</span>
-              <span>${row.subtotal.toLocaleString("es-CO")}</span>
-            </div>
-          ))}
-          <div className="flex justify-between font-bold text-text-primary text-body pt-2 border-t border-border">
-            <span>Total</span>
-            <span>${total.toLocaleString("es-CO")}</span>
-          </div>
+      <aside className="order-composer__aside">
+        <OrderSummary
+          tableNumber={selectedTable}
+          cart={cart}
+          observations={observations}
+          onObservationsChange={setObservations}
+          errors={visibleErrors}
+        />
+        <div className="order-composer__actions">
+          <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
+          <Button variant="primary" type="submit" disabled={isSubmitting} className="order-composer__submit">
+            {submitLabel}
+          </Button>
         </div>
-      )}
+      </aside>
 
-      <div className="flex justify-end gap-4 pt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-        <Button variant="secondary" type="button" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button
-          variant="primary"
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full md:w-64 py-3 text-base font-bold shadow-elevation-2"
-        >
-          {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear orden"}
+      {/* Barra fija en móvil: total y envío siempre a la vista */}
+      <div className="order-composer__mobile-bar">
+        <div className="order-composer__mobile-total">
+          <span>{selectedTable ? `Mesa ${selectedTable}` : "Sin mesa"} · {cart.totalItems} platillos</span>
+          <strong>{formatCOP(cart.total)}</strong>
+        </div>
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Guardando..." : "Crear orden"}
         </Button>
       </div>
     </form>
