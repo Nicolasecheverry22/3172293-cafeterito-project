@@ -31,6 +31,7 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
   // Columna Fecha
   {
     accessorKey: "createdAt",
+    meta: { hideBelow: "lg" },
     header: () => (
       <button
         type="button"
@@ -72,6 +73,7 @@ export const getOrdensColumns = (sortConfig, onSort, onChanged) => [
         )}
       </button>
     ),
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Total

@@ -74,7 +74,7 @@ export const getMenuColumns = (sortConfig, onSort, onChanged) => [
         )}
       </button>
     ),
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Precio (Ordenable)

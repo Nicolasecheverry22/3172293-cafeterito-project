@@ -205,7 +205,7 @@ export default function EditProvisions() {
         </h1>
       </div>
 
-      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         
         {/* COLUMNA 1 */}
         <div className="space-y-4">
@@ -323,7 +323,7 @@ export default function EditProvisions() {
         </div>
 
         {/* COLUMNA 3 */}
-        <div className="flex flex-col justify-between h-full space-y-6">
+        <div className="flex flex-col justify-between h-full space-y-6 md:col-span-2 lg:col-span-1">
           <div>
             <span className="font-label text-text-primary text-small block mb-2 text-center">
               Imagen del suministro
@@ -344,7 +344,7 @@ export default function EditProvisions() {
             />
           </div>
 
-          <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+          <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
             <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>

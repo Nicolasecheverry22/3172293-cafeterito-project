@@ -372,7 +372,7 @@ export default function EditOrder() {
         </div>
 
         {/* Acciones de Guardado */}
-        <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+        <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
           <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
             Cancelar
           </Button>

@@ -125,7 +125,7 @@ export default function UserForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
       <div className="space-y-4">
         <Select
           label="Tipo de documento"
@@ -240,7 +240,7 @@ export default function UserForm({
         </div>
       </div>
 
-      <div className="flex flex-col justify-between h-full">
+      <div className="flex flex-col justify-between h-full md:col-span-2 lg:col-span-1">
         <div className="bg-surface-inverse/70 p-4 sm:p-6 rounded-shape-lg text-text-inverse space-y-3 shadow-inner">
           <h3 className="font-heading text-subtitle mb-2">Tipo de Usuario:</h3>
 
@@ -274,7 +274,7 @@ export default function UserForm({
           )}
         </div>
 
-        <div className="flex gap-4 items-center justify-end mt-4 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+        <div className="flex gap-4 items-center justify-end mt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
           <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>

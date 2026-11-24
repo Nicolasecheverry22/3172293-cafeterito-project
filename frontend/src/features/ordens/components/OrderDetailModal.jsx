@@ -20,7 +20,7 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
   return createPortal(
     // Overlay oscuro de fondo con animación y backdrop
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4"
       onClick={onClose}
     >
       {/* Contenido del modal (e.stopPropagation evita que al hacer clic dentro se cierre) */}
@@ -31,7 +31,7 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
         aria-modal="true"
         tabIndex={-1}
         aria-labelledby="order-detail-title"
-        className="bg-background text-text-primary rounded-shape-xl max-w-lg w-full max-h-[calc(100dvh-2rem)] overflow-y-auto p-6 shadow-elevation-3 relative transition-all"
+        className="bg-background text-text-primary rounded-none sm:rounded-shape-xl max-w-lg w-full h-dvh max-h-dvh sm:h-auto sm:max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6 shadow-elevation-3 relative transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Encabezado */}
@@ -54,7 +54,7 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
         </div>
 
         {/* Información general */}
-        <div className="grid grid-cols-3 gap-3 mb-4 text-sm bg-surface-muted/50 p-3 rounded-shape-md border border-surface-muted">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4 text-sm bg-surface-muted/50 p-3 rounded-shape-md border border-surface-muted">
           <div>
             <span className="block text-xs text-text-secondary font-medium">Mesa</span>
             <span className="font-semibold text-text-primary">Mesa {order.tableNumber}</span>
@@ -81,7 +81,7 @@ export default function OrderDetailModal({ isOpen, onClose, order }) {
         <h4 className="font-semibold text-text-primary text-sm mb-2">
           Productos solicitados
         </h4>
-        <div className="border border-surface-muted rounded-shape-md overflow-hidden mb-4">
+        <div className="border border-surface-muted rounded-shape-md overflow-x-auto mb-4">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-muted/50 text-text-secondary font-medium border-b border-surface-muted">
               <tr>

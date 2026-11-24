@@ -59,17 +59,17 @@ export const getUserColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "userDocument",
     header: "Documento",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "xl" },
   },
   {
     accessorKey: "userEmail",
     header: "Correo",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "lg" },
   },
   {
     accessorKey: "userPhone",
     header: "Teléfono",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "xl" },
   },
   {
     accessorKey: "is_active",

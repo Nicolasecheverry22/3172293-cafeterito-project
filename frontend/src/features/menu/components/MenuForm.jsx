@@ -130,7 +130,7 @@ export default function MenuForm({
           />
         </div>
 
-        <div className="flex justify-end gap-4 mt-12 pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+        <div className="flex justify-end gap-4 mt-12 pt-6 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
           <Button type="button" variant="secondary" onClick={onCancel} className="px-10">
             Cancelar
           </Button>

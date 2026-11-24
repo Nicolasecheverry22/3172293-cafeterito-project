@@ -58,7 +58,7 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "batch",
     header: "Lote",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Stock
@@ -71,13 +71,14 @@ export const getInventoryColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "unit",
     header: "Unidad",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "xl" },
   },
 
   // Columna Precio
   {
     accessorKey: "price",
     header: "Precio",
+    meta: { hideBelow: "lg" },
     cell: ({ row }) => {
       const price = row.original.price ?? 0;
 

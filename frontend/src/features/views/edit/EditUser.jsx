@@ -158,14 +158,14 @@ export default function EditUser() {
   return (
     <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-2 border border-border/40 shadow-elevation-3">
 
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 mt-8 mb-6 flex items-center gap-3">
         <Pencil className="w-9 h-9 text-text-primary" />
         <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
           Editar Usuario
         </h1>
       </div>
 
-      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         <div className="flex flex-col gap-6">
           <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-4 text-center">
@@ -264,7 +264,7 @@ export default function EditUser() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-center justify-end border-t border-border/40 pt-6 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+          <div className="flex gap-4 items-center justify-end border-t border-border/40 pt-6 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
             <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>

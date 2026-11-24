@@ -66,7 +66,7 @@ export default function OrderView() {
         </h1>
       </div>
 
-      <div className="max-w-7xl w-full mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-4 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         {/* Columna 1: Estado General y Acciones */}
         <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">

@@ -50,7 +50,7 @@ export default function ProvisionsView() {
   return (
     <div className="bg-surface/40 dark:bg-surface/80 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
       {/* Encabezado Principal */}
-      <div className="max-w-7xl w-full mx-auto px-6 mt-8 mb-6 flex items-center gap-3">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 mt-8 mb-6 flex items-center gap-3">
         <UtensilsCrossed className="w-9 h-9 text-text-primary" />
         <h1 className="text-main font-heading font-bold text-text-primary text-2xl">
           Visualizar Suministro de Inventario
@@ -58,7 +58,7 @@ export default function ProvisionsView() {
       </div>
 
       {/* Grid Responsivo Estandarizado */}
-      <div className="max-w-7xl w-full mx-auto px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      <div className="max-w-7xl w-full mx-auto px-0 sm:px-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Columna 1: Estado General y Acciones */}
         <div className="bg-surface-muted rounded-shape-xl p-4 sm:p-6 shadow-elevation-1 border border-border/50 flex flex-col items-center gap-6 text-center">

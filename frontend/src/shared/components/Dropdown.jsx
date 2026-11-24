@@ -114,7 +114,8 @@ export function DropdownContent({ children, className = "" }) {
 export function DropdownItem({
   children,
   onClick,
-  className = ""
+  className = "",
+  ...props
 }) {
   const { setOpen } = useContext(DropdownContext)
 
@@ -125,7 +126,9 @@ export function DropdownItem({
 
   return (
     <button
+      type="button"
       role="menuitem"
+      {...props}
       onClick={handleClick}
       className={`
         w-full min-h-touch flex items-center text-left px-3

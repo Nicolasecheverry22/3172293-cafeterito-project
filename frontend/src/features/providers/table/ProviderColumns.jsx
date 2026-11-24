@@ -58,14 +58,14 @@ export const getProviderColumns = (sortConfig, onSort, onChanged) => [
   {
     accessorKey: "providerEmail",
     header: "Email",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Teléfono
   {
     accessorKey: "providerPhone",
     header: "Teléfono",
-    meta: { hideBelow: "md" },
+    meta: { hideBelow: "lg" },
   },
 
   // Columna Estado

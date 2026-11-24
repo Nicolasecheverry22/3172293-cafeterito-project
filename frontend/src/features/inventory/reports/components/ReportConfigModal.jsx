@@ -138,8 +138,8 @@ export default function ReportConfigModal({ isOpen, onClose }) {
   // Portal a <body>: la tarjeta de la página usa backdrop-blur, y backdrop-filter
   // convierte a sus hijos position:fixed en relativos a ella (el modal salía cortado bajo el Navbar)
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} className="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-shape-xl bg-surface/90 text-text-primary p-6 shadow-elevation-3 dark:bg-surface/95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-0 sm:p-4">
+      <div ref={dialogRef} role="dialog" aria-modal="true" tabIndex={-1} className="w-full max-w-lg h-dvh max-h-dvh sm:h-auto sm:max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-none sm:rounded-shape-xl bg-background sm:bg-surface/90 text-text-primary p-6 shadow-elevation-3 sm:dark:bg-surface/95">
         <h2 className="mb-6 text-xl font-semibold">
           Generar reporte de inventario
         </h2>

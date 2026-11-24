@@ -245,7 +245,7 @@ export default function EditProvider() {
           </div>
 
           {/* Botones de Acción */}
-          <div className="w-full flex items-center justify-end gap-3 pt-2 flex-wrap [&>*]:flex-1 sm:[&>*]:flex-none">
+          <div className="w-full flex items-center justify-end gap-3 pt-2 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
             <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
               Cancelar
             </Button>
