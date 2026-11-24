@@ -1,12 +1,14 @@
 // src/users/pages/UserListPage.js
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
+import usePermission from "@/shared/hooks/usePermission";
 import { getUserColumns } from "../table/UserColumns";
 import { getUsers } from "@/services/userApi";
 import { Link } from "react-router-dom";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function UserListPage() {
+  const { guard } = usePermission();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
@@ -78,11 +80,12 @@ export default function UserListPage() {
               size="md"
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
+              {...guard("report_user", "generar reportes de usuarios")}
             >
               Reportar usuarios
             </Button>
 
-            <Button as={Link} to="/userCreate" size="md" variant="primary">Crear usuario</Button>
+            <Button as={Link} to="/userCreate" size="md" variant="primary" {...guard("create_user", "crear usuarios")}>Crear usuario</Button>
           </div>
         </div>
 

@@ -1,9 +1,10 @@
 // Confirmación de anulación con motivo obligatorio (10–300 caracteres, igual que Joi).
-// Solo se muestra a Administradores; el backend responde 403 a cualquier otro rol.
+// Requiere void_invoice: sin él, "Sí, anular" queda deshabilitado (el backend responde 403).
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/shared";
 import useDialogA11y from "@/shared/hooks/useDialogA11y";
+import usePermission from "@/shared/hooks/usePermission";
 import { voidInvoice } from "@/services/invoiceApi";
 import { showSuccessAlert } from "@/shared/services/alertService";
 
@@ -11,6 +12,7 @@ const MIN = 10;
 const MAX = 300;
 
 export default function VoidInvoiceModal({ invoice, onClose, onVoided }) {
+  const { guard } = usePermission();
   const [reason, setReason] = useState("");
   const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -92,6 +94,7 @@ export default function VoidInvoiceModal({ invoice, onClose, onVoided }) {
             type="submit"
             disabled={submitting}
             className="bg-error! text-on-error! hover:bg-error/90!"
+            {...guard("void_invoice", "anular comprobantes")}
           >
             {submitting ? "Anulando..." : "Sí, anular"}
           </Button>

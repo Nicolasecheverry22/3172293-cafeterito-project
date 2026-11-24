@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Receipt, Printer, Ban, ClipboardList } from "lucide-react";
 import { Input, Button } from "@/shared";
-import { hasSessionGroup } from "@/services/apiClient";
+import usePermission from "@/shared/hooks/usePermission";
 import {
   getInvoiceById, formatCOP, formatDateTime, paymentMethodLabel, INVOICE_STATUS_STYLES,
 } from "@/services/invoiceApi";
@@ -16,6 +16,7 @@ export default function InvoiceView() {
   const [invoice, setInvoice] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [voiding, setVoiding] = useState(false);
+  const { guard } = usePermission();
 
   const load = useCallback(() => {
     getInvoiceById(id).then(setInvoice).catch(() => setNotFound(true));
@@ -46,7 +47,7 @@ export default function InvoiceView() {
   }
 
   const isVoided = invoice.status === "anulada";
-  const canVoid = !isVoided && hasSessionGroup("Administrador");
+  const canBeVoided = !isVoided;
   const customerDocument = invoice.customerDocument
     ? `${invoice.customerDocumentType ?? ""} ${invoice.customerDocument}`.trim()
     : "Sin documento";
@@ -79,11 +80,13 @@ export default function InvoiceView() {
             <Button variant="primary" className="w-full gap-2" onClick={() => printReceiptPdf(invoice)}>
               <Printer className="w-5 h-5" aria-hidden="true" /> Imprimir/PDF
             </Button>
-            <Button as={Link} to={`/OrderView/${invoice.orderId}`} variant="tertiary" className="w-full gap-2">
+            <Button as={Link} to={`/OrderView/${invoice.orderId}`} variant="tertiary" className="w-full gap-2"
+              {...guard("view_order", "ver órdenes")}>
               <ClipboardList className="w-5 h-5" aria-hidden="true" /> Ver orden #{invoice.orderId}
             </Button>
-            {canVoid && (
-              <Button className="w-full gap-2 bg-error! text-on-error! hover:bg-error/90!" onClick={() => setVoiding(true)}>
+            {canBeVoided && (
+              <Button className="w-full gap-2 bg-error! text-on-error! hover:bg-error/90!" onClick={() => setVoiding(true)}
+                {...guard("void_invoice", "anular comprobantes")}>
                 <Ban className="w-5 h-5" aria-hidden="true" /> Anular comprobante
               </Button>
             )}

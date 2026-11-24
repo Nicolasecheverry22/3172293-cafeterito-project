@@ -1,6 +1,7 @@
 // src/inventory/pages/InventoryListPage.js
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
+import usePermission from "@/shared/hooks/usePermission";
 import { Link } from "react-router-dom";
 
 import { getInventoryColumns } from "../table/InventoryColumns";
@@ -8,6 +9,7 @@ import { getInventory } from "@/services/inventoryApi";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function InventoryListPage() {
+  const { guard } = usePermission();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [loadError, setLoadError] = useState(null);
@@ -72,11 +74,12 @@ export default function InventoryListPage() {
               size="md"
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
+              {...guard("report_inventory", "generar reportes de inventario")}
             >
               Reportar inventario
             </Button>
 
-            <Button as={Link} to="/inventoryCreate" size="md" variant="primary">Crear suministro</Button>
+            <Button as={Link} to="/inventoryCreate" size="md" variant="primary" {...guard("create_inventory", "crear suministros")}>Crear suministro</Button>
           </div>
         </div>
 

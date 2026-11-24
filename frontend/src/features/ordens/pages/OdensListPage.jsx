@@ -1,12 +1,14 @@
 // src/ordens/pages/OrdenListPage.js
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { DataTable, Button } from "@/shared";
+import usePermission from "@/shared/hooks/usePermission";
 import { Link } from "react-router-dom";
 import { getOrdensColumns } from "../table/OrdensColumns";
 import { getOrders } from "@/services/orderApi";
 import ReportConfigModal from "../reports/components/ReportConfigModal";
 
 export default function OrdenListPage() {
+  const { guard } = usePermission();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Estado para controlar la columna y dirección del ordenamiento
@@ -81,11 +83,12 @@ export default function OrdenListPage() {
               size="md"
               variant="tertiary"
               onClick={() => setIsModalOpen(true)}
+              {...guard("report_order", "generar reportes de órdenes")}
             >
               Reportar órdenes
             </Button>
 
-            <Button as={Link} to="/ordensCreate" size="md" variant="primary">Crear orden</Button>
+            <Button as={Link} to="/ordensCreate" size="md" variant="primary" {...guard("create_order", "crear órdenes")}>Crear orden</Button>
           </div>
         </div>
 

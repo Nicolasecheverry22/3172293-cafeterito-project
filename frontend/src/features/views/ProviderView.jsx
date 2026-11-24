@@ -3,8 +3,10 @@ import { useState, useEffect } from "react";
 import { Input, Button, StatusSwitch, ImageThumb } from "../../shared";
 import { SquarePen, Ambulance } from "lucide-react";
 import { getProviderById } from "@/services/providerApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 export default function ProviderView() {
+  const { guard } = usePermission();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -152,6 +154,7 @@ export default function ProviderView() {
               size="md"
               className="w-full flex items-center justify-center gap-2"
               onClick={() => navigate(`/editProvider/${provider.id}`)}
+              {...guard("update_provider", "editar proveedores")}
             >
               <SquarePen className="w-5 h-5" />
               Editar Info

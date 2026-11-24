@@ -7,6 +7,7 @@ import { getUserById, updateUser } from "@/services/userApi";
 import { getSessionUser, updateSessionUser } from "@/services/apiClient";
 import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 import { getGroups } from "@/services/groupApi";
+import usePermission from "@/shared/hooks/usePermission";
 import { createEditUserSchema } from "../../users/schemas/editUserSchema";
 import {
   showSystemErrorAlert,
@@ -38,6 +39,9 @@ export default function EditUser() {
   const [imageRemoved, setImageRemoved] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  // Cambiar el rol = asignar permisos (manage_permissions); Administrador solo un superusuario
+  const { can, isSuperuser } = usePermission();
+  const canChangeRole = can("manage_permissions");
 
   useEffect(() => {
     getDocumentTypes().then(setDocumentTypes);
@@ -188,8 +192,12 @@ export default function EditUser() {
                 label={group.group_name}
                 checked={formData.groupNames.includes(group.group_name)}
                 onChange={(e) => toggleGroup(group.group_name, e.target.checked)}
+                disabled={!canChangeRole || (group.group_name === "Administrador" && !isSuperuser)}
               />
             ))}
+            {!canChangeRole && (
+              <p className="text-small opacity-90">No tienes permiso para cambiar el rol de un usuario.</p>
+            )}
             {errors.groupNames && (
               <span className="text-error text-small block">{errors.groupNames}</span>
             )}

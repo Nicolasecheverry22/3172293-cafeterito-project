@@ -3,10 +3,12 @@ import { DataTable, Button, Input, Select } from "@/shared";
 import { getInvoices, PAYMENT_METHODS, INVOICE_STATUSES } from "@/services/invoiceApi";
 import { getInvoiceColumns } from "../table/InvoiceColumns";
 import ReportConfigModal from "../reports/ReportConfigModal";
+import usePermission from "@/shared/hooks/usePermission";
 
 const EMPTY_FILTERS = { from: "", to: "", paymentMethod: "", status: "" };
 
 export default function InvoiceListPage() {
+  const { guard } = usePermission();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [invoices, setInvoices] = useState([]);
   const [loadError, setLoadError] = useState(null);
@@ -43,7 +45,7 @@ export default function InvoiceListPage() {
             <p className="text-small text-text-secondary">Documentos sin validez fiscal</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
-            <Button size="md" variant="tertiary" onClick={() => setIsReportOpen(true)}>
+            <Button size="md" variant="tertiary" onClick={() => setIsReportOpen(true)} {...guard("report_invoice", "generar reportes de comprobantes")}>
               Reportar comprobantes
             </Button>
           </div>

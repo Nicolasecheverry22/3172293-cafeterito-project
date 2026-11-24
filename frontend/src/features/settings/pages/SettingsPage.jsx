@@ -5,13 +5,18 @@ import { Button } from "@/shared";
 import { getSettings, updateSettings } from "@/services/settingsApi";
 import { getOrders, OPEN_ORDER_STATUSES } from "@/services/orderApi";
 import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
+import usePermission from "@/shared/hooks/usePermission";
 
 // Mismo rango que el backend (settings.schema.js) y el CHECK de la BD
 const MIN_TABLES = 1;
 const MAX_TABLES = 200;
 const clamp = (n) => Math.min(Math.max(n, MIN_TABLES), MAX_TABLES);
 
+// Visible para todos; sin change_settings queda en solo lectura.
 export default function SettingsPage() {
+  const { can, guard } = usePermission();
+  const canEdit = can("change_settings");
+  const canSeeOrders = can("list_order");
   const [saved, setSaved] = useState(null);        // { tableCount, updatedAt, updatedBy }
   const [draft, setDraft] = useState("");           // texto del input (permite borrar y escribir)
   const [occupied, setOccupied] = useState(() => new Set());
@@ -19,14 +24,16 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    Promise.all([getSettings(), ...OPEN_ORDER_STATUSES.map((status) => getOrders({ status }))])
+    // Las mesas ocupadas solo se consultan si el rol puede listar órdenes (evita un 403)
+    const orderLists = canSeeOrders ? OPEN_ORDER_STATUSES.map((status) => getOrders({ status })) : [];
+    Promise.all([getSettings(), ...orderLists])
       .then(([settings, ...lists]) => {
         setSaved(settings);
         setDraft(String(settings.tableCount));
         setOccupied(new Set(lists.flat().map((o) => Number(o.tableNumber))));
       })
       .catch((err) => setLoadError(err.message));
-  }, []);
+  }, [canSeeOrders]);
 
   const value = Number.parseInt(draft, 10);
   const isValid = Number.isInteger(value) && value >= MIN_TABLES && value <= MAX_TABLES;
@@ -55,7 +62,7 @@ export default function SettingsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isDirty || blocked.length) return;
+    if (!canEdit || !isDirty || blocked.length) return;
     setIsSaving(true);
     try {
       const { settings } = await updateSettings({ tableCount: value });
@@ -93,6 +100,11 @@ export default function SettingsPage() {
                 <p className="settings-card__hint">
                   Define cuántas mesas aparecen al registrar una orden. Se numeran del 1 al total.
                 </p>
+                {!canEdit && (
+                  <p className="settings-card__readonly" role="note">
+                    Solo lectura: tu rol no tiene permiso para modificar la configuración.
+                  </p>
+                )}
               </div>
             </header>
 
@@ -100,7 +112,7 @@ export default function SettingsPage() {
               <label htmlFor="tableCount" className="table-count__label">Cantidad de mesas</label>
               <div className="table-count__control">
                 <button type="button" className="table-count__btn touch-target" onClick={() => step(-1)}
-                  disabled={isValid && value <= MIN_TABLES} aria-label="Quitar una mesa">
+                  disabled={!canEdit || (isValid && value <= MIN_TABLES)} aria-label="Quitar una mesa">
                   <Minus aria-hidden="true" />
                 </button>
                 <input
@@ -111,12 +123,13 @@ export default function SettingsPage() {
                   max={MAX_TABLES}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
+                  readOnly={!canEdit}
                   className="table-count__input"
                   aria-invalid={!isValid}
                   aria-describedby="tableCount-help"
                 />
                 <button type="button" className="table-count__btn touch-target" onClick={() => step(1)}
-                  disabled={isValid && value >= MAX_TABLES} aria-label="Agregar una mesa">
+                  disabled={!canEdit || (isValid && value >= MAX_TABLES)} aria-label="Agregar una mesa">
                   <Plus aria-hidden="true" />
                 </button>
               </div>
@@ -151,10 +164,11 @@ export default function SettingsPage() {
                 {saved.updatedBy ? `Última modificación: ${saved.updatedAt} por ${saved.updatedBy}` : "Valor inicial del sistema"}
               </span>
               <div className="settings-card__actions">
-                <Button variant="secondary" disabled={!isDirty || isSaving} onClick={() => setDraft(String(saved.tableCount))}>
+                <Button variant="secondary" disabled={!isDirty || isSaving || !canEdit} onClick={() => setDraft(String(saved.tableCount))}>
                   Descartar
                 </Button>
-                <Button variant="primary" type="submit" disabled={!isDirty || blocked.length > 0 || isSaving}>
+                <Button variant="primary" type="submit" disabled={!isDirty || blocked.length > 0 || isSaving}
+                  {...guard("change_settings", "modificar la configuración")}>
                   {isSaving ? "Guardando..." : "Guardar cambios"}
                 </Button>
               </div>

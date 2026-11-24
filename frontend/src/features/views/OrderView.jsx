@@ -4,6 +4,7 @@ import { Input, Button } from "@/shared";
 import { ClipboardList, SquarePen, HandCoins, Receipt } from "lucide-react";
 import { getOrderById, OPEN_ORDER_STATUSES } from "@/services/orderApi";
 import PaymentModal from "@/features/invoices/components/PaymentModal";
+import usePermission from "@/shared/hooks/usePermission";
 
 const STATUS_STYLES = {
   activa: "bg-warning-container text-on-warning-container border-warning/30",
@@ -28,6 +29,7 @@ export default function OrderView() {
   const [order, setOrder] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [paying, setPaying] = useState(false);
+  const { guard, can } = usePermission();
 
   const load = useCallback(() => {
     getOrderById(id)
@@ -88,7 +90,7 @@ export default function OrderView() {
               {order.status}
             </span>
             {/* Orden cobrada: enlace a su comprobante de venta */}
-            {order.invoiceNumber && (
+            {order.invoiceNumber && can("view_invoice") && (
               <Link
                 to={`/InvoiceView/${order.invoiceId}`}
                 className="inline-flex items-center gap-2 min-h-touch font-semibold text-text-primary underline underline-offset-4 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring rounded-sm"
@@ -108,6 +110,7 @@ export default function OrderView() {
                 size="md"
                 className="w-full flex items-center justify-center gap-2"
                 onClick={() => setPaying(true)}
+                {...guard("create_invoice", "cobrar órdenes")}
               >
                 <HandCoins className="w-5 h-5" />
                 Cobrar
@@ -118,6 +121,7 @@ export default function OrderView() {
                 size="md"
                 className="w-full flex items-center justify-center gap-2"
                 onClick={() => navigate(`/EditOrder/${order.id}`)}
+                {...guard(["update_order", "prepare_order"], "editar órdenes")}
               >
                 <SquarePen className="w-5 h-5" />
                 Editar Orden

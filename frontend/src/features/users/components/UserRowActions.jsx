@@ -2,9 +2,11 @@ import { Pencil, Eye, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { confirmAction } from "@/shared/services/confirmAction";
 import { setUserStatus } from "@/services/userApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 // Acciones por fila. No existe "Eliminar": el usuario se habilita/deshabilita (RFADMIN05).
 export default function UserRowActions({ user, onChanged }) {
+  const { guard } = usePermission();
   const navigate = useNavigate();
   const isActive = user.is_active ?? user.isActive ?? true;
   const name = user.userName || user.nombre || "este usuario";
@@ -28,6 +30,7 @@ export default function UserRowActions({ user, onChanged }) {
         onClick={() => navigate(`/UserView/${user.id}`)}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Visualizar usuario"
+        {...guard("view_user", "ver el detalle de usuarios")}
       >
         <Eye size={20} />
       </button>
@@ -36,6 +39,7 @@ export default function UserRowActions({ user, onChanged }) {
         onClick={() => navigate(`/EditUser/${user.id}`)}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         title="Editar usuario"
+        {...guard("update_user", "editar usuarios")}
       >
         <Pencil size={20} />
       </button>
@@ -48,6 +52,7 @@ export default function UserRowActions({ user, onChanged }) {
             : "text-error"
         }`}
         title={isActive ? "Activo — clic para deshabilitar" : "Inactivo — clic para habilitar"}
+        {...guard("disable_user", "cambiar el estado de usuarios")}
       >
         {isActive ? <Power size={20} /> : <PowerOff size={20} />}
       </button>

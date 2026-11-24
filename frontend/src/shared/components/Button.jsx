@@ -3,7 +3,7 @@
 export default function Button ({
     // "as" permite pintarlo como otro elemento con el mismo estilo, p. ej. as={Link}
     // para navegar: evita anidar <Link><button> (dos elementos interactivos, doble foco).
-    as: Component = "button",
+    as = "button",
     variant = "primary",
     size = "md",
     type = "button",
@@ -23,6 +23,14 @@ export default function Button ({
         md: "h-10 px-4",
     };
 
+    // Un enlace no se puede deshabilitar: deshabilitado (p. ej. sin permiso) se pinta como
+    // <button disabled> y se descarta el destino.
+    const isDisabledLink = props.disabled && as !== "button";
+    const Component = isDisabledLink ? "button" : as;
+    const elementProps = isDisabledLink
+        ? Object.fromEntries(Object.entries(props).filter(([key]) => key !== "to"))
+        : props;
+
     return(
         <Component
             // type solo tiene sentido en <button>; en un enlace sería un atributo inválido
@@ -40,7 +48,7 @@ export default function Button ({
                 ${sizes[size] || sizes.md}
                 ${className}
             `}
-            {...props} 
+            {...elementProps}
         >
             {children}
         </Component>

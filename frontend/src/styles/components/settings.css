@@ -17,6 +17,15 @@
   .settings-card__icon { width: 40px; height: 40px; padding: var(--md-space-2); flex-shrink: 0; border-radius: var(--md-shape-md); background: var(--semantic-brand); color: var(--semantic-text-on-brand); }
   .settings-card__title { font-size: var(--semantic-font-size-h3); font-weight: var(--semantic-font-weight-heading); color: var(--semantic-text-primary); }
   .settings-card__hint { font-size: var(--semantic-font-size-small); color: var(--semantic-text-secondary); }
+  .settings-card__readonly {
+    margin-top: var(--md-space-2);
+    display: inline-block;
+    padding: var(--md-space-1) var(--md-space-3);
+    border-radius: var(--md-shape-full);
+    background: var(--semantic-info-container);
+    color: var(--semantic-on-info-container);
+    font-size: var(--semantic-font-size-small);
+  }
   .settings-card__footer {
     display: flex;
     flex-wrap: wrap;

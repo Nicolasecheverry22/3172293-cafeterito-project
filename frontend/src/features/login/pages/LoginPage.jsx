@@ -3,6 +3,7 @@ import { login as loginRequest } from "@/features/login/services/authService";
 import imageLoginLight from "@/assets/images/image-login.png";
 import imageLoginDark from "@/assets/images/image-login__black.png";
 import useTheme from "@/shared/theme/useTheme";
+import { firstAllowedPath } from "@/services/apiClient";
 
 export default function LoginPage() {
   const { theme } = useTheme();
@@ -15,7 +16,8 @@ export default function LoginPage() {
       userPassword: credentials.password,
     });
 
-    window.location.replace("/home");
+    // Primer módulo que su rol puede ver (o /home si no tiene ninguno)
+    window.location.replace(firstAllowedPath());
   };
 
   return (

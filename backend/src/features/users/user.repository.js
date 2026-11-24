@@ -213,35 +213,29 @@ async updateWithGroups(id, userData, groupNames, afterChange) {
     }
 },
 
-// Permisos de un usuario: directos (user_permissions) y heredados de sus grupos.
-// Un permiso puede ser directo y heredado al mismo tiempo.
+// Permisos de un usuario: directos (user_permissions) y heredados de sus grupos ACTIVOS
+// (inherited_from: nombres de esos grupos). Un permiso puede ser directo y heredado a la vez.
 async getPermissionsByUserId(userId) {
     const query = `
+    WITH inherited AS (
+        SELECT gp.permission_id, ARRAY_AGG(g.group_name ORDER BY g.group_name) AS groups
+        FROM user_groups ug
+        JOIN groups g             ON g.group_id = ug.group_id AND g.is_active
+        JOIN group_permissions gp ON gp.group_id = ug.group_id
+        WHERE ug.user_id = $1
+        GROUP BY gp.permission_id
+    )
     SELECT
         p.permission_id,
         p.permission_name,
         p.permission_codename,
-        EXISTS (
-            SELECT 1 FROM user_permissions up
-            WHERE up.user_id = $1 AND up.permission_id = p.permission_id
-        ) AS is_direct,
-        EXISTS (
-            SELECT 1
-            FROM user_groups ug
-            INNER JOIN group_permissions gp ON gp.group_id = ug.group_id
-            WHERE ug.user_id = $1 AND gp.permission_id = p.permission_id
-        ) AS is_inherited
+        (up.permission_id IS NOT NULL)          AS is_direct,
+        (inh.permission_id IS NOT NULL)         AS is_inherited,
+        COALESCE(inh.groups, '{}')              AS inherited_from
     FROM permissions p
-    WHERE EXISTS (
-            SELECT 1 FROM user_permissions up
-            WHERE up.user_id = $1 AND up.permission_id = p.permission_id
-        )
-       OR EXISTS (
-            SELECT 1
-            FROM user_groups ug
-            INNER JOIN group_permissions gp ON gp.group_id = ug.group_id
-            WHERE ug.user_id = $1 AND gp.permission_id = p.permission_id
-        )
+    LEFT JOIN user_permissions up ON up.permission_id = p.permission_id AND up.user_id = $1
+    LEFT JOIN inherited inh       ON inh.permission_id = p.permission_id
+    WHERE up.permission_id IS NOT NULL OR inh.permission_id IS NOT NULL
     ORDER BY p.permission_name;
     `;
 

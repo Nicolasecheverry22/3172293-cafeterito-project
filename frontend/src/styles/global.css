@@ -185,8 +185,38 @@ body {
     cursor: pointer;
     transition: background-color 150ms, color 150ms;
   }
+  /* Acción sin permiso: visible pero deshabilitada (usePermission().guard) */
+  .row-actions__btn:disabled {
+    opacity: var(--md-disabled-content);
+    /* !important: ganan a las utilidades cursor-pointer / hover:bg-* del botón */
+    cursor: not-allowed !important;
+    background-color: transparent !important;
+  }
 
   /* ============== BEM: miniatura / avatar (ImageThumb) ============== */
+  /* Origen de un permiso en Gestión de Permisos (BEM: perm-badge) */
+  .perm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--md-space-2);
+    border-radius: var(--md-shape-full);
+    border: 1px solid transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .perm-badge--direct {
+    background: var(--semantic-success-container);
+    color: var(--semantic-on-success-container);
+    border-color: var(--semantic-success);
+  }
+  .perm-badge--inherited {
+    background: var(--semantic-info-container);
+    color: var(--semantic-on-info-container);
+    border-color: var(--semantic-info);
+  }
+
   .image-thumb {
     display: inline-flex;
     flex-shrink: 0;

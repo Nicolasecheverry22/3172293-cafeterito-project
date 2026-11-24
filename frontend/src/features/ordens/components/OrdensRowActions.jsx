@@ -6,12 +6,14 @@ import OrderDetailModal from "./OrderDetailModal";
 import PaymentModal from "@/features/invoices/components/PaymentModal";
 import { confirmAction } from "@/shared/services/confirmAction";
 import { cancelOrder, OPEN_ORDER_STATUSES } from "@/services/orderApi";
+import usePermission from "@/shared/hooks/usePermission";
 
 // Acciones por fila. No existe "Eliminar": la orden se ANULA (estado "cancelada").
 // Solo se pueden cobrar, editar o anular órdenes abiertas (activa / lista para entrega).
 // Cobrar genera el comprobante de venta y es el ÚNICO camino para que la orden quede "pagada".
 export default function OrdensRowActions({ order, onChanged }) {
   const navigate = useNavigate();
+  const { guard } = usePermission();
   const [open, setOpen] = useState(false);
   const [paying, setPaying] = useState(false);
   const isOpen = OPEN_ORDER_STATUSES.includes(order.status?.toLowerCase());
@@ -34,6 +36,7 @@ export default function OrdensRowActions({ order, onChanged }) {
           onClick={() => setPaying(true)}
           title="Cobrar orden"
           aria-label={`Cobrar orden ${order.id}`}
+          {...guard("create_invoice", "cobrar órdenes")}
           className="row-actions__btn touch-target text-success hover:bg-success-container hover:text-on-success-container cursor-pointer"
         >
           <HandCoins size={20} />
@@ -43,6 +46,7 @@ export default function OrdensRowActions({ order, onChanged }) {
       <button
         onClick={() => navigate(`/OrderView/${order.id}`)}
         title="Visualizar orden"
+        {...guard("view_order", "ver el detalle de órdenes")}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
       >
         <Eye size={20} />
@@ -52,6 +56,7 @@ export default function OrdensRowActions({ order, onChanged }) {
         <button
           onClick={() => navigate(`/EditOrder/${order.id}`)}
           title="Editar orden"
+          {...guard(["update_order", "prepare_order"], "editar órdenes")}
           className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         >
           <Pencil size={20} />
@@ -61,6 +66,7 @@ export default function OrdensRowActions({ order, onChanged }) {
       <button
         onClick={() => setOpen(true)}
         title="Ver detalles completos"
+        {...guard("view_order", "ver el detalle de órdenes")}
         className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
       >
         <FileText size={20} />
@@ -70,6 +76,7 @@ export default function OrdensRowActions({ order, onChanged }) {
         <button
           onClick={handleCancel}
           title="Anular orden"
+          {...guard("cancel_order", "anular órdenes")}
           className="row-actions__btn touch-target hover:bg-error-container text-error hover:text-on-error-container cursor-pointer transition-colors"
         >
           <Ban size={20} />
