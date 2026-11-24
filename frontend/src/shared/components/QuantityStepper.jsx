@@ -8,6 +8,7 @@ export default function QuantityStepper({
   max = 99,
   itemLabel = "",        // nombre del producto para los aria-label
   size = "md",           // sm | md
+  disabled = false,      // solo lectura (p. ej. cocina editando una orden)
   className = "",
 }) {
   const isLast = value <= 1;
@@ -19,6 +20,7 @@ export default function QuantityStepper({
         type="button"
         className={`qty-stepper__btn touch-target ${isLast ? "qty-stepper__btn--danger" : ""}`}
         onClick={onDecrement}
+        disabled={disabled}
         aria-label={isLast ? `Quitar ${itemLabel}` : `Restar uno de ${itemLabel}`}
       >
         <DecrementIcon aria-hidden="true" />
@@ -28,7 +30,7 @@ export default function QuantityStepper({
         type="button"
         className="qty-stepper__btn touch-target"
         onClick={onIncrement}
-        disabled={value >= max}
+        disabled={disabled || value >= max}
         aria-label={`Sumar uno de ${itemLabel}`}
       >
         <Plus aria-hidden="true" />

@@ -1,386 +1,194 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Pencil, Trash2 } from "lucide-react";
-import { Input, Button, Select } from "@/shared";
-import { getOrderById, updateOrder } from "@/services/orderApi";
-import { getUsers } from "@/services/userApi";
+// Editar orden con el mismo diseño que registrarla (OrderComposer en modo "edit").
+// Orden pagada o cancelada → vista de solo lectura con enlace a su comprobante.
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Pencil, Receipt, Eye, Lock } from "lucide-react";
+import { Button } from "@/shared";
+import OrderComposer from "@/features/ordens/components/OrderComposer";
+import PaymentModal from "@/features/invoices/components/PaymentModal";
+import { getOrderById, updateOrder, OPEN_ORDER_STATUSES, ORDER_STATUS_LABELS } from "@/services/orderApi";
 import { getProducts } from "@/services/productApi";
-import { updateOrderSchema } from "../../ordens/schemas/orderSchema";
-import {
-  showSystemErrorAlert,
-  showDeleteCancelAlert,
-  showSuccessAlert,
-  showConfirmDeleteAlert,
-  showCreateErrorAlert
-} from "@/shared/services/alertService";
+import { getUsers } from "@/services/userApi";
+import usePermission from "@/shared/hooks/usePermission";
+import { showSystemErrorAlert, showSuccessAlert } from "@/shared/services/alertService";
 
-// Estados destino permitidos al editar (ORDER_TRANSITIONS del backend). "Pagada" no está:
-// una orden solo se paga con "Cobrar", que genera su comprobante de venta.
-const ORDER_STATUS_OPTIONS = [
-  { value: "activa", label: "Activa" },
-  { value: "lista para entrega", label: "Lista para entrega" },
-  { value: "cancelada", label: "Cancelada" },
-];
-
-const formatCurrency = (amount) =>
-  new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-  }).format(amount ?? 0);
+const formatCOP = (value) => `$${Number(value ?? 0).toLocaleString("es-CO")}`;
 
 export default function EditOrder() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { can } = usePermission();
+  // Reasignar el mesero es de administración (el backend exige update_order + manage_permissions)
+  const canChangeWaiter = can("update_order") && can("manage_permissions") && can("list_user");
 
-  const [item, setItem] = useState(null);
-  const [formData, setFormData] = useState(null);
-  const [waitersData, setWaitersData] = useState([]);
-  const [menuDishesData, setMenuDishesData] = useState([]);
-  const [errors, setErrors] = useState({});
-  const [isSaving, setIsSaving] = useState(false);
+  const [order, setOrder] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [waiters, setWaiters] = useState(null);
+  const [isLoadingDishes, setIsLoadingDishes] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [version, setVersion] = useState(0); // remonta el compositor tras recargar la orden
 
-  // Carga la orden real + opciones de meseros y platillos desde la BD
+  const loadOrder = useCallback(
+    () =>
+      getOrderById(id)
+        .then((data) => {
+          setOrder(data);
+          setVersion((v) => v + 1);
+        })
+        .catch(() =>
+          showSystemErrorAlert({ text: "La orden que intentas editar no existe." })
+            .then(() => navigate("/ordensList", { replace: true }))
+        ),
+    [id, navigate]
+  );
+
   useEffect(() => {
-    Promise.all([getOrderById(id), getUsers(), getProducts()])
-      .then(([order, users, products]) => {
-        setItem(order);
-        setFormData({
-          tableNumber: order.tableNumber ?? "",
-          waiterId: order.waiterId ? String(order.waiterId) : "",
-          status: order.status ?? "activa",
-          observations: order.observations ?? "",
-          items: order.items.map((i) => ({
-            productId: i.productId,
-            dish: i.dish,
-            price: i.price, // precio de venta guardado en la orden
-            quantity: i.quantity,
-          })),
-        });
-        setWaitersData(
-          users
-            .filter((u) => u.is_active || u.id === order.waiterId)
-            .map((u) => ({ value: String(u.id), label: u.userName }))
-        );
-        setMenuDishesData(
-          products
-            .filter((p) => p.isAvailable)
-            .map((p) => ({ value: String(p.id), label: p.productName, price: p.price }))
-        );
-      })
-      .catch(() =>
-        showSystemErrorAlert({ text: "La orden que intentas editar no existe." })
-          .then(() => navigate("/ordensList", { replace: true }))
-      );
-  }, [id, navigate]);
+    loadOrder();
+    getProducts()
+      .then(setProducts)
+      .catch(() => showSystemErrorAlert({ text: "No se pudo cargar el menú." }))
+      .finally(() => setIsLoadingDishes(false));
+  }, [loadOrder]);
 
-  if (!formData) {
+  useEffect(() => {
+    if (!canChangeWaiter || !order) return;
+    getUsers({ isActive: true })
+      .then((users) => {
+        const options = users.map((u) => ({ value: String(u.id), label: u.userName }));
+        // El mesero actual aunque esté inactivo, para no perderlo de la lista
+        if (order.waiterId && !options.some((o) => o.value === String(order.waiterId))) {
+          options.unshift({ value: String(order.waiterId), label: `${order.waiter} (inactivo)` });
+        }
+        setWaiters(options);
+      })
+      .catch(() => setWaiters(null));
+  }, [canChangeWaiter, order]);
+
+  // Catálogo para el resumen: los platillos que ya estaban conservan el precio guardado en la
+  // orden (el backend también lo conserva) y aparecen aunque hoy estén inhabilitados.
+  const { catalog, menu } = useMemo(() => {
+    if (!order) return { catalog: [], menu: [] };
+    const stored = new Map(order.items.map((i) => [i.productId, i]));
+    const merged = products.map((p) =>
+      stored.has(p.id) ? { ...p, price: stored.get(p.id).price } : p
+    );
+    for (const item of order.items) {
+      if (!merged.some((p) => p.id === item.productId)) {
+        merged.push({ id: item.productId, productName: item.dish, price: item.price, category: "Sin categoría", isAvailable: false });
+      }
+    }
+    return { catalog: merged, menu: merged.filter((p) => p.isAvailable) };
+  }, [order, products]);
+
+  const initial = useMemo(
+    () =>
+      order && {
+        tableNumber: order.tableNumber,
+        observations: order.observations ?? "",
+        status: order.status,
+        waiterId: order.waiterId,
+        items: order.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+      },
+    [order]
+  );
+
+  if (!order || !initial) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center">
-        <p className="text-text-secondary">Cargando orden...</p>
+      <div className="min-h-[50vh] w-full flex items-center justify-center">
+        <p className="bg-background/90 rounded-shape-lg px-4 py-2 text-text-secondary">Cargando orden...</p>
       </div>
     );
   }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
+  const isOpen = OPEN_ORDER_STATUSES.includes(order.status);
 
-  const handleAddItem = (dishValue) => {
-    const dishObj = menuDishesData.find((d) => d.value === dishValue);
-    if (!dishObj) return;
-    const productId = Number(dishObj.value);
-
-    setFormData((prev) => {
-      const existing = prev.items.find((i) => i.productId === productId);
-
-      if (existing) {
-        return {
-          ...prev,
-          items: prev.items.map((i) =>
-            i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i
-          ),
-        };
-      }
-
-      return {
-        ...prev,
-        items: [
-          ...prev.items,
-          { productId, dish: dishObj.label, price: dishObj.price, quantity: 1 },
-        ],
-      };
-    });
-    if (errors.items) {
-      setErrors((prev) => ({ ...prev, items: undefined }));
-    }
-  };
-
-  // Modifica la cantidad sin bajar de 1
-  const handleQuantityChange = (index, delta) => {
-    setFormData((prev) => {
-      const newQty = prev.items[index].quantity + delta;
-      if (newQty <= 0) return prev;
-      const updated = [...prev.items];
-      updated[index] = { ...updated[index], quantity: newQty };
-      return { ...prev, items: updated };
-    });
-  };
-
-  const handleRemoveItem = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index),
-    }));
-  };
-
-  const calculatedTotal = formData.items.reduce(
-    (acc, curr) => acc + curr.price * curr.quantity,
-    0
-  );
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-
-    const result = updateOrderSchema().safeParse(formData);
-
-    if (!result.success) {
-      const fieldErrors = {};
-      result.error.issues.forEach((issue) => {
-        fieldErrors[issue.path[0]] = issue.message;
-      });
-      setErrors(fieldErrors);
-
-      await showCreateErrorAlert({
-        entity: "orden",
-        text: "Por favor revisa los errores indicados en el formulario antes de guardar.",
-      });
-      return;
-    }
-
-    setErrors({});
-    setIsSaving(true);
-
+  const handleSave = async (data) => {
     try {
-      // PUT /api/orders/:id — el backend conserva el precio de los platillos que ya estaban
-      await updateOrder(item.id, {
-        tableNumber: Number(result.data.tableNumber),
-        waiterId: Number(result.data.waiterId),
-        status: result.data.status,
-        observations: result.data.observations ?? "",
-        items: formData.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
-      });
-
-      await showSuccessAlert({
-        title: "¡Orden actualizada!",
-        text: "Los cambios fueron guardados correctamente.",
-      });
-
+      // Solo ids y cantidades: el backend conserva el precio de los platillos que ya estaban
+      await updateOrder(order.id, { ...data, observations: data.observations ?? "" });
+      await showSuccessAlert({ title: "¡Orden actualizada!", text: "Los cambios fueron guardados correctamente." });
       navigate("/ordensList");
+      return true;
     } catch (error) {
-      console.error("Error al actualizar la orden:", error);
-      await showSystemErrorAlert({
-        text: error.message || "Los cambios no pudieron guardarse.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Descartar cambios?",
-      text: "Los cambios realizados no se guardarán.",
-      confirmButtonText: "Sí, descartar",
-      cancelButtonText: "Continuar editando",
-    });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Edición cancelada",
-        text: "No se guardaron los cambios.",
-      });
-      navigate("/ordensList");
+      await showSystemErrorAlert({ text: error.message || "Los cambios no pudieron guardarse." });
+      return false;
     }
   };
 
   return (
-    <div className="bg-surface/70 dark:bg-surface/90 backdrop-blur-md rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
-      <div className="max-w-7xl w-full mx-auto px-4 mb-6 flex items-center gap-3">
-        <Pencil className="w-8 h-8 text-text-primary" />
-        <h1 className="text-2xl font-heading font-bold text-text-primary">
-          Editar Orden #{item.id}
-        </h1>
+    <div className="bg-background/95 rounded-shape-xl p-4 sm:p-6 md:p-8 border border-border/40 shadow-elevation-3">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="order-edit__title">
+          <Pencil className="w-8 h-8 text-text-primary shrink-0" aria-hidden="true" />
+          <h1 className="text-title font-heading text-text-primary">Editar orden #{order.id}</h1>
+          <span className={`order-edit__badge order-edit__badge--${order.status.replace(/\s+/g, "-")}`}>
+            {ORDER_STATUS_LABELS[order.status] ?? order.status}
+          </span>
+        </div>
+
+        {isOpen ? (
+          <OrderComposer
+            key={version}
+            mode="edit"
+            order={order}
+            initial={initial}
+            dishes={menu}
+            catalog={catalog}
+            isLoadingDishes={isLoadingDishes}
+            waiters={canChangeWaiter ? waiters : null}
+            onSubmit={handleSave}
+            onCharge={() => setPaying(true)}
+          />
+        ) : (
+          // Pagada o cancelada: estado final, solo lectura
+          <section className="order-readonly" aria-labelledby="order-readonly-title">
+            <p id="order-readonly-title" className="order-readonly__title">
+              <Lock className="size-5" aria-hidden="true" />
+              Esta orden está {order.status} y ya no se puede modificar.
+            </p>
+            <dl className="order-readonly__facts">
+              <div><dt>Mesa</dt><dd>{order.tableNumber}</dd></div>
+              <div><dt>Mesero</dt><dd>{order.waiter}</dd></div>
+              <div><dt>Total</dt><dd>{formatCOP(order.total)}</dd></div>
+            </dl>
+            <ul className="order-readonly__lines">
+              {order.items.map((item) => (
+                <li key={item.id}>
+                  <span>{item.quantity} × {item.dish}</span>
+                  <span>{formatCOP(item.price * item.quantity)}</span>
+                </li>
+              ))}
+            </ul>
+            {order.observations && <p className="order-readonly__notes">Observaciones: {order.observations}</p>}
+            <div className="order-readonly__actions">
+              <Button as={Link} to={`/OrderView/${order.id}`} variant="secondary" className="gap-2">
+                <Eye className="size-4" aria-hidden="true" /> Ver orden
+              </Button>
+              {order.invoiceId && (
+                <Button
+                  as={Link}
+                  to={`/InvoiceView/${order.invoiceId}`}
+                  variant="primary"
+                  className="gap-2"
+                  {...(can("view_invoice") ? {} : { disabled: true, "aria-disabled": true, title: "No tienes permiso para ver comprobantes" })}
+                >
+                  <Receipt className="size-4" aria-hidden="true" /> Comprobante {order.invoiceNumber}
+                </Button>
+              )}
+            </div>
+          </section>
+        )}
       </div>
 
-      <form onSubmit={handleSave} className="max-w-7xl w-full mx-auto space-y-8">
-        {/* Datos Principales de la Orden */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-surface p-4 sm:p-6 rounded-shape-lg border border-border/40 shadow-elevation-1">
-          <Input
-            label="Observaciones"
-            name="observations"
-            type="text"
-            value={formData.observations}
-            placeholder="Ej: sin cebolla"
-            onChange={handleChange}
-            error={errors.observations}
-          />
-
-          <Input
-            label="Número de mesa"
-            name="tableNumber"
-            type="number"
-            min="1"
-            value={formData.tableNumber}
-            placeholder="Mesa #"
-            onChange={handleChange}
-            error={errors.tableNumber}
-          />
-
-          <Select
-            label="Mesero asignado"
-            name="waiterId"
-            value={formData.waiterId}
-            onChange={handleChange}
-            options={waitersData}
-            placeholder="Seleccione mesero"
-            error={errors.waiterId}
-          />
-
-          <Select
-            label="Estado"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            options={ORDER_STATUS_OPTIONS}
-            error={errors.status}
-          />
-        </div>
-
-        {/* Selección y Gestión de Platillos */}
-        <div className="bg-surface p-4 sm:p-6 rounded-shape-lg border border-border/40 shadow-elevation-1 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <h3 className="text-lg font-heading font-bold text-text-primary">
-              Platillos de la Orden
-            </h3>
-
-            <div className="w-full md:w-72">
-              <Select
-                placeholder="Añadir platillo..."
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleAddItem(e.target.value);
-                    e.target.value = "";
-                  }
-                }}
-                options={menuDishesData}
-              />
-            </div>
-          </div>
-          {errors.items && (
-            <span className="text-error text-small block mt-1">
-              {errors.items}
-            </span>
-          )}
-
-          {/* Tabla Dinámica de Selección */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-border/40 text-text-primary/70 font-semibold">
-                  <th className="py-2 px-3">Platillo</th>
-                  <th className="py-2 px-3 text-right">Precio Unitario</th>
-                  <th className="py-2 px-3 text-center">Cantidad</th>
-                  <th className="py-2 px-3 text-right">Subtotal</th>
-                  <th className="py-2 px-3 text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {formData.items.length > 0 ? (
-                  formData.items.map((rowItem, index) => (
-                    <tr key={rowItem.productId} className="border-b border-border/20">
-                      <td className="py-3 px-3 font-medium text-text-primary">
-                        {rowItem.dish || rowItem.productName}
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        {formatCurrency(rowItem.price)}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                e.stopPropagation(); // Evita que el evento se propague doble
-                                handleQuantityChange(index, -1);
-                                }}
-                                aria-label="Disminuir cantidad"
-                                className="touch-target w-8 h-8 rounded-md bg-surface-muted hover:bg-border/30 flex items-center justify-center font-bold text-text-primary"
-                            >
-                                -
-                            </button>
-                            <span className="w-8 text-center font-semibold">
-                                {rowItem.quantity}
-                            </span>
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                e.stopPropagation(); // Evita que el evento se propague doble
-                                handleQuantityChange(index, 1);
-                                }}
-                                aria-label="Aumentar cantidad"
-                                className="touch-target w-8 h-8 rounded-md bg-surface-muted hover:bg-border/30 flex items-center justify-center font-bold text-text-primary"
-                            >
-                                +
-                            </button>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-right font-semibold text-text-primary">
-                        {formatCurrency(rowItem.price * rowItem.quantity)}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveItem(index)}
-                          aria-label="Quitar producto"
-                          className="touch-target text-error hover:opacity-80 p-2 rounded-md transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-6 text-center text-text-primary/60">
-                      No se han seleccionado platillos para esta orden.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex justify-end items-center pt-4 border-t border-border/40">
-            <p className="text-xl font-heading font-bold text-text-primary">
-              Total Actual: <span className="text-primary">{formatCurrency(calculatedTotal)}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Acciones de Guardado */}
-        <div className="flex gap-4 items-center justify-end pt-4 border-t border-border/40 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-          <Button variant="secondary" size="md" type="button" onClick={handleCancel}>
-            Cancelar
-          </Button>
-          <Button variant="primary" size="md" type="submit" disabled={isSaving}>
-            {isSaving ? "Guardando..." : "Guardar Cambios"}
-          </Button>
-        </div>
-      </form>
+      {paying && (
+        <PaymentModal
+          orderId={order.id}
+          onClose={() => {
+            setPaying(false);
+            loadOrder();
+          }}
+        />
+      )}
     </div>
   );
 }

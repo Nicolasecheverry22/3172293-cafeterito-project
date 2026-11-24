@@ -5,7 +5,10 @@ import { MAX_QTY_PER_DISH } from "../config/orderConfig";
 
 const formatCOP = (value) => `$${value.toLocaleString("es-CO")}`;
 
-export default function OrderSummary({ tableNumber, cart, observations, onObservationsChange, errors }) {
+// readOnly: platillos y observaciones sin edición. allowClear: botón "Vaciar orden" (solo al crear).
+export default function OrderSummary({
+  tableNumber, cart, observations, onObservationsChange, errors, readOnly = false, allowClear = true,
+}) {
   return (
     <section className="order-summary" aria-labelledby="order-summary-title">
       <header className="order-summary__header">
@@ -36,6 +39,7 @@ export default function OrderSummary({ tableNumber, cart, observations, onObserv
                 value={quantity}
                 max={MAX_QTY_PER_DISH}
                 itemLabel={dish.productName}
+                disabled={readOnly}
                 onIncrement={() => cart.increment(productId)}
                 onDecrement={() => cart.decrement(productId)}
               />
@@ -46,7 +50,7 @@ export default function OrderSummary({ tableNumber, cart, observations, onObserv
       )}
       {errors.items && <p className="order-composer__error" role="alert">{errors.items}</p>}
 
-      {cart.detailed.length > 0 && (
+      {allowClear && !readOnly && cart.detailed.length > 0 && (
         <button type="button" className="order-summary__clear" onClick={cart.clear}>
           <Trash2 aria-hidden="true" /> Vaciar orden
         </button>
@@ -60,6 +64,7 @@ export default function OrderSummary({ tableNumber, cart, observations, onObserv
           maxLength={300}
           value={observations}
           onChange={(e) => onObservationsChange(e.target.value)}
+          readOnly={readOnly}
           placeholder="Ej: sin cebolla, para llevar, alergias..."
           className="order-summary__notes-input"
         />

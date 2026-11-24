@@ -1,9 +1,12 @@
 // Mapa de mesas (BEM: table-picker). Radios nativos: teclado con flechas y lector de pantalla gratis.
+// currentTable: mesa actual de la orden que se edita (se muestra libre y marcada "Actual").
 import { RefreshCw } from "lucide-react";
 
-export default function TablePicker({ tables, value, onChange, freeCount, isLoading, error, onRefresh }) {
+export default function TablePicker({
+  tables, value, onChange, freeCount, isLoading, error, onRefresh, currentTable = null, disabled = false,
+}) {
   return (
-    <fieldset className="table-picker">
+    <fieldset className="table-picker" disabled={disabled}>
       <div className="table-picker__header">
         <legend className="order-composer__step-title">
           <span className="order-composer__step-number">1</span> Selecciona la mesa
@@ -50,7 +53,7 @@ export default function TablePicker({ tables, value, onChange, freeCount, isLoad
               />
               <span className="table-picker__number">{number}</span>
               <span className="table-picker__status">
-                {isOccupied ? "Ocupada" : value === number ? "✓ Elegida" : "Libre"}
+                {isOccupied ? "Ocupada" : value === number ? "✓ Elegida" : number === currentTable ? "Actual" : "Libre"}
               </span>
             </label>
           );

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Utensils } from "lucide-react";
 
-import OrderForm from "../components/OrderForm";
+import OrderComposer from "../components/OrderComposer";
 import { createOrder } from "@/services/orderApi";
 import { getProducts } from "@/services/productApi";
 
@@ -76,7 +76,8 @@ export default function CreateOrderPage() {
           <h1 className="text-title font-heading font-bold text-text-primary">Registrar orden nueva</h1>
         </div>
 
-        <OrderForm
+        <OrderComposer
+          mode="create"
           dishes={dishes}
           isLoadingDishes={isLoadingDishes}
           onSubmit={handleCreateOrder}

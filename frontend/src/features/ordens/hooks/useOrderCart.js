@@ -25,14 +25,19 @@ function cartReducer(state, action) {
       return state.filter((line) => line.productId !== productId);
     case "clear":
       return [];
+    case "reset":
+      return action.lines;
     default:
       return state;
   }
 }
 
-/** @param {Array<{id:number, productName:string, price:number}>} dishes */
-export default function useOrderCart(dishes) {
-  const [lines, dispatch] = useReducer(cartReducer, []);
+/**
+ * @param {Array<{id:number, productName:string, price:number}>} dishes catálogo para precios y nombres
+ * @param {Array<{productId:number, quantity:number}>} initialLines carrito inicial (editar orden)
+ */
+export default function useOrderCart(dishes, initialLines = []) {
+  const [lines, dispatch] = useReducer(cartReducer, initialLines);
 
   const dishById = useMemo(() => new Map(dishes.map((d) => [d.id, d])), [dishes]);
 
@@ -61,5 +66,7 @@ export default function useOrderCart(dishes) {
     decrement: (productId) => dispatch({ type: "decrement", productId }),
     remove: (productId) => dispatch({ type: "remove", productId }),
     clear: () => dispatch({ type: "clear" }),
+    // Descartar cambios: vuelve a las líneas indicadas
+    reset: (nextLines) => dispatch({ type: "reset", lines: nextLines }),
   };
 }
