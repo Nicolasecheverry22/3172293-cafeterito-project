@@ -1,6 +1,7 @@
 import { Eye, Pencil, FileText, Ban, HandCoins } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/shared";
 
 import OrderDetailModal from "./OrderDetailModal";
 import PaymentModal from "@/features/invoices/components/PaymentModal";
@@ -32,45 +33,60 @@ export default function OrdensRowActions({ order, onChanged }) {
   return (
     <div className="row-actions">
       {isOpen && (
-        <button
+        <Button
+          variant="success"
+          size="xs"
+          shape="pill"
           onClick={() => setPaying(true)}
           title="Cobrar orden"
           aria-label={`Cobrar orden ${order.id}`}
+          className="row-actions__btn !px-0 !w-12 !h-12"
           {...guard("create_invoice", "cobrar órdenes")}
-          className="row-actions__btn touch-target text-success hover:bg-success-container hover:text-on-success-container cursor-pointer"
         >
-          <HandCoins size={20} />
-        </button>
+          <HandCoins className="w-5 h-5" aria-hidden="true" />
+        </Button>
       )}
 
-      <button
+      <Button
+        variant="info"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/OrderView/${order.id}`)}
         title="Visualizar orden"
+        aria-label={`Visualizar orden ${order.id}`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         {...guard("view_order", "ver el detalle de órdenes")}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
       >
-        <Eye size={20} />
-      </button>
+        <Eye className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
       {isOpen && (
-        <button
+        <Button
+          variant="edit"
+          size="xs"
+          shape="pill"
           onClick={() => navigate(`/EditOrder/${order.id}`)}
           title="Editar orden"
+          aria-label={`Editar orden ${order.id}`}
+          className="row-actions__btn !px-0 !w-12 !h-12"
           {...guard(["update_order", "prepare_order"], "editar órdenes")}
-          className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
         >
-          <Pencil size={20} />
-        </button>
+          <Pencil className="w-5 h-5" aria-hidden="true" />
+        </Button>
       )}
 
-      <button
+      <Button
+        variant="detail"
+        size="xs"
+        shape="pill"
         onClick={() => setOpen(true)}
         title="Ver detalles completos"
+        aria-label={`Ver detalles completos de la orden ${order.id}`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         {...guard("view_order", "ver el detalle de órdenes")}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
       >
-        <FileText size={20} />
-      </button>
+        <FileText className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
       {isOpen && (
         <button

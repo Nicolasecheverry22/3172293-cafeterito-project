@@ -3,8 +3,8 @@
 // En modo usuario se distingue lo DIRECTO (editable) de lo HEREDADO de sus grupos (solo lectura).
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, ChevronDown, UserRoundKey, Users, UserRound, Lock } from "lucide-react";
-import { Button, Checkbox } from "@/shared";
+import { Save, UserRoundKey, Users, UserRound, Lock } from "lucide-react";
+import { Button, Checkbox, Select } from "@/shared";
 import { getPermissions } from "@/services/permissionApi";
 import { getGroups, getGroupPermissions, updateGroupPermissions } from "@/services/groupApi";
 import { getUsers, getUserPermissions, updateUserPermissions } from "@/services/userApi";
@@ -17,9 +17,6 @@ import {
   showSystemErrorAlert,
   showConfirmDeleteAlert,
 } from "@/shared/services/alertService";
-
-const SELECT_CLASSES =
-  "w-full appearance-none bg-brand text-text-on-brand h-12 pl-6 pr-12 rounded-full font-bold outline-none cursor-pointer shadow-elevation-2 hover:brightness-95 transition-all focus-visible:ring-2 focus-visible:ring-focus-ring";
 
 const ADMIN_GROUP = "Administrador";
 
@@ -62,6 +59,23 @@ export default function PermissionsManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const modules = useMemo(() => groupByModule(catalog), [catalog]);
+  const groupOptions = useMemo(
+    () =>
+      groups.map((g) => ({
+        value: String(g.group_id),
+        label: g.group_name,
+      })),
+    [groups]
+  );
+  const userOptions = useMemo(
+    () =>
+      users.map((u) => ({
+        value: String(u.id),
+        label: `${u.userName}${u.is_superuser ? " (superusuario)" : ""}${u.is_active ? "" : " (inactivo)"}`,
+      })),
+    [users]
+  );
+
   const hasTarget = Boolean(selectedGroup || selectedUser);
   const group = groups.find((g) => String(g.group_id) === selectedGroup);
   const targetUser = users.find((u) => String(u.id) === selectedUser);
@@ -230,35 +244,37 @@ export default function PermissionsManagementPage() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-1 flex flex-col gap-8 mt-2">
             <div className="flex flex-col gap-2">
-              <label htmlFor="permissions-group" className="text-body text-text-primary font-bold border-b border-border-strong pb-1 flex items-center justify-center gap-2">
-                <Users className="w-5 h-5" aria-hidden="true" /> Grupo de usuarios
-              </label>
-              <div className="relative mt-2">
-                <select id="permissions-group" value={selectedGroup} onChange={handleGroupChange} className={SELECT_CLASSES}>
-                  <option value="">Seleccione un grupo</option>
-                  {groups.map((g) => (
-                    <option key={g.group_id} value={g.group_id}>{g.group_name}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-on-brand pointer-events-none" aria-hidden="true" />
+              <div className="text-body text-text-primary font-bold border-b border-border-strong pb-1 flex items-center justify-center gap-2">
+                <Users className="w-5 h-5" aria-hidden="true" />
+                <span>Grupo de usuarios</span>
               </div>
+              <Select
+                htmlFor="permissions-group"
+                name="permissionsGroup"
+                value={selectedGroup}
+                onChange={handleGroupChange}
+                options={groupOptions}
+                placeholder="Seleccione un grupo"
+                disabled={isSaving}
+                className="mt-1"
+              />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="permissions-user" className="text-body text-text-primary font-bold border-b border-border-strong pb-1 flex items-center justify-center gap-2">
-                <UserRound className="w-5 h-5" aria-hidden="true" /> Usuario individual
-              </label>
-              <div className="relative mt-2">
-                <select id="permissions-user" value={selectedUser} onChange={handleUserChange} className={SELECT_CLASSES}>
-                  <option value="">Seleccione un usuario</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.userName}{u.is_superuser ? " (superusuario)" : ""}{u.is_active ? "" : " (inactivo)"}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-on-brand pointer-events-none" aria-hidden="true" />
+              <div className="text-body text-text-primary font-bold border-b border-border-strong pb-1 flex items-center justify-center gap-2">
+                <UserRound className="w-5 h-5" aria-hidden="true" />
+                <span>Usuario individual</span>
               </div>
+              <Select
+                htmlFor="permissions-user"
+                name="permissionsUser"
+                value={selectedUser}
+                onChange={handleUserChange}
+                options={userOptions}
+                placeholder="Seleccione un usuario"
+                disabled={isSaving}
+                className="mt-1"
+              />
             </div>
 
             {selectedUser && (

@@ -1,5 +1,6 @@
 import { Eye, Pencil, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/shared";
 import { confirmAction } from "@/shared/services/confirmAction";
 import { setProductStatus } from "@/services/productApi";
 import usePermission from "@/shared/hooks/usePermission";
@@ -26,36 +27,44 @@ export default function MenuRowActions({ product, onChanged }) {
 
   return (
     <div className="row-actions">
-      <button
+      <Button
+        variant="info"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/ProductView/${product.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Visualizar platillo"
+        aria-label={`Visualizar platillo ${name}`}
         {...guard("view_product", "ver el detalle de platillos")}
       >
-        <Eye size={20} />
-      </button>
+        <Eye className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant="edit"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/EditProduct/${product.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Editar platillo"
+        aria-label={`Editar platillo ${name}`}
         {...guard("update_product", "editar platillos")}
       >
-        <Pencil size={20} />
-      </button>
+        <Pencil className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant={isAvailable ? "enable" : "disable"}
+        size="xs"
+        shape="pill"
         onClick={handleToggleStatus}
-        className={`row-actions__btn touch-target hover:bg-surface-muted cursor-pointer ${
-          isAvailable
-            ? "text-success"
-            : "text-error"
-        }`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title={isAvailable ? "Disponible — clic para inhabilitar" : "Inhabilitado — clic para habilitar"}
+        aria-label={isAvailable ? `Inhabilitar platillo ${name}` : `Habilitar platillo ${name}`}
         {...guard("disable_product", "cambiar el estado de platillos")}
       >
-        {isAvailable ? <Power size={20} /> : <PowerOff size={20} />}
-      </button>
+        {isAvailable ? <Power className="w-5 h-5" aria-hidden="true" /> : <PowerOff className="w-5 h-5" aria-hidden="true" />}
+      </Button>
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import { useState, useId } from "react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
+
 export default function Input({
   label,
   error,
@@ -6,64 +9,126 @@ export default function Input({
   variant = "primary",
   size = "md",
   className = "",
+  id,
   ...props
 }) {
+  const generatedId = useId()
+  const inputId = htmlFor || id || generatedId
+
+  const [isFocused, setIsFocused] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const isPassword = type === "password"
+  const resolvedType = isPassword ? (showPassword ? "text" : "password") : type
+
   const variants = {
-    primary: "bg-background border-border text-text-primary",
-    secondary: "bg-surface-muted border-border-strong text-text-primary",
-    tertiary: "bg-transparent border-b-2 border-border text-text-primary",
-  };
+    primary:
+      "bg-background text-text-primary border-border-strong shadow-elevation-1 hover:bg-surface-muted/40 hover:shadow-elevation-2",
+    secondary:
+      "bg-surface text-text-primary border-border-strong shadow-elevation-1 hover:bg-surface-muted hover:shadow-elevation-2",
+    tertiary:
+      "bg-transparent text-text-primary border-b-2 border-border-strong rounded-none px-1 shadow-none hover:border-focus-ring",
+  }
 
   const sizes = {
-    // M3: mínimo 48px de área táctil; lg = 56px (alto estándar de text field)
-    sm: "h-10 text-xs",
-    md: "h-12 text-sm",
+    sm: "h-10 text-xs sm:text-sm",
+    md: "h-12 text-sm sm:text-body",
     lg: "h-14 text-base",
-  };
+  }
+
+  const stateClasses = error
+    ? "border-2 border-error focus:border-error focus:ring-2 focus:ring-error/40"
+    : isFocused && variant !== "tertiary"
+    ? "border-2 border-focus-ring ring-2 ring-focus-ring/30 shadow-elevation-2"
+    : isFocused && variant === "tertiary"
+    ? "border-b-2 border-focus-ring"
+    : ""
 
   return (
-    <div className={`w-full flex flex-col gap-1 ${className}`}>
-      {/* Label */}
+    <div className={`w-full flex flex-col gap-1.5 ${className}`}>
       {label && (
         <label
-          htmlFor={htmlFor}
-          className={`block text-small font-label ${
-            error ? "text-error" : "text-text-secondary"
+          htmlFor={inputId}
+          className={`inline-flex items-center text-small font-label tracking-wide transition-colors ${
+            error
+              ? "text-error font-semibold"
+              : isFocused
+              ? "text-text-primary font-semibold"
+              : "text-text-primary"
           }`}
         >
           {label}
         </label>
       )}
 
-      {/* Contenedor de input */}
       <div className="relative flex items-center w-full">
-        {/* Input visual */}
         <input
-          id={htmlFor}
-          type={type}
+          id={inputId}
+          type={resolvedType}
+          aria-invalid={Boolean(error)}
+          onFocus={(e) => {
+            setIsFocused(true)
+            props.onFocus?.(e)
+          }}
+          onBlur={(e) => {
+            setIsFocused(false)
+            props.onBlur?.(e)
+          }}
           className={`
             w-full
-            rounded-shape-xs
+            ${variant === "tertiary" ? "" : "rounded-shape-md"}
             border
-            px-4
-            text-body
-            transition-colors
+            ${variant === "tertiary" ? "px-1" : "px-4"}
+            ${isPassword ? "pr-11" : ""}
+            font-body
+            placeholder:text-text-secondary
+            disabled:bg-surface-muted disabled:text-text-secondary disabled:opacity-60 disabled:cursor-not-allowed
+            transition-all duration-200
             focus:outline-none
-            focus:ring-2
-            focus:ring-focus-ring
             ${variants[variant] || variants.primary}
             ${sizes[size] || sizes.md}
-            ${error ? "border-error focus:ring-error" : "border-border"}
+            ${stateClasses}
           `}
-          {...props} 
+          {...props}
         />
+
+        {isPassword && (
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            className="
+              absolute right-2.5
+              inline-flex h-8 w-8 items-center justify-center
+              rounded-shape-full
+              border border-border
+              bg-surface text-text-primary
+              hover:bg-surface-muted hover:border-border-strong
+              active:scale-95
+              transition-all duration-150
+              cursor-pointer
+            "
+          >
+            {showPassword ? (
+              <EyeOff className="w-4 h-4" aria-hidden="true" />
+            ) : (
+              <Eye className="w-4 h-4" aria-hidden="true" />
+            )}
+          </button>
+        )}
       </div>
 
       {error && (
-        <p className="text-small text-error place-self-start px-4">
-          {error}
+        <p
+          role="alert"
+          className="inline-flex items-center gap-1.5 text-small font-medium text-error px-1 pt-0.5"
+        >
+          <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
         </p>
       )}
     </div>
-  );
+  )
 }

@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { 
   Input, 
@@ -62,8 +60,10 @@ export default function InventoryForm({
 
   const handleStatusChange = (e) => {
     const selectedStatus = e.target.value;
-    
-    const isActivo = selectedStatus.toLowerCase() === "activo" || selectedStatus.toLowerCase() === "disponible";
+
+    const isActivo =
+      selectedStatus.toLowerCase() === "activo" ||
+      selectedStatus.toLowerCase() === "disponible";
 
     setFormData((prev) => ({
       ...prev,
@@ -108,8 +108,10 @@ export default function InventoryForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-      
+    <form
+      onSubmit={handleSubmit}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+    >
       {/* COLUMNA 1 */}
       <div className="space-y-4">
         <Input
@@ -140,16 +142,15 @@ export default function InventoryForm({
           error={errors.unit}
         />
 
-        
-      <Select
-            label="Estado del suministro"
-            name="status"
-            value={formData.status}
-            onChange={handleStatusChange} 
-            placeholder="Seleccione estado"
-            options={STATUS_OPTIONS}
-            error={errors.status}
-          />
+        <Select
+          label="Estado del suministro"
+          name="status"
+          value={formData.status}
+          onChange={handleStatusChange}
+          placeholder="Seleccione estado"
+          options={STATUS_OPTIONS}
+          error={errors.status}
+        />
       </div>
 
       {/* COLUMNA 2 */}
@@ -158,6 +159,7 @@ export default function InventoryForm({
           label="Stock actual"
           name="stock"
           type="number"
+          min="0"
           value={formData.stock}
           placeholder="Ingrese el stock (Ej. 28)"
           onChange={handleChange}
@@ -168,6 +170,7 @@ export default function InventoryForm({
           label="Precio unitario ($)"
           name="price"
           type="number"
+          min="0"
           value={formData.price}
           placeholder="Ingrese el precio (Ej. 12000)"
           onChange={handleChange}
@@ -207,6 +210,7 @@ export default function InventoryForm({
           label="Stock mínimo"
           name="minStock"
           type="number"
+          min="0"
           value={formData.minStock}
           placeholder="Ingrese stock mínimo (Ej. 10)"
           onChange={handleChange}
@@ -217,6 +221,7 @@ export default function InventoryForm({
           label="Stock máximo"
           name="maxStock"
           type="number"
+          min="0"
           value={formData.maxStock}
           placeholder="Ingrese stock máximo (Ej. 50)"
           onChange={handleChange}
@@ -245,7 +250,7 @@ export default function InventoryForm({
         </div>
 
         <div className="flex gap-4 items-center justify-end pt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-          <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
+          <Button variant="cancel" size="sm" type="button" onClick={onCancel}>
             Cancelar
           </Button>
           <Button
@@ -262,7 +267,6 @@ export default function InventoryForm({
           </Button>
         </div>
       </div>
-
     </form>
   );
 }

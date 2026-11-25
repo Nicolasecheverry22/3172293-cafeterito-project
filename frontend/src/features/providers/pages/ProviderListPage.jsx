@@ -69,18 +69,26 @@ export default function ProviderListPage() {
             Listado de Proveedores
           </h1>
 
-          {/* Móvil: botones apilados a ancho completo; desde sm, en fila */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
+          {/* Móvil: botones apilados a ancho completo; desde sm, centrados en fila */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
             <Button
               size="md"
-              variant="tertiary"
+              variant="warm"
               onClick={() => setIsModalOpen(true)}
               {...guard("report_provider", "generar reportes de proveedores")}
             >
               Reportar proveedores
             </Button>
 
-            <Button as={Link} to="/providerCreate" size="md" variant="primary" {...guard("create_provider", "crear proveedores")}>Crear proveedor</Button>
+            <Button
+              as={Link}
+              to="/providerCreate"
+              size="lg"
+              variant="primary"
+              {...guard("create_provider", "crear proveedores")}
+            >
+              Crear proveedor
+            </Button>
           </div>
         </div>
 

@@ -78,18 +78,26 @@ export default function MenuListPage() {
             Listado de Menú
           </h1>
 
-          {/* Móvil: botones apilados a ancho completo; desde sm, en fila */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
+          {/* Móvil: botones apilados a ancho completo; desde sm, centrados en fila */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
             <Button
               size="md"
-              variant="tertiary"
+              variant="warm"
               onClick={() => setIsModalOpen(true)}
               {...guard("report_product", "generar reportes del menú")}
             >
               Reportar menú
             </Button>
 
-            <Button as={Link} to="/menuCreate" size="md" variant="primary" {...guard("create_product", "crear platillos")}>Crear platillo</Button>
+            <Button
+              as={Link}
+              to="/menuCreate"
+              size="lg"
+              variant="primary"
+              {...guard("create_product", "crear platillos")}
+            >
+              Crear platillo
+            </Button>
           </div>
         </div>
 

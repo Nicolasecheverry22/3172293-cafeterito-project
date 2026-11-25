@@ -75,17 +75,26 @@ export default function UserListPage() {
           </h1>
 
           {/* Móvil: botones apilados a ancho completo; desde sm, en fila */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
+          {/* Móvil: botones apilados a ancho completo; desde sm, centrados en fila */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
             <Button
               size="md"
-              variant="tertiary"
+              variant="warm"
               onClick={() => setIsModalOpen(true)}
               {...guard("report_user", "generar reportes de usuarios")}
             >
               Reportar usuarios
             </Button>
 
-            <Button as={Link} to="/userCreate" size="md" variant="primary" {...guard("create_user", "crear usuarios")}>Crear usuario</Button>
+            <Button
+              as={Link}
+              to="/userCreate"
+              size="lg"
+              variant="primary"
+              {...guard("create_user", "crear usuarios")}
+            >
+              Crear usuario
+            </Button>
           </div>
         </div>
 

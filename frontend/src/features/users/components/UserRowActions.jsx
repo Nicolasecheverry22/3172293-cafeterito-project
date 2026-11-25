@@ -1,5 +1,6 @@
 import { Pencil, Eye, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/shared";
 import { confirmAction } from "@/shared/services/confirmAction";
 import { setUserStatus } from "@/services/userApi";
 import usePermission from "@/shared/hooks/usePermission";
@@ -26,36 +27,44 @@ export default function UserRowActions({ user, onChanged }) {
 
   return (
     <div className="row-actions">
-      <button
+      <Button
+        variant="info"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/UserView/${user.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Visualizar usuario"
+        aria-label={`Visualizar usuario ${name}`}
         {...guard("view_user", "ver el detalle de usuarios")}
       >
-        <Eye size={20} />
-      </button>
+        <Eye className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant="edit"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/EditUser/${user.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Editar usuario"
+        aria-label={`Editar usuario ${name}`}
         {...guard("update_user", "editar usuarios")}
       >
-        <Pencil size={20} />
-      </button>
+        <Pencil className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant={isActive ? "enable" : "disable"}
+        size="xs"
+        shape="pill"
         onClick={handleToggleStatus}
-        className={`row-actions__btn touch-target hover:bg-surface-muted cursor-pointer ${
-          isActive
-            ? "text-success"
-            : "text-error"
-        }`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title={isActive ? "Activo — clic para deshabilitar" : "Inactivo — clic para habilitar"}
+        aria-label={isActive ? `Deshabilitar usuario ${name}` : `Habilitar usuario ${name}`}
         {...guard("disable_user", "cambiar el estado de usuarios")}
       >
-        {isActive ? <Power size={20} /> : <PowerOff size={20} />}
-      </button>
+        {isActive ? <Power className="w-5 h-5" aria-hidden="true" /> : <PowerOff className="w-5 h-5" aria-hidden="true" />}
+      </Button>
     </div>
   );
 }

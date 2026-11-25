@@ -1,5 +1,6 @@
 import { Pencil, Eye, Power, PowerOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/shared";
 import { confirmAction } from "@/shared/services/confirmAction";
 import { setProviderStatus } from "@/services/providerApi";
 import usePermission from "@/shared/hooks/usePermission";
@@ -26,36 +27,44 @@ export default function ProviderRowActions({ provider, onChanged }) {
 
   return (
     <div className="row-actions">
-      <button
+      <Button
+        variant="info"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/ProviderView/${provider.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Visualizar proveedor"
+        aria-label={`Visualizar proveedor ${name}`}
         {...guard("view_provider", "ver el detalle de proveedores")}
       >
-        <Eye size={20} />
-      </button>
+        <Eye className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant="edit"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/EditProvider/${provider.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Editar proveedor"
+        aria-label={`Editar proveedor ${name}`}
         {...guard("update_provider", "editar proveedores")}
       >
-        <Pencil size={20} />
-      </button>
+        <Pencil className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant={isActive ? "enable" : "disable"}
+        size="xs"
+        shape="pill"
         onClick={handleToggleStatus}
-        className={`row-actions__btn touch-target hover:bg-surface-muted cursor-pointer ${
-          isActive
-            ? "text-success"
-            : "text-error"
-        }`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title={isActive ? "Activo — clic para inhabilitar" : "Inactivo — clic para habilitar"}
+        aria-label={isActive ? `Inhabilitar proveedor ${name}` : `Habilitar proveedor ${name}`}
         {...guard("disable_provider", "cambiar el estado de proveedores")}
       >
-        {isActive ? <Power size={20} /> : <PowerOff size={20} />}
-      </button>
+        {isActive ? <Power className="w-5 h-5" aria-hidden="true" /> : <PowerOff className="w-5 h-5" aria-hidden="true" />}
+      </Button>
     </div>
   );
 }

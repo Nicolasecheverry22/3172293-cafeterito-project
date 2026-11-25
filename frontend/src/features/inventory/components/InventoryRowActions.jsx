@@ -1,6 +1,7 @@
 import { Pencil, Eye, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { Button } from "@/shared";
 import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
 import { setInventoryStatus, INVENTORY_STATUSES } from "@/services/inventoryApi";
 import usePermission from "@/shared/hooks/usePermission";
@@ -25,8 +26,10 @@ export default function InventoryRowActions({ provision, onChanged }) {
       cancelButtonText: "Cancelar",
       customClass: {
         popup: "rounded-shape-lg",
-        confirmButton: "!bg-brand !text-text-on-brand px-4 py-2 rounded-shape-sm font-medium cursor-pointer mr-2",
-        cancelButton: "bg-surface-muted px-4 py-2 rounded-shape-sm font-medium cursor-pointer",
+        confirmButton:
+          "!bg-brand !text-text-on-brand border-2 border-border-strong px-4 py-2 rounded-shape-md font-bold cursor-pointer mr-2",
+        cancelButton:
+          "!bg-error/20 !text-text-primary border-2 border-error px-4 py-2 rounded-shape-md font-bold cursor-pointer",
       },
       buttonsStyling: false,
     });
@@ -47,32 +50,44 @@ export default function InventoryRowActions({ provision, onChanged }) {
 
   return (
     <div className="row-actions">
-      <button
+      <Button
+        variant="info"
+        size="xs"
+        shape="pill"
         onClick={() => provision.id && navigate(`/InventoryView/${provision.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Ver detalles"
+        aria-label="Ver detalles del suministro"
         {...guard("view_inventory", "ver el detalle de suministros")}
       >
-        <Eye size={20} />
-      </button>
+        <Eye className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant="edit"
+        size="xs"
+        shape="pill"
         onClick={() => provision.id && navigate(`/editInventory/${provision.id}`)}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Editar suministro"
+        aria-label="Editar suministro"
         {...guard("update_inventory", "editar suministros")}
       >
-        <Pencil size={20} />
-      </button>
+        <Pencil className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
+      <Button
+        variant="detail"
+        size="xs"
+        shape="pill"
         onClick={handleChangeStatus}
-        className="row-actions__btn touch-target hover:bg-surface-muted cursor-pointer"
+        className="row-actions__btn !px-0 !w-12 !h-12"
         title="Cambiar estado"
+        aria-label="Cambiar estado del suministro"
         {...guard("change_status_inventory", "cambiar el estado de suministros")}
       >
-        <RefreshCw size={20} />
-      </button>
+        <RefreshCw className="w-5 h-5" aria-hidden="true" />
+      </Button>
     </div>
   );
 }

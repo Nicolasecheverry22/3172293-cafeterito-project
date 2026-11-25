@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Printer, Ban } from "lucide-react";
+import { Button } from "@/shared";
 import usePermission from "@/shared/hooks/usePermission";
 import { printInvoiceById } from "../utils/invoicePdf";
 import VoidInvoiceModal from "./VoidInvoiceModal";
@@ -15,39 +16,45 @@ export default function InvoiceRowActions({ invoice, onChanged }) {
 
   return (
     <div className="row-actions">
-      <button
-        type="button"
+      <Button
+        variant="info"
+        size="xs"
+        shape="pill"
         onClick={() => navigate(`/InvoiceView/${invoice.id}`)}
         title="Ver comprobante"
         aria-label={`Ver comprobante ${invoice.invoiceNumber}`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         {...guard("view_invoice", "ver comprobantes")}
-        className="row-actions__btn touch-target hover:bg-surface-muted"
       >
-        <Eye size={20} />
-      </button>
+        <Eye className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
-      <button
-        type="button"
+      <Button
+        variant="detail"
+        size="xs"
+        shape="pill"
         onClick={() => printInvoiceById(invoice.id)}
         title="Imprimir / PDF"
         aria-label={`Imprimir comprobante ${invoice.invoiceNumber}`}
+        className="row-actions__btn !px-0 !w-12 !h-12"
         {...guard("view_invoice", "imprimir comprobantes")}
-        className="row-actions__btn touch-target hover:bg-surface-muted"
       >
-        <Printer size={20} />
-      </button>
+        <Printer className="w-5 h-5" aria-hidden="true" />
+      </Button>
 
       {canBeVoided && (
-        <button
-          type="button"
+        <Button
+          variant="disable"
+          size="xs"
+          shape="pill"
           onClick={() => setVoiding(true)}
           title="Anular comprobante"
           aria-label={`Anular comprobante ${invoice.invoiceNumber}`}
+          className="row-actions__btn !px-0 !w-12 !h-12"
           {...guard("void_invoice", "anular comprobantes")}
-          className="row-actions__btn touch-target text-error hover:bg-error-container hover:text-on-error-container"
         >
-          <Ban size={20} />
-        </button>
+          <Ban className="w-5 h-5" aria-hidden="true" />
+        </Button>
       )}
 
       {voiding && (

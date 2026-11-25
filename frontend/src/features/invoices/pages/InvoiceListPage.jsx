@@ -44,8 +44,14 @@ export default function InvoiceListPage() {
             <h1 className="text-2xl font-bold font-heading text-text-primary">Comprobantes de venta</h1>
             <p className="text-small text-text-secondary">Documentos sin validez fiscal</p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
-            <Button size="md" variant="tertiary" onClick={() => setIsReportOpen(true)} {...guard("report_invoice", "generar reportes de comprobantes")}>
+          {/* Móvil: botones apilados a ancho completo; desde sm, centrados en fila */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
+            <Button
+              size="md"
+              variant="warm"
+              onClick={() => setIsReportOpen(true)}
+              {...guard("report_invoice", "generar reportes de comprobantes")}
+            >
               Reportar comprobantes
             </Button>
           </div>

@@ -3,21 +3,34 @@ import {
   getCoreRowModel,
   flexRender,
   getPaginationRowModel,
-  getFilteredRowModel
+  getFilteredRowModel,
 } from "@tanstack/react-table"
+import { useState, useMemo } from "react"
+import {
+  Search,
+  X,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+  Inbox,
+  Sparkles,
+} from "lucide-react"
+import { Button, Select, Input } from "@/shared"
 
-// Hook de React para manejar estado
-import { useState } from "react"
+const PAGE_SIZE_OPTIONS = [5, 7, 10, 20, 50].map((size) => ({
+  value: size,
+  label: `${size} filas`,
+}))
 
-// ================== FILTRO GLOBAL PERSONALIZADO ==================
+// Filtro global personalizado:
 // Si la columna define meta.searchValue(row.original) se busca sobre ese texto
-// (útil para columnas booleanas como "Estado"); si no, sobre row.getValue().
-// La comparación es en minúsculas y por coincidencia parcial.
+// (útil para columnas booleanas o compuestas); si no, sobre row.getValue().
 const globalSearchFilter = (row, columnId, filterValue) => {
   const search = String(filterValue ?? "").trim().toLowerCase()
   if (!search) return true
 
-  const column = row.getAllCells().find(cell => cell.column.id === columnId)?.column
+  const column = row.getAllCells().find((cell) => cell.column.id === columnId)?.column
   const searchValue = column?.columnDef.meta?.searchValue
 
   const value = searchValue ? searchValue(row.original) : row.getValue(columnId)
@@ -26,281 +39,339 @@ const globalSearchFilter = (row, columnId, filterValue) => {
   return String(value).toLowerCase().includes(search)
 }
 
-// Columnas de baja prioridad: meta.hideBelow = "sm" | "md" | "lg" | "xl" las oculta por debajo
-// de ese breakpoint (clases literales para que Tailwind las genere). La columna de
-// acciones nunca se oculta.
+// Clases literales para que Tailwind v4 genere las utilidades responsive correctamente.
+// La columna de acciones nunca se oculta.
 const HIDE_BELOW = {
   sm: "hidden sm:table-cell",
   md: "hidden md:table-cell",
   lg: "hidden lg:table-cell",
   xl: "hidden xl:table-cell",
 }
+
 const responsiveClass = (column) =>
   column.id === "actions" ? "" : HIDE_BELOW[column.columnDef.meta?.hideBelow] ?? ""
 
-// Botón reutilizable del sistema de componentes
-import { Button } from "@/shared"
-
-// Componente reutilizable de tabla
-// Recibe:
-// - data: datos que se mostrarán
-// - columns: configuración de columnas
-export default function DataTable({ data, columns }) {
-
-  // ================== ESTADO DE PAGINACIÓN ==================
-  // pageIndex → página actual
-  // pageSize → cantidad de filas por página
+export default function DataTable({ data = [], columns = [] }) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 5
+    pageSize: 5,
   })
 
-  // ================== ESTADO DEL FILTRO GLOBAL ==================
-  // Se usa para el buscador de la tabla
   const [globalFilter, setGlobalFilter] = useState("")
+  const [jumpPageInput, setJumpPageInput] = useState("1")
 
-  // ================== CONFIGURACIÓN DE LA TABLA ==================
   const table = useReactTable({
-    // Datos que se mostrarán
     data,
-
-    // Definición de columnas
     columns,
-
-    // Estado controlado de la tabla
     state: {
       globalFilter,
-      pagination
+      pagination,
     },
-
-    // Función que se ejecuta cuando cambia la paginación
-    onPaginationChange: setPagination,
-
-    // Función que se ejecuta cuando cambia el filtro global
+    onPaginationChange: (updater) => {
+      setPagination((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater
+        setJumpPageInput(String(next.pageIndex + 1))
+        return next
+      })
+    },
     onGlobalFilterChange: setGlobalFilter,
-
-    // Todas las columnas participan en la búsqueda excepto "Acciones"
     getColumnCanGlobalFilter: (column) => column.id !== "actions",
-
-    // Filtro que entiende meta.searchValue (columnas booleanas)
     globalFilterFn: globalSearchFilter,
-
-    // Modelo base de filas
     getCoreRowModel: getCoreRowModel(),
-
-    // Modelo con filtrado aplicado
     getFilteredRowModel: getFilteredRowModel(),
-
-    // Modelo con paginación aplicada
     getPaginationRowModel: getPaginationRowModel(),
   })
 
+  const filteredRows = table.getFilteredRowModel().rows
+  const pageRows = table.getRowModel().rows
+  const pageCount = Math.max(table.getPageCount(), 1)
+  const currentPageIndex = table.getState().pagination.pageIndex
+  const pageSize = table.getState().pagination.pageSize
+
+  const rangeInfo = useMemo(() => {
+    const totalFiltered = filteredRows.length
+    if (totalFiltered === 0) return { start: 0, end: 0, total: 0 }
+    const start = currentPageIndex * pageSize + 1
+    const end = Math.min(start + pageRows.length - 1, totalFiltered)
+    return { start, end, total: totalFiltered }
+  }, [filteredRows.length, currentPageIndex, pageSize, pageRows.length])
+
+  const handleClearSearch = () => {
+    setGlobalFilter("")
+    setPagination((prev) => {
+      setJumpPageInput("1")
+      return { ...prev, pageIndex: 0 }
+    })
+  }
+
+  const handleJumpPageChange = (e) => {
+    const raw = e.target.value
+    setJumpPageInput(raw)
+
+    const parsed = Number(raw)
+    if (!raw || Number.isNaN(parsed)) return
+
+    const clampedPage = Math.min(Math.max(Math.trunc(parsed), 1), pageCount) - 1
+    table.setPageIndex(clampedPage)
+  }
+
+  const handleJumpPageBlur = () => {
+    setJumpPageInput(String(currentPageIndex + 1))
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-3.5">
+      {/* ================== TOOLBAR SUPERIOR ================== */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-shape-lg border border-border-strong bg-surface p-3 shadow-elevation-2">
+        {/* Buscador global */}
+        <div className="relative w-full sm:w-72 lg:w-80">
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary transition-colors"
+            aria-hidden="true"
+          />
+          <input
+            type="text"
+            value={globalFilter ?? ""}
+            onChange={(e) => {
+              setGlobalFilter(e.target.value)
+              setJumpPageInput("1")
+              setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+            }}
+            placeholder="Buscar en registros..."
+            aria-label="Buscar en la tabla"
+            className="h-10 w-full rounded-shape-full border border-border-strong bg-background pl-10 pr-10 text-sm text-text-primary placeholder:text-text-secondary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-focus-border"
+          />
 
-      {/* ================== TOOLBAR ================== */}
-      {/* Barra superior con buscador y selector de filas */}
-
-      <div className="flex items-center justify-between gap-2 sm:gap-4">
-
-        {/* ================== BUSCADOR ================== */}
-        {/* Filtra todas las columnas de la tabla */}
-        <input
-          type="text"
-          placeholder="Buscar..."
-          value={globalFilter ?? ""}
-          onChange={(e) => {
-            setGlobalFilter(e.target.value)
-            // Al cambiar la búsqueda se vuelve a la primera página
-            setPagination(prev => ({ ...prev, pageIndex: 0 }))
-          }}
-          className="h-12 border border-border-strong rounded-shape-xs px-4 w-full min-w-0 sm:w-64 bg-background text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-focus-ring"
-        />
-
-        {/* ================== SELECTOR DE FILAS ================== */}
-        {/* Permite cambiar cuántas filas se muestran por página */}
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => table.setPageSize(Number(e.target.value))}
-          aria-label="Filas por página"
-          className="h-12 shrink-0 border border-border-strong rounded-shape-xs px-3 bg-background text-text-primary cursor-pointer focus:outline-none focus:ring-2 focus:ring-focus-ring"
-        >
-          {[5, 7, 10, 20, 50].map(size => (
-            <option key={size} value={size}>
-              {size} filas
-            </option>
-          ))}
-        </select>
-
-      </div>
-
-      {/* ================== TABLA ================== */}
-      <div className="overflow-x-auto border border-border-strong rounded-shape-md bg-background">
-        <table className="w-full bg-background text-text-primary">
-
-          {/* ================== CABECERA ================== */}
-          <thead className="bg-brand-soft-two text-text-primary">
-
-            {/* TanStack agrupa cabeceras automáticamente */}
-            {table.getHeaderGroups().map(headerGroup => (
-
-              <tr key={headerGroup.id}>
-
-                {headerGroup.headers.map(header => (
-
-                  <th
-                    key={header.id}
-                    className={`px-3 lg:px-4 py-3 text-left border-b border-border-strong text-text-primary whitespace-nowrap ${responsiveClass(header.column)}`}
-                  >
-
-                    {/* 
-                      flexRender permite renderizar:
-                      - texto
-                      - JSX
-                      - funciones
-                      definidos en columnDef.header
-                    */}
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-
-                  </th>
-
-                ))}
-              </tr>
-
-            ))}
-
-          </thead>
-
-          {/* ================== CUERPO DE LA TABLA ================== */}
-          <tbody className="bg-background text-text-primary">
-
-            {/* Filas generadas por TanStack */}
-            {table.getRowModel().rows.map(row => (
-
-              <tr key={row.id} className="hover:bg-surface-muted text-text-primary">
-
-                {/* Celdas visibles de cada fila */}
-                {row.getVisibleCells().map(cell => (
-
-                  <td
-                    key={cell.id}
-                    className={`px-3 lg:px-4 py-2 border-b border-border-strong text-text-primary ${responsiveClass(cell.column)}`}
-                  >
-
-                    {/* Render dinámico del contenido de la celda */}
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
-
-                  </td>
-
-                ))}
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
-      </div>
-
-      {/* ================== FOOTER ================== */}
-      {/* En móvil se apila: el contador arriba y la paginación debajo (antes se salía de la tarjeta) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-
-        {/* ================== INFORMACIÓN ================== */}
-        {/* Cantidad de registros visibles */}
-        <span className="text-sm text-text-primary">
-          Mostrando {table.getRowModel().rows.length} de{" "}
-          {table.getFilteredRowModel().rows.length} registros
-        </span>
-
-        {/* ================== CONTROLES DE PAGINACIÓN ================== */}
-        {/* En móvil solo Anterior / "Página X de Y" / Siguiente; Inicio y Final desde sm */}
-        <div className="flex items-center justify-between sm:justify-end gap-2">
-
-          {/* Ir a la primera página */}
-          <Button
-            size="sm"
-            variant="secondary"
-            className="max-sm:hidden"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Inicio
-          </Button>
-
-          {/* Página anterior */}
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Anterior
-          </Button>
-
-          {/* Información de página actual */}
-          <span className="text-sm px-2 text-text-primary whitespace-nowrap" aria-live="polite">
-            Página {table.getState().pagination.pageIndex + 1} de{" "}
-            {Math.max(table.getPageCount(), 1)}
-          </span>
-
-          {/* Página siguiente */}
-          <Button
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Siguiente
-          </Button>
-
-          {/* Ir a la última página */}
-          <Button
-            size="sm"
-            className="max-sm:hidden"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            Final
-          </Button>
-
+          {globalFilter && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              aria-label="Limpiar búsqueda"
+              title="Limpiar búsqueda"
+              className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-shape-full bg-surface-muted text-text-primary border border-border hover:bg-brand hover:text-text-on-brand active:scale-90 transition-all duration-150"
+            >
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
+            </button>
+          )}
         </div>
 
+        {/* Selector de filas por página */}
+        <div className="w-36 self-end sm:self-auto">
+          <Select
+            name="pageSize"
+            value={pageSize}
+            options={PAGE_SIZE_OPTIONS}
+            compact
+            onChange={(e) => {
+              table.setPageSize(Number(e.target.value))
+              setJumpPageInput("1")
+            }}
+            aria-label="Filas por página"
+          />
+        </div>
       </div>
 
-      {/* ================== IR A PÁGINA ================== */}
-      {/* Permite navegar directamente a una página específica */}
-      {/* Oculto en móvil: la paginación se reduce a Anterior / Siguiente */}
-      <div className="hidden sm:flex items-center gap-2 text-sm text-text-primary">
+      {/* ================== CUERPO PRINCIPAL DE LA TABLA ================== */}
+      <div className="w-full rounded-shape-lg border border-border-strong bg-background shadow-elevation-3 overflow-hidden">
+        <div className="w-full max-h-[58vh] overflow-auto">
+          <table className="group/table w-full min-w-full table-auto border-separate border-spacing-0 text-left text-text-primary">
+            {/* CABECERA STICKY DE ANCHO COMPLETO, PESO UNIFORME Y CONTRASTE >= 3:1 */}
+            <thead className="sticky top-0 z-10 bg-surface">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="bg-surface">
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      scope="col"
+                      className={`bg-surface border-b-2 border-border-strong px-3.5 lg:px-4 py-2.5 text-xs uppercase tracking-wider !font-bold text-text-primary whitespace-nowrap select-none [&_button]:!font-bold [&_button]:text-xs [&_button]:tracking-wider [&_button]:uppercase [&_button]:text-text-primary [&_span]:!font-bold ${responsiveClass(
+                        header.column
+                      )}`}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
 
-        <span>Ir a página:</span>
-
-        <input
-          type="number"
-
-          // Página actual (se muestra +1 porque el índice empieza en 0)
-          defaultValue={table.getState().pagination.pageIndex + 1}
-
-          onChange={(e) => {
-
-            // Convierte el número ingresado en índice de página
-            const page = e.target.value ? Number(e.target.value) - 1 : 0
-
-            // Cambia la página
-            table.setPageIndex(page)
-          }}
-
-          className="h-12 border border-border-strong rounded-shape-xs px-3 w-20 bg-background text-text-primary focus:outline-none focus:ring-2 focus:ring-focus-ring"
-        />
-
+            {/* FILAS SIEMPRE COMPACTAS */}
+            <tbody className="bg-background">
+              {pageRows.length > 0 ? (
+                pageRows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="group/row transition-all duration-200 ease-out hover:bg-surface-muted group-hover/table:opacity-80 hover:!opacity-100"
+                  >
+                    {row.getVisibleCells().map((cell, idx) => (
+                      <td
+                        key={cell.id}
+                        className={`border-b border-border px-3.5 lg:px-4 py-1.5 text-sm text-text-primary transition-all duration-200 ease-out ${
+                          idx === 0
+                            ? "border-l-4 border-l-transparent group-hover/row:border-l-focus-ring group-hover/row:pl-4"
+                            : ""
+                        } ${responsiveClass(cell.column)}`}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={table.getAllLeafColumns().length || 1}
+                    className="px-6 py-12 text-center"
+                  >
+                    <div className="mx-auto flex max-w-sm flex-col items-center gap-2.5">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-shape-full bg-surface-muted border border-border-strong text-text-primary shadow-elevation-1">
+                        <Inbox className="w-5 h-5" aria-hidden="true" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-bold text-text-primary">
+                          Sin resultados por aquí
+                        </p>
+                        <p className="text-xs text-text-secondary">
+                          {globalFilter
+                            ? `No encontramos coincidencias para "${globalFilter}".`
+                            : "Todavía no hay registros cargados en esta vista."}
+                        </p>
+                      </div>
+                      {globalFilter && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={handleClearSearch}
+                          className="mt-1"
+                        >
+                          Restablecer búsqueda
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
+      {/* ================== FOOTER Y PAGINACIÓN ================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-shape-lg border border-border-strong bg-surface px-4 py-2.5 shadow-elevation-1">
+        {/* Izquierda: Contador único de registros */}
+        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 text-xs sm:text-sm font-medium text-text-primary">
+          <span>
+            Mostrando{" "}
+            <strong className="font-bold text-text-primary tabular-nums">
+              {rangeInfo.start}
+            </strong>
+            {rangeInfo.total > 0 && (
+              <>
+                {"–"}
+                <strong className="font-bold text-text-primary tabular-nums">
+                  {rangeInfo.end}
+                </strong>
+              </>
+            )}{" "}
+            de{" "}
+            <strong className="font-bold text-text-primary tabular-nums">
+              {rangeInfo.total}
+            </strong>{" "}
+            registros
+          </span>
+
+          {globalFilter && (
+            <span className="inline-flex items-center gap-1 rounded-shape-full bg-brand text-text-on-brand border border-border-strong px-2.5 py-0.5 text-xs font-semibold">
+              <Sparkles className="w-3 h-3" aria-hidden="true" />
+              <span>"{globalFilter}"</span>
+            </span>
+          )}
+        </div>
+
+        {/* Centro: Controles de paginación */}
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="max-sm:hidden transition-transform active:scale-95"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Ir a la primera página"
+          >
+            <ChevronsLeft className="w-4 h-4" aria-hidden="true" />
+            <span className="hidden md:inline">Inicio</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="secondary"
+            className="transition-transform active:scale-95"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Página anterior"
+          >
+            <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+            <span>Anterior</span>
+          </Button>
+
+          <span
+            className="px-3 py-1 rounded-shape-xs bg-background border border-border-strong text-xs sm:text-sm font-semibold text-text-primary tabular-nums whitespace-nowrap shadow-inner"
+            aria-live="polite"
+          >
+            <strong>{currentPageIndex + 1}</strong> / <strong>{pageCount}</strong>
+          </span>
+
+          <Button
+            size="sm"
+            className="transition-transform active:scale-95"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            aria-label="Página siguiente"
+          >
+            <span>Siguiente</span>
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          </Button>
+
+          <Button
+            size="sm"
+            className="max-sm:hidden transition-transform active:scale-95"
+            onClick={() => table.setPageIndex(pageCount - 1)}
+            disabled={!table.getCanNextPage()}
+            aria-label="Ir a la última página"
+          >
+            <span className="hidden md:inline">Final</span>
+            <ChevronsRight className="w-4 h-4" aria-hidden="true" />
+          </Button>
+        </div>
+
+        {/* Derecha: Ir a página */}
+       {/* Derecha: Ir a página */}
+        <div className="hidden lg:flex items-center justify-end">
+          <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-text-primary">
+            <Input
+              label="Página:"
+              htmlFor="datatable-jump-page"
+              type="number"
+              size="sm"
+              min={1}
+              max={pageCount}
+              value={jumpPageInput}
+              onChange={handleJumpPageChange}
+              onBlur={handleJumpPageBlur}
+              aria-label="Ir a página número"
+              className="!w-auto flex-row items-center gap-2 space-y-0"
+              inputClassName="w-16 text-center font-bold tabular-nums px-2"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

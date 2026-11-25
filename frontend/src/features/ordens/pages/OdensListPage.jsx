@@ -77,18 +77,26 @@ export default function OrdenListPage() {
             Listado de Órdenes
           </h1>
 
-          {/* Móvil: botones apilados a ancho completo; desde sm, en fila */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
+          {/* Móvil: botones apilados a ancho completo; desde sm, centrados en fila */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto *:w-full sm:*:w-auto">
             <Button
               size="md"
-              variant="tertiary"
+              variant="warm"
               onClick={() => setIsModalOpen(true)}
               {...guard("report_order", "generar reportes de órdenes")}
             >
               Reportar órdenes
             </Button>
 
-            <Button as={Link} to="/ordensCreate" size="md" variant="primary" {...guard("create_order", "crear órdenes")}>Crear orden</Button>
+            <Button
+              as={Link}
+              to="/ordensCreate"
+              size="lg"
+              variant="primary"
+              {...guard("create_order", "crear órdenes")}
+            >
+              Crear orden
+            </Button>
           </div>
         </div>
 
