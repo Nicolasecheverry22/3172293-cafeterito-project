@@ -50,7 +50,7 @@ export default function EditProvider() {
 
   if (!formData) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center">
+      <div className="min-h-[50vh] w-full flex items-center justify-center">
         <p className="text-text-secondary">Cargando...</p>
       </div>
     );

@@ -54,8 +54,8 @@ export function sessionCan(codes) {
   return [].concat(codes).some((code) => granted.includes(code));
 }
 
-// Módulos principales en orden de navegación (Navbar y redirección tras el login).
-// El Navbar les agrega el icono.
+// Orden de redirección tras el login (primer módulo permitido). La navegación de la
+// interfaz (barra lateral e inferior) está en shared/config/navigation.js.
 export const MODULE_ROUTES = [
   { to: "/userList", label: "Usuarios", permission: "list_user" },
   { to: "/inventoryList", label: "Inventario", permission: "list_inventory" },

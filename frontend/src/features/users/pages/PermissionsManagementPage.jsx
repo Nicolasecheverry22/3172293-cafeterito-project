@@ -236,7 +236,7 @@ export default function PermissionsManagementPage() {
       setSavedIds(new Set(selectedIds));
 
       // Si el cambio afecta al usuario en sesión (su grupo o él mismo), se refrescan sus
-      // permisos: el Navbar y los botones se actualizan (SESSION_EVENT).
+      // permisos: la navegación y los botones se actualizan (SESSION_EVENT).
       const affectsMe = selectedGroup
         ? sessionUser?.groups?.includes(group?.group_name)
         : String(sessionUser?.id) === selectedUser;
