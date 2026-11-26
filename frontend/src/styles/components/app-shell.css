@@ -153,6 +153,41 @@
   .sidebar__icon > svg { width: 24px; height: 24px; }
   .sidebar__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  /* Badge M3: numérico (99+ como máximo). error = pendientes, warning = alertas */
+  .sidebar__badge,
+  .bottom-nav__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 24px;
+    height: 20px;
+    padding-inline: 6px;
+    border-radius: var(--md-shape-full);
+    font-size: var(--semantic-font-size-caption);
+    font-weight: var(--semantic-font-weight-heading);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .sidebar__badge { margin-left: auto; }
+  .sidebar__badge--error,
+  .bottom-nav__badge--error { background: var(--semantic-error); color: var(--semantic-on-error); }
+  .sidebar__badge--warning,
+  .bottom-nav__badge--warning { background: var(--semantic-warning); color: var(--semantic-on-warning); }
+  /* Pequeño, sobre la esquina del icono (rail y barra inferior). El anillo con el color de
+     fondo lo separa del icono y del indicador activo */
+  .sidebar__badge--small,
+  .bottom-nav__badge {
+    position: absolute;
+    min-width: 16px;
+    height: 16px;
+    padding-inline: 4px;
+    font-size: 10px;
+    box-shadow: 0 0 0 2px var(--semantic-background);
+  }
+  .sidebar__badge--small { top: -6px; left: 14px; margin-left: 0; }
+  .bottom-nav__badge { top: 0; left: 36px; }
+
   .sidebar__toggle {
     display: flex;
     align-items: center;

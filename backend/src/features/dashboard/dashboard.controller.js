@@ -6,4 +6,10 @@ export const dashboardController = {
     res.set("Cache-Control", "no-store");
     res.json(await dashboardService.getDashboard(req.user.id, req.auth));
   },
+
+  // GET /api/dashboard/badges — contadores de la navegación (ver dashboard.service.js)
+  async badges(req, res) {
+    res.set("Cache-Control", "no-store");
+    res.json(await dashboardService.getBadges(req.auth));
+  },
 };

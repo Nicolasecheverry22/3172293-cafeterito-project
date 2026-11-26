@@ -1,5 +1,6 @@
 // Llamadas al API del backend para comprobantes de venta (documento sin validez fiscal).
 import { api } from "./apiClient";
+import { withBadgesRefresh } from "./dashboardApi";
 
 // Deben coincidir con el backend (invoice.schema.js / migración 0040)
 export const PAYMENT_METHODS = [
@@ -49,10 +50,10 @@ export const getInvoiceById = (id) => api.get(`/invoices/${id}`);
 export const getInvoiceByOrderId = (orderId) => api.get(`/invoices/by-order/${orderId}`);
 
 // payload: { orderId, paymentMethod, amountReceived?, tip?, customer? } → { message, invoice }
-export const createInvoice = (payload) => api.post("/invoices", payload);
+export const createInvoice = (payload) => api.post("/invoices", payload).then(withBadgesRefresh);
 
 // Solo Administrador (el backend responde 403 a los demás)
-export const voidInvoice = (id, reason) => api.patch(`/invoices/${id}/void`, { reason });
+export const voidInvoice = (id, reason) => api.patch(`/invoices/${id}/void`, { reason }).then(withBadgesRefresh);
 
 // { invoices, totals: { count, issuedCount, voidedCount, totalSold, totalTax, totalTips, byPaymentMethod, byDay } }
 export const getInvoiceReportData = (query) => api.get("/invoices/report-data", { query });

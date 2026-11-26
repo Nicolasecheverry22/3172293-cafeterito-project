@@ -30,6 +30,31 @@ const BOUNDS = `
 const MINUTES_SINCE = (col) =>
   `FLOOR(EXTRACT(EPOCH FROM (now() - (${col} AT TIME ZONE $1))) / 60)::int`;
 
+// Alertas de inventario ($1 = zona, $2 = días hasta el vencimiento). Compartido por el
+// tablero (listado) y los badges de navegación (conteo): un solo criterio de "alerta".
+const INVENTORY_ALERTS = `
+  today AS (SELECT (now() AT TIME ZONE $1)::date AS d),
+  alerts AS (
+    SELECT i.id,
+           i.provision_name AS name,
+           i.stock,
+           i.min_stock      AS "minStock",
+           i.unit,
+           i.status,
+           TO_CHAR(i.expiration_date, 'YYYY-MM-DD') AS "expirationDate",
+           (i.expiration_date - t.d)                AS "daysToExpire",
+           CASE
+             WHEN i.status = 'Agotado' THEN 'agotado'
+             WHEN i.status = 'Vencido' OR i.expiration_date < t.d THEN 'vencido'
+             WHEN i.stock <= i.min_stock THEN 'bajo_minimo'
+             ELSE 'por_vencer'
+           END AS type
+      FROM inventory i, today t
+     WHERE i.stock <= i.min_stock
+        OR i.status IN ('Agotado', 'Vencido')
+        OR (i.expiration_date IS NOT NULL AND i.expiration_date <= t.d + $2::int)
+  )`;
+
 const rows = async (sql, params) => (await pool.query(sql, params)).rows;
 
 export const dashboardRepository = {
@@ -167,27 +192,7 @@ export const dashboardRepository = {
   // (incluye los ya vencidos por fecha aunque su estado siga "Disponible").
   async getInventoryAlerts({ limit = 8, days = 3 } = {}) {
     return rows(
-      `WITH today AS (SELECT (now() AT TIME ZONE $1)::date AS d),
-       alerts AS (
-         SELECT i.id,
-                i.provision_name AS name,
-                i.stock,
-                i.min_stock      AS "minStock",
-                i.unit,
-                i.status,
-                TO_CHAR(i.expiration_date, 'YYYY-MM-DD') AS "expirationDate",
-                (i.expiration_date - t.d)                AS "daysToExpire",
-                CASE
-                  WHEN i.status = 'Agotado' THEN 'agotado'
-                  WHEN i.status = 'Vencido' OR i.expiration_date < t.d THEN 'vencido'
-                  WHEN i.stock <= i.min_stock THEN 'bajo_minimo'
-                  ELSE 'por_vencer'
-                END AS type
-           FROM inventory i, today t
-          WHERE i.stock <= i.min_stock
-             OR i.status IN ('Agotado', 'Vencido')
-             OR (i.expiration_date IS NOT NULL AND i.expiration_date <= t.d + $2::int)
-       )
+      `WITH ${INVENTORY_ALERTS}
        SELECT a.*,
               CASE WHEN a.type IN ('agotado', 'vencido') THEN 'error' ELSE 'warning' END AS severity,
               COUNT(*) OVER ()::int AS "totalAlerts"
@@ -197,6 +202,15 @@ export const dashboardRepository = {
         LIMIT $3`,
       [DASHBOARD_TZ, days, limit]
     );
+  },
+
+  // Solo el total de alertas (mismo criterio que getInventoryAlerts), para los badges
+  async countInventoryAlerts({ days = 3 } = {}) {
+    const [row] = await rows(`WITH ${INVENTORY_ALERTS} SELECT COUNT(*)::int AS total FROM alerts`, [
+      DASHBOARD_TZ,
+      days,
+    ]);
+    return row.total;
   },
 
   // Top de platillos vendidos (comprobantes emitidos) desde el inicio de hoy menos `daysBack` días

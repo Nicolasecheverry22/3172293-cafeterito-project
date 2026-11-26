@@ -159,4 +159,24 @@ export const dashboardService = {
 
     return response;
   },
+
+  // Contadores livianos para la navegación (GET /api/dashboard/badges). Mismo criterio de
+  // permisos que getDashboard; solo conteos, en paralelo:
+  //  openOrders (list_order) · toCharge (create_invoice: 'lista para entrega') ·
+  //  kitchenQueue (prepare_order: 'activa') · inventoryAlerts (list_inventory).
+  async getBadges(auth) {
+    const has = (code) => can(auth, code);
+    const needsOrders = has("list_order") || has("create_invoice") || has("prepare_order");
+    const [orders, inventoryAlerts] = await Promise.all([
+      needsOrders ? repo.getOpenOrderCounts() : null,
+      has("list_inventory") ? repo.countInventoryAlerts({ days: 3 }) : null,
+    ]);
+
+    const badges = {};
+    if (has("list_order")) badges.openOrders = orders.total;
+    if (has("create_invoice")) badges.toCharge = orders.ready;
+    if (has("prepare_order")) badges.kitchenQueue = orders.active;
+    if (inventoryAlerts !== null) badges.inventoryAlerts = inventoryAlerts;
+    return badges;
+  },
 };

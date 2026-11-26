@@ -7,5 +7,6 @@ import { dashboardController } from "./dashboard.controller.js";
 const router = Router();
 
 router.get("/", dashboardController.get);
+router.get("/badges", dashboardController.badges);
 
 export default router;

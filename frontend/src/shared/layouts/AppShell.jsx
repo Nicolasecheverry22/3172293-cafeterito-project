@@ -10,7 +10,13 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import usePermission from "@/shared/hooks/usePermission";
 import useDialogA11y from "@/shared/hooks/useDialogA11y";
-import { getBottomNavItems, getRouteMeta, getVisibleSections } from "@/shared/config/navigation";
+import useNavBadges from "@/shared/hooks/useNavBadges";
+import {
+  getBottomNavItems,
+  getRouteMeta,
+  getVisibleSections,
+  resolveBadge,
+} from "@/shared/config/navigation";
 import listBg from "@/assets/images/bg-2.jpg";
 import detailBg from "@/assets/images/bg-3.jpg";
 import Sidebar from "./Sidebar";
@@ -80,6 +86,8 @@ export default function AppShell() {
   const activeKey = meta.item?.key;
   const sections = getVisibleSections(can);
   const isDetail = meta.back;
+  const badges = useNavBadges();
+  const getBadge = (item) => resolveBadge(item.badgeKey, badges, can);
 
   return (
     <div className="app-shell">
@@ -90,6 +98,7 @@ export default function AppShell() {
           <Sidebar
             sections={sections}
             activeKey={activeKey}
+            getBadge={getBadge}
             rail={!isDesktop || collapsed}
             collapsed={collapsed}
             onToggle={isDesktop ? toggleCollapsed : undefined}
@@ -124,6 +133,7 @@ export default function AppShell() {
           <BottomNav
             items={getBottomNavItems(sections)}
             activeKey={activeKey}
+            getBadge={getBadge}
             onMore={openDrawer}
             moreOpen={drawerOpen}
           />
@@ -140,7 +150,7 @@ export default function AppShell() {
               tabIndex={-1}
               className="app-shell__drawer-panel"
             >
-              <Sidebar sections={sections} activeKey={activeKey} modal onClose={closeDrawer} />
+              <Sidebar sections={sections} activeKey={activeKey} getBadge={getBadge} modal onClose={closeDrawer} />
             </div>
           </div>
         </>

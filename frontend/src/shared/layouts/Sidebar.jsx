@@ -6,6 +6,7 @@
 // Teclado: Tab entra y sale; flechas arriba/abajo, Inicio y Fin se mueven entre ítems.
 import { Link } from "react-router-dom";
 import { Coffee, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { itemAriaLabel } from "@/shared/config/navigation";
 
 const focusSibling = (e) => {
   const keys = ["ArrowDown", "ArrowUp", "Home", "End"];
@@ -26,6 +27,7 @@ const focusSibling = (e) => {
 export default function Sidebar({
   sections,
   activeKey,
+  getBadge = () => null, // item → { text, label, tone } | null (useNavBadges)
   rail = false,        // solo iconos
   collapsed = false,   // estado guardado (solo se muestra el botón si onToggle existe)
   onToggle,            // contraer / expandir (solo en ≥ 1024px)
@@ -67,6 +69,8 @@ export default function Sidebar({
               {section.items.map((item) => {
                 const isActive = item.key === activeKey;
                 const Icon = item.icon;
+                const badge = getBadge(item);
+                const badgeClass = `sidebar__badge sidebar__badge--${badge?.tone} ${rail ? "sidebar__badge--small" : ""}`;
                 return (
                   <li key={item.key}>
                     {/* Link con aria-current manual: NavLink solo marca su propia ruta y
@@ -76,12 +80,17 @@ export default function Sidebar({
                       onClick={onClose}
                       data-nav-item
                       aria-current={isActive ? "page" : undefined}
-                      aria-label={item.label}
-                      title={rail ? item.label : undefined}
+                      aria-label={itemAriaLabel(item, badge)}
+                      title={rail ? itemAriaLabel(item, badge) : undefined}
                       className={`sidebar__item ${isActive ? "sidebar__item--active" : ""}`}
                     >
-                      <span className="sidebar__icon"><Icon aria-hidden="true" /></span>
+                      <span className="sidebar__icon">
+                        <Icon aria-hidden="true" />
+                        {/* Rail: número pequeño sobre el icono */}
+                        {badge && rail && <span className={badgeClass} aria-hidden="true">{badge.text}</span>}
+                      </span>
                       <span className="sidebar__label">{item.label}</span>
+                      {badge && !rail && <span className={badgeClass} aria-hidden="true">{badge.text}</span>}
                     </Link>
                   </li>
                 );

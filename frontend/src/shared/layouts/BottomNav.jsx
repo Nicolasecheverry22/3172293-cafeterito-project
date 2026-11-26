@@ -3,8 +3,9 @@
 // con la navegación completa). Icono + etiqueta corta, áreas táctiles de 48px.
 import { Link } from "react-router-dom";
 import { Menu } from "lucide-react";
+import { itemAriaLabel } from "@/shared/config/navigation";
 
-export default function BottomNav({ items, activeKey, onMore, moreOpen = false }) {
+export default function BottomNav({ items, activeKey, getBadge = () => null, onMore, moreOpen = false }) {
   // "Más" se resalta cuando la página actual está dentro del drawer
   const moreActive = Boolean(activeKey) && !items.some((item) => item.key === activeKey);
 
@@ -13,15 +14,23 @@ export default function BottomNav({ items, activeKey, onMore, moreOpen = false }
       {items.map((item) => {
         const isActive = item.key === activeKey;
         const Icon = item.icon;
+        const badge = getBadge(item);
         return (
           <Link
             key={item.key}
             to={item.to}
             aria-current={isActive ? "page" : undefined}
-            aria-label={item.label}
+            aria-label={itemAriaLabel(item, badge)}
             className={`bottom-nav__item ${isActive ? "bottom-nav__item--active" : ""}`}
           >
-            <span className="bottom-nav__icon"><Icon aria-hidden="true" /></span>
+            <span className="bottom-nav__icon">
+              <Icon aria-hidden="true" />
+              {badge && (
+                <span className={`bottom-nav__badge bottom-nav__badge--${badge.tone}`} aria-hidden="true">
+                  {badge.text}
+                </span>
+              )}
+            </span>
             <span className="bottom-nav__label">{item.shortLabel ?? item.label}</span>
           </Link>
         );
