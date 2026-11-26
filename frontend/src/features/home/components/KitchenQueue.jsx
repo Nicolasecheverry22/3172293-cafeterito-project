@@ -66,7 +66,7 @@ export default function KitchenQueue({ orders, onChanged, spanMd, spanLg }) {
       spanLg={spanLg}
     >
       {orders.length === 0 ? (
-        <DashboardEmpty icon={PartyPopper}>Sin órdenes por preparar 🎉</DashboardEmpty>
+        <DashboardEmpty icon={PartyPopper}>Sin órdenes por preparar</DashboardEmpty>
       ) : (
         <ol className="kitchen-queue">
           {orders.map((order) => (
