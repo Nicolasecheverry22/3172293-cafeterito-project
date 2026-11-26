@@ -75,7 +75,10 @@
     background: var(--semantic-background);
     border-right: 1px solid var(--semantic-border);
     color: var(--semantic-text-primary);
+    overflow: hidden;
+    transition: width .2s cubic-bezier(.2, 0, 0, 1);
   }
+  .sidebar--collapsed { width: var(--app-shell-rail-width); }
   .sidebar__brand {
     display: flex;
     align-items: center;
@@ -125,6 +128,34 @@
   .sidebar__icon { position: relative; display: inline-flex; flex-shrink: 0; }
   .sidebar__icon > svg { width: 24px; height: 24px; }
   .sidebar__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .sidebar__toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-3);
+    min-height: var(--md-touch-target);
+    margin: var(--md-space-2) var(--md-space-3) var(--md-space-3);
+    padding-inline: var(--md-space-4);
+    border-radius: var(--md-shape-full);
+    color: var(--semantic-text-secondary);
+    font-weight: var(--semantic-font-weight-label);
+    transition: background-color .15s, color .15s;
+  }
+  .sidebar__toggle:hover { background: var(--semantic-surface-muted); color: var(--semantic-text-primary); }
+  .sidebar__toggle:focus-visible { outline: 2px solid var(--semantic-focus-ring); outline-offset: 2px; }
+
+  /* Rail: solo iconos centrados; los títulos de sección se vuelven separadores */
+  .sidebar--collapsed .sidebar__label,
+  .sidebar--collapsed .sidebar__section-title { display: none; }
+  .sidebar--collapsed .sidebar__brand { justify-content: center; padding-inline: 0; }
+  .sidebar--collapsed .sidebar__sections { padding-inline: var(--md-space-3); }
+  .sidebar--collapsed .sidebar__item,
+  .sidebar--collapsed .sidebar__toggle { justify-content: center; padding-inline: 0; min-height: var(--md-touch-target); }
+  .sidebar--collapsed .sidebar__list { gap: var(--md-space-1); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar, .sidebar__item, .sidebar__toggle { transition: none; }
+  }
 
   /* ==================== top-bar ==================== */
   .top-bar {
