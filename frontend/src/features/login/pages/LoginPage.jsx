@@ -1,12 +1,22 @@
+import { useSearchParams } from "react-router-dom";
+import { Info } from "lucide-react";
 import LoginForm from "../components/LoginForm";
 import { login as loginRequest } from "@/features/login/services/authService";
 import imageLoginLight from "@/assets/images/image-login.png";
 import imageLoginDark from "@/assets/images/image-login__black.png";
 import useTheme from "@/shared/theme/useTheme";
-import { firstAllowedPath } from "@/services/apiClient";
+import { firstAllowedPath, LOGOUT_REASONS } from "@/services/apiClient";
+
+// Mensaje según el motivo del cierre forzado (?reason=..., ver endSession en apiClient)
+const LOGOUT_MESSAGES = {
+  [LOGOUT_REASONS.INACTIVITY]: "Tu sesión se cerró por inactividad. Inicia sesión de nuevo.",
+  [LOGOUT_REASONS.UNAUTHORIZED]: "Tu sesión ya no es válida. Inicia sesión de nuevo.",
+};
 
 export default function LoginPage() {
   const { theme } = useTheme();
+  const [searchParams] = useSearchParams();
+  const logoutMessage = LOGOUT_MESSAGES[searchParams.get("reason")];
   const imageLogin = theme === "dark" ? imageLoginDark : imageLoginLight;
 
   const handleLoginSubmit = async (credentials) => {
@@ -38,6 +48,16 @@ export default function LoginPage() {
           Inicia sesión<br />
           Y disfruta la experiencia
         </p>
+
+        {logoutMessage && (
+          <p
+            role="status"
+            className="mb-4 flex items-start gap-2 rounded-md bg-warning-container text-on-warning-container px-4 py-3 text-body"
+          >
+            <Info className="size-5 shrink-0 mt-0.5" aria-hidden="true" />
+            {logoutMessage}
+          </p>
+        )}
 
         <LoginForm onSubmit={handleLoginSubmit} />
       </div>

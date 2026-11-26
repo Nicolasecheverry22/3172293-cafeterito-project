@@ -5,6 +5,7 @@
 // - Ante un 403 (sin permiso): alerta con el mensaje del servidor, sin cerrar la sesión.
 // - Lanza ApiError con el mensaje del backend ({ error }) y su código HTTP.
 
+import Swal from "sweetalert2";
 import { showForbiddenAlert } from "@/shared/services/alertService";
 
 export const API_URL =import.meta.env.VITE_API_URL || "http://localhost:4000/api";
@@ -82,11 +83,32 @@ export function clearSession() {
   localStorage.removeItem(USER_KEY);
 }
 
-function redirectToLogin() {
+// ── Cierre forzado de la sesión ─────────────────────────────────
+// Motivos que la pantalla de login traduce a un mensaje (LoginPage):
+//  - "session-expired": cierre por inactividad (useIdleSession).
+//  - "unauthorized":    401 inesperado (token inválido, usuario deshabilitado...).
+export const LOGOUT_REASONS = { INACTIVITY: "session-expired", UNAUTHORIZED: "unauthorized" };
+
+let sessionEnding = false;
+// true mientras se cierra la sesión a la fuerza: los avisos de "cambios sin guardar"
+// (useBlocker, beforeunload) deben dejar salir sin preguntar.
+export const isSessionEnding = () => sessionEnding;
+
+export function endSession(reason) {
+  if (sessionEnding) return;
+  sessionEnding = true;
+  clearSession();
+  // Cierra cualquier alerta abierta (SweetAlert) antes de salir
+  Swal.close();
   if (!window.location.pathname.startsWith("/auth")) {
-    window.location.replace("/auth?reason=session-expired");
+    // Navegación completa: no pasa por los useBlocker del router
+    window.location.replace(`/auth?reason=${encodeURIComponent(reason)}`);
+  } else {
+    sessionEnding = false;
   }
 }
+
+const redirectToLogin = () => endSession(LOGOUT_REASONS.UNAUTHORIZED);
 
 const buildUrl = (path, query) => {
   const url = new URL(`${API_URL}${path}`);
@@ -121,7 +143,6 @@ export async function apiRequest(path, { method = "GET", body, query, auth = tru
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 401 && auth) {
-    clearSession();
     redirectToLogin();
     throw new ApiError(data.error || "Tu sesión expiró. Inicia sesión de nuevo.", 401);
   }

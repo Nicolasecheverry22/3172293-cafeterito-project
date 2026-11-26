@@ -32,9 +32,13 @@ export const hashResetCode = (userId, code) =>
 const sameHash = (a, b) =>
   a.length === b.length && crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
+// REGLA: JWT_EXPIRES > VITE_SESSION_IDLE_MINUTES (frontend, 15 por defecto) + margen.
+// El frontend solo renueva el token (/api/auth/refresh) cuando el usuario está activo y lo
+// cierra tras la ventana de inactividad; si el token venciera antes, "Seguir conectado" en
+// la alerta "¿Sigues ahí?" fallaría con 401. Por eso el valor por defecto es 20 min.
 const signToken = (user) =>
   jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES || "10m",
+    expiresIn: process.env.JWT_EXPIRES || "20m",
   });
 
 // Solo lo que el frontend muestra (el token sigue llevando únicamente id y correo).

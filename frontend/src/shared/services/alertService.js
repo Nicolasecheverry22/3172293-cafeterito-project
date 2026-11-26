@@ -216,3 +216,44 @@ export function showSystemErrorAlert({
     buttonsStyling: false,
   });
 }
+/**
+ * 6. Advertencia de cierre de sesión por inactividad (useIdleSession). Variante warning.
+ *  - Confirmar ("Seguir conectado") o Escape → el usuario está presente.
+ *  - Cancelar ("Cerrar sesión") o tiempo agotado → cerrar la sesión.
+ * No se cierra con clic fuera; la cuenta regresiva se actualiza con
+ * updateSessionWarningCountdown.
+ */
+const secondsLabel = (seconds) => `${seconds} ${seconds === 1 ? "segundo" : "segundos"}`;
+
+export function showSessionWarningAlert({ seconds, timer = seconds * 1000 } = {}) {
+  const base = getConfirmAlertOptions({
+    title: "¿Sigues ahí?",
+    confirmButtonText: "Seguir conectado",
+    cancelButtonText: "Cerrar sesión",
+    variant: "warning",
+  });
+  return Swal.fire({
+    ...base,
+    text: undefined,
+    html: `Por inactividad, tu sesión se cerrará en <strong data-session-countdown>${secondsLabel(seconds)}</strong>.`,
+    timer,
+    timerProgressBar: true,
+    allowOutsideClick: false,
+    allowEscapeKey: true,
+    focusConfirm: true,
+    focusCancel: false,
+    customClass: { ...base.customClass, timerProgressBar: "!bg-warning" },
+  });
+}
+
+export function updateSessionWarningCountdown(seconds) {
+  const el = Swal.getHtmlContainer()?.querySelector("[data-session-countdown]");
+  if (el) el.textContent = secondsLabel(seconds);
+}
+
+export const SESSION_WARNING_RESULT = {
+  // Escape cuenta como "seguir conectado": quien la pulsa está frente al equipo
+  stayConnected: (result) => result.isConfirmed || result.dismiss === Swal.DismissReason.esc,
+  logout: (result) =>
+    result.dismiss === Swal.DismissReason.cancel || result.dismiss === Swal.DismissReason.timer,
+};
