@@ -1,7 +1,7 @@
 // Acción confirmada (habilitar/inhabilitar, anular): confirma → ejecuta → informa.
 // Reemplaza a los antiguos "Eliminar": el backend ya no permite borrado físico.
 import {
-  showConfirmDeleteAlert,
+  showConfirmAlert,
   showSuccessAlert,
   showSystemErrorAlert,
 } from "@/shared/services/alertService";
@@ -11,6 +11,7 @@ import {
  * @param {string} opts.title          Título de la confirmación
  * @param {string} opts.text           Texto de la confirmación
  * @param {string} opts.confirmText    Texto del botón de confirmar
+ * @param {"danger"|"warning"|"info"} [opts.variant] Variante de la confirmación (por defecto danger)
  * @param {() => Promise} opts.action  Llamada al API
  * @param {string} opts.successTitle   Título del mensaje de éxito
  * @param {string} opts.successText    Texto del mensaje de éxito
@@ -20,16 +21,18 @@ export async function confirmAction({
   title,
   text,
   confirmText,
+  variant = "danger",
   action,
   successTitle,
   successText,
   onDone,
 }) {
-  const result = await showConfirmDeleteAlert({
+  const result = await showConfirmAlert({
     title,
     text,
     confirmButtonText: confirmText,
     cancelButtonText: "Cancelar",
+    variant,
   });
   if (!result.isConfirmed) return false;
 

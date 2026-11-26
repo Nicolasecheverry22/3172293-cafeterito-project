@@ -14,11 +14,12 @@ export default function ProviderRowActions({ provider, onChanged }) {
 
   const handleToggleStatus = () =>
     confirmAction({
-      title: isActive ? "¿Inhabilitar proveedor?" : "¿Habilitar proveedor?",
+      title: isActive ? `¿Inhabilitar al proveedor ${name}?` : `¿Habilitar al proveedor ${name}?`,
       text: isActive
         ? `"${name}" no podrá asignarse a insumos nuevos mientras esté inhabilitado.`
         : `"${name}" podrá volver a asignarse a insumos.`,
       confirmText: isActive ? "Sí, inhabilitar" : "Sí, habilitar",
+      variant: isActive ? "danger" : "info",
       action: () => setProviderStatus(provider.id, !isActive),
       successTitle: isActive ? "Proveedor inhabilitado" : "Proveedor habilitado",
       successText: "El estado del proveedor se actualizó correctamente.",

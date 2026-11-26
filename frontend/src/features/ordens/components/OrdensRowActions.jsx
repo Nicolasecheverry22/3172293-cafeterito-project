@@ -21,9 +21,10 @@ export default function OrdensRowActions({ order, onChanged }) {
 
   const handleCancel = () =>
     confirmAction({
-      title: "¿Anular orden?",
-      text: `La orden #${order.id} (mesa ${order.tableNumber}) quedará cancelada. Esta acción no se puede deshacer.`,
+      title: `¿Anular la orden #${order.id}?`,
+      text: `La orden #${order.id} de la mesa ${order.tableNumber} quedará cancelada y sus platillos no se prepararán. Esta acción no se puede deshacer.`,
       confirmText: "Sí, anular",
+      variant: "danger",
       action: () => cancelOrder(order.id),
       successTitle: "Orden anulada",
       successText: "La orden fue anulada correctamente.",

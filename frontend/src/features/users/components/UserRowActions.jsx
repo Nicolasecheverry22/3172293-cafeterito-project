@@ -14,11 +14,12 @@ export default function UserRowActions({ user, onChanged }) {
 
   const handleToggleStatus = () =>
     confirmAction({
-      title: isActive ? "¿Deshabilitar usuario?" : "¿Habilitar usuario?",
+      title: isActive ? `¿Deshabilitar a ${name}?` : `¿Habilitar a ${name}?`,
       text: isActive
-        ? `"${name}" no podrá iniciar sesión hasta que se habilite de nuevo.`
-        : `"${name}" podrá volver a iniciar sesión (también se levanta un bloqueo por intentos fallidos).`,
+        ? `El usuario "${name}" no podrá iniciar sesión hasta que se habilite de nuevo.`
+        : `El usuario "${name}" podrá volver a iniciar sesión (también se levanta un bloqueo por intentos fallidos).`,
       confirmText: isActive ? "Sí, deshabilitar" : "Sí, habilitar",
+      variant: isActive ? "danger" : "info",
       action: () => setUserStatus(user.id, !isActive),
       successTitle: isActive ? "Usuario deshabilitado" : "Usuario habilitado",
       successText: "El estado del usuario se actualizó correctamente.",

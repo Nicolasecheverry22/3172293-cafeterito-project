@@ -54,32 +54,88 @@ export const showCreateErrorAlert = async ({
 }
 
 /**
- * 2. Confirmación antes de eliminar
+ * Estilos por variante de confirmación. Los colores salen de los tokens semánticos,
+ * así que siguen al tema (claro/oscuro) sin reglas extra.
+ *  - danger:  destructiva o irreversible (quitar, vaciar, anular, deshabilitar).
+ *  - warning: salir con cambios sin guardar, cancelar un formulario.
+ *  - info:    confirmación neutra (cerrar sesión, generar reporte, habilitar).
  */
-export function showConfirmDeleteAlert({
-  title = "registro",
-  text = "¡No podrás revertir esta acción!",
-  confirmButtonText = "Sí, eliminar",
-  cancelButtonText = "No, cancelar",
+const CONFIRM_VARIANTS = {
+  danger: {
+    icon: "warning",
+    iconColor: "var(--semantic-error)",
+    title: "!text-error font-bold",
+    confirmButton: "!bg-error hover:!bg-error/90 !text-on-error",
+    focusCancel: true,
+  },
+  warning: {
+    icon: "warning",
+    iconColor: "var(--semantic-warning)",
+    title: "!text-warning font-bold",
+    confirmButton: "!bg-warning hover:!bg-warning/90 !text-on-warning",
+    focusCancel: false,
+  },
+  info: {
+    icon: "question",
+    iconColor: "var(--semantic-brand)",
+    title: "!text-text-primary font-bold",
+    confirmButton: "!bg-brand hover:!bg-brand-hover !text-text-on-brand",
+    focusCancel: false,
+  },
+};
+
+// Base compartida para que las alertas con inputs (p. ej. InventoryRowActions) usen
+// exactamente los mismos estilos que las confirmaciones.
+export function getConfirmAlertOptions({
+  title,
+  text,
+  confirmButtonText = "Confirmar",
+  cancelButtonText = "Cancelar",
+  variant = "danger",
 } = {}) {
-  return Swal.fire({
+  const v = CONFIRM_VARIANTS[variant] ?? CONFIRM_VARIANTS.danger;
+  return {
     title,
     text,
-    icon: "warning",
+    icon: v.icon,
+    iconColor: v.iconColor,
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText,
     reverseButtons: true,
+    // En "danger" el foco inicial va a Cancelar: un Enter no confirma por accidente.
+    focusCancel: v.focusCancel,
     customClass: {
       popup: "!rounded-shape-xl",
-      title: "!text-warning font-bold",
-      confirmButton:
-        "!bg-error hover:!bg-error/90 !text-on-error cursor-pointer px-4 py-2 rounded-md ml-2 font-medium",
+      title: v.title,
+      confirmButton: `${v.confirmButton} cursor-pointer px-4 py-2 rounded-md ml-2 font-medium`,
       cancelButton:
         "!bg-surface-muted hover:!bg-border !text-text-primary cursor-pointer px-4 py-2 rounded-md font-medium",
+      input: "!rounded-md",
+      validationMessage: "!bg-error-container !text-on-error-container",
     },
     buttonsStyling: false,
-  });
+  };
+}
+
+/**
+ * 2. Confirmación genérica con variante ("danger" | "warning" | "info").
+ * El texto debe decir qué se afecta, con el nombre del registro.
+ */
+export function showConfirmAlert(options = {}) {
+  return Swal.fire(getConfirmAlertOptions(options));
+}
+
+/**
+ * Alias histórico: confirmación destructiva (variant "danger").
+ */
+export function showConfirmDeleteAlert({
+  title = "¿Eliminar el registro?",
+  text = "¡No podrás revertir esta acción!",
+  confirmButtonText = "Sí, eliminar",
+  cancelButtonText = "Cancelar",
+} = {}) {
+  return showConfirmAlert({ title, text, confirmButtonText, cancelButtonText, variant: "danger" });
 }
 
 /**
