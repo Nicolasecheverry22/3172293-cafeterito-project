@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout, DashboardLayout, MainLayout } from "@/shared";
 import ProtectedRoute from "@/shared/components/auth/ProtectedRoute";
+import IdleSessionGuard from "@/features/login/components/IdleSessionGuard";
 
 // Auth
 import LoginPage from "@/features/login/pages/LoginPage";
@@ -66,57 +67,62 @@ const router = createBrowserRouter([
     ],
   },
 
-  /* ==================== RUTAS PRIVADAS (DASHBOARD) ==================== */
+  /* ==================== RUTAS PRIVADAS ==================== */
+  // Un solo control de sesión por inactividad (IdleSessionGuard) para todas las rutas
+  // autenticadas: está por encima de ambos layouts, así que cambiar de layout no lo
+  // desmonta ni reinicia el contador. Nunca envuelve las rutas de /auth.
   {
     element: (
       <ProtectedRoute>
-        <DashboardLayout />
+        <IdleSessionGuard />
       </ProtectedRoute>
     ),
     children: [
-      { path: "/home", element: <HomePage /> },
-      { path: "/userList", element: <ProtectedRoute permission="list_user"><UserListPage /></ProtectedRoute> },
-      { path: "/providerList", element: <ProtectedRoute permission="list_provider"><ProviderListPage /></ProtectedRoute> },
-      { path: "/inventoryList", element: <ProtectedRoute permission="list_inventory"><InventoryListPage /></ProtectedRoute> },
-      { path: "/menuList", element: <ProtectedRoute permission="list_product"><MenuListPage /></ProtectedRoute> },
-      { path: "/ordensList", element: <ProtectedRoute permission="list_order"><OrdensListPage /></ProtectedRoute> },
-      { path: "/settings", element: <SettingsPage /> },
-      // Mi perfil: cualquier usuario autenticado
-      { path: "/profile", element: <ProfilePage /> },
-      { path: "/invoiceList", element: <ProtectedRoute permission="list_invoice"><InvoiceListPage /></ProtectedRoute> },
-    ],
-  },
+      /* ==================== RUTAS PRIVADAS (DASHBOARD) ==================== */
+      {
+        element: <DashboardLayout />,
+        children: [
+          { path: "/home", element: <HomePage /> },
+          { path: "/userList", element: <ProtectedRoute permission="list_user"><UserListPage /></ProtectedRoute> },
+          { path: "/providerList", element: <ProtectedRoute permission="list_provider"><ProviderListPage /></ProtectedRoute> },
+          { path: "/inventoryList", element: <ProtectedRoute permission="list_inventory"><InventoryListPage /></ProtectedRoute> },
+          { path: "/menuList", element: <ProtectedRoute permission="list_product"><MenuListPage /></ProtectedRoute> },
+          { path: "/ordensList", element: <ProtectedRoute permission="list_order"><OrdensListPage /></ProtectedRoute> },
+          { path: "/settings", element: <SettingsPage /> },
+          // Mi perfil: cualquier usuario autenticado
+          { path: "/profile", element: <ProfilePage /> },
+          { path: "/invoiceList", element: <ProtectedRoute permission="list_invoice"><InvoiceListPage /></ProtectedRoute> },
+        ],
+      },
 
-  /* ==================== RUTAS PRIVADAS (FORMULARIOS / DETALLES) ==================== */
-  {
-    element: (
-      <ProtectedRoute>
-        <MainLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { path: "/userCreate", element: <ProtectedRoute permission="create_user"><CreateUserPage /></ProtectedRoute> },
-      { path: "/UserView/:id", element: <ProtectedRoute permission="view_user"><UserView /></ProtectedRoute> },
-      { path: "/EditUser/:id", element: <ProtectedRoute permission="update_user"><EditUser /></ProtectedRoute> },
-      { path: "/permits", element: <ProtectedRoute permission="manage_permissions"><PermissionsManagementPage /></ProtectedRoute> },
+      /* ==================== RUTAS PRIVADAS (FORMULARIOS / DETALLES) ==================== */
+      {
+        element: <MainLayout />,
+        children: [
+          { path: "/userCreate", element: <ProtectedRoute permission="create_user"><CreateUserPage /></ProtectedRoute> },
+          { path: "/UserView/:id", element: <ProtectedRoute permission="view_user"><UserView /></ProtectedRoute> },
+          { path: "/EditUser/:id", element: <ProtectedRoute permission="update_user"><EditUser /></ProtectedRoute> },
+          { path: "/permits", element: <ProtectedRoute permission="manage_permissions"><PermissionsManagementPage /></ProtectedRoute> },
 
-      { path: "/providerCreate", element: <ProtectedRoute permission="create_provider"><CreateProviderPage /></ProtectedRoute> },
-      { path: "/ProviderView/:id", element: <ProtectedRoute permission="view_provider"><ProviderView /></ProtectedRoute> },
-      { path: "/EditProvider/:id", element: <ProtectedRoute permission="update_provider"><EditProvider /></ProtectedRoute> },
+          { path: "/providerCreate", element: <ProtectedRoute permission="create_provider"><CreateProviderPage /></ProtectedRoute> },
+          { path: "/ProviderView/:id", element: <ProtectedRoute permission="view_provider"><ProviderView /></ProtectedRoute> },
+          { path: "/EditProvider/:id", element: <ProtectedRoute permission="update_provider"><EditProvider /></ProtectedRoute> },
 
-      { path: "/inventoryCreate", element: <ProtectedRoute permission="create_inventory"><CreateInventoryPage /></ProtectedRoute> },
-      { path: "/InventoryView/:id", element: <ProtectedRoute permission="view_inventory"><ProvisionsView /></ProtectedRoute> },
-      { path: "/editInventory/:id", element: <ProtectedRoute permission="update_inventory"><EditProvisions /></ProtectedRoute> },
+          { path: "/inventoryCreate", element: <ProtectedRoute permission="create_inventory"><CreateInventoryPage /></ProtectedRoute> },
+          { path: "/InventoryView/:id", element: <ProtectedRoute permission="view_inventory"><ProvisionsView /></ProtectedRoute> },
+          { path: "/editInventory/:id", element: <ProtectedRoute permission="update_inventory"><EditProvisions /></ProtectedRoute> },
 
-      { path: "/menuCreate", element: <ProtectedRoute permission="create_product"><CreateMenuPage /></ProtectedRoute> },
-      { path: "/ProductView/:id", element: <ProtectedRoute permission="view_product"><ProductView /></ProtectedRoute> },
-      { path: "/EditProduct/:id", element: <ProtectedRoute permission="update_product"><EditProduct /></ProtectedRoute> },
+          { path: "/menuCreate", element: <ProtectedRoute permission="create_product"><CreateMenuPage /></ProtectedRoute> },
+          { path: "/ProductView/:id", element: <ProtectedRoute permission="view_product"><ProductView /></ProtectedRoute> },
+          { path: "/EditProduct/:id", element: <ProtectedRoute permission="update_product"><EditProduct /></ProtectedRoute> },
 
-      { path: "/ordensCreate", element: <ProtectedRoute permission="create_order"><CreateOrderPage /></ProtectedRoute> },
-      { path: "/OrderView/:id", element: <ProtectedRoute permission="view_order"><OrderView /></ProtectedRoute> },
-      { path: "/EditOrder/:id", element: <ProtectedRoute permission={["update_order", "prepare_order"]}><EditOrder /></ProtectedRoute> },
+          { path: "/ordensCreate", element: <ProtectedRoute permission="create_order"><CreateOrderPage /></ProtectedRoute> },
+          { path: "/OrderView/:id", element: <ProtectedRoute permission="view_order"><OrderView /></ProtectedRoute> },
+          { path: "/EditOrder/:id", element: <ProtectedRoute permission={["update_order", "prepare_order"]}><EditOrder /></ProtectedRoute> },
 
-      { path: "/InvoiceView/:id", element: <ProtectedRoute permission="view_invoice"><InvoiceView /></ProtectedRoute> },
+          { path: "/InvoiceView/:id", element: <ProtectedRoute permission="view_invoice"><InvoiceView /></ProtectedRoute> },
+        ],
+      },
     ],
   },
 

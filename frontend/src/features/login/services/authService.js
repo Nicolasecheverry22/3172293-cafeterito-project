@@ -25,7 +25,7 @@ export async function login(userData) {
   }
 }
 
-// Renueva el token (10 min) mientras haya actividad del usuario (RNF09)
+// Renueva el token (JWT_EXPIRES) mientras haya actividad del usuario (RNF09, useIdleSession)
 export async function refreshSession() {
   const data = await api.post("/auth/refresh");
   setSession(data);

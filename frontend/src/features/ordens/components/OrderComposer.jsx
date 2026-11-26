@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker } from "react-router-dom";
 import { HandCoins, RotateCcw, CircleDot } from "lucide-react";
 import { Button, Select } from "@/shared";
-import { getSessionUser } from "@/services/apiClient";
+import { getSessionUser, isSessionEnding } from "@/services/apiClient";
 import { ORDER_TRANSITIONS, ORDER_STATUS_LABELS } from "@/services/orderApi";
 import usePermission from "@/shared/hooks/usePermission";
 import { showConfirmAlert } from "@/shared/services/alertService";
@@ -122,7 +122,8 @@ export default function OrderComposer({
   // Al crear: hay algo que perder si ya se eligió mesa, platillos u observaciones
   const hasDraft = !isEdit && (tableNumber != null || observations.trim() !== "" || baseCart.lines.length > 0);
 
-  // Aviso al salir con cambios pendientes: navegación interna (useBlocker) y cierre/recarga
+  // Aviso al salir con cambios pendientes: navegación interna (useBlocker) y cierre/recarga.
+  // Un cierre de sesión forzado (inactividad, 401) sale sin preguntar: isSessionEnding().
   const dirtyRef = useRef(false);
   const allowLeaveRef = useRef(false);
   useEffect(() => {
@@ -130,7 +131,7 @@ export default function OrderComposer({
   }, [isDirty]);
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      isEdit && dirtyRef.current && !allowLeaveRef.current &&
+      isEdit && dirtyRef.current && !allowLeaveRef.current && !isSessionEnding() &&
       currentLocation.pathname !== nextLocation.pathname
   );
   useEffect(() => {
@@ -146,6 +147,7 @@ export default function OrderComposer({
   useEffect(() => {
     if (!isDirty) return;
     const warn = (e) => {
+      if (isSessionEnding()) return;
       e.preventDefault();
       e.returnValue = "";
     };
