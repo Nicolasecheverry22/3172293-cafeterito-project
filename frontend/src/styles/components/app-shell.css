@@ -171,7 +171,10 @@
     background: var(--semantic-background);
     border-bottom: 1px solid var(--semantic-border);
     color: var(--semantic-text-primary);
+    transition: box-shadow .2s;
   }
+  .top-bar--scrolled { box-shadow: var(--md-elevation-2); }
+  @media (min-width: 768px) { .top-bar__menu { display: none; } }
   @media (min-width: 640px) { .top-bar { padding-inline: var(--md-space-4) var(--md-space-5); } }
   .top-bar__start { display: flex; align-items: center; gap: var(--md-space-1); min-width: 0; }
   .top-bar__title {
@@ -208,4 +211,23 @@
   .top-bar__icon-button:focus-visible,
   .top-bar__account:focus-visible { outline: 2px solid var(--semantic-focus-ring); outline-offset: 2px; }
   @media (max-width: 639px) { .top-bar__back { padding-inline: 0; } .top-bar__back-label { display: none; } }
+
+  .top-bar__breadcrumb { min-width: 0; }
+  .top-bar__breadcrumb ol { display: flex; align-items: center; min-width: 0; }
+  .top-bar__crumb--parent {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding-left: var(--md-space-2);
+    color: var(--semantic-text-secondary);
+    font-size: var(--semantic-font-size-body);
+  }
+  .top-bar__crumb--parent a { border-radius: var(--md-shape-xs); text-decoration: none; color: inherit; }
+  .top-bar__crumb--parent a:hover { color: var(--semantic-text-primary); text-decoration: underline; }
+  .top-bar__crumb--parent a:focus-visible { outline: 2px solid var(--semantic-focus-ring); outline-offset: 2px; }
+  .top-bar__crumb-separator { width: 18px; height: 18px; margin-left: var(--md-space-1); }
+  /* En móvil solo el título actual: no cabe la ruta completa */
+  @media (max-width: 639px) { .top-bar__crumb--parent { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) { .top-bar { transition: none; } }
 }
