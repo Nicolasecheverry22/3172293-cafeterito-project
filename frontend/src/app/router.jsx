@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthLayout, DashboardLayout, MainLayout } from "@/shared";
+import { AuthLayout, AppShell } from "@/shared";
 import ProtectedRoute from "@/shared/components/auth/ProtectedRoute";
 import IdleSessionGuard from "@/features/login/components/IdleSessionGuard";
 
@@ -69,7 +69,7 @@ const router = createBrowserRouter([
 
   /* ==================== RUTAS PRIVADAS ==================== */
   // Un solo control de sesión por inactividad (IdleSessionGuard) para todas las rutas
-  // autenticadas: está por encima de ambos layouts, así que cambiar de layout no lo
+  // autenticadas: está por encima del layout (AppShell), así que navegar no lo
   // desmonta ni reinicia el contador. Nunca envuelve las rutas de /auth.
   {
     element: (
@@ -78,9 +78,12 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      /* ==================== RUTAS PRIVADAS (DASHBOARD) ==================== */
+      /* ==================== RUTAS PRIVADAS (AppShell) ==================== */
+      // Un solo layout para listados, detalles y formularios: barra lateral, superior e
+      // inferior (móvil). La configuración de cada ruta (ítem activo, título, "Volver",
+      // fondo) vive en shared/config/navigation.js: al agregar una ruta, regístrala allí.
       {
-        element: <DashboardLayout />,
+        element: <AppShell />,
         children: [
           { path: "/home", element: <HomePage /> },
           { path: "/userList", element: <ProtectedRoute permission="list_user"><UserListPage /></ProtectedRoute> },
@@ -92,34 +95,22 @@ const router = createBrowserRouter([
           // Mi perfil: cualquier usuario autenticado
           { path: "/profile", element: <ProfilePage /> },
           { path: "/invoiceList", element: <ProtectedRoute permission="list_invoice"><InvoiceListPage /></ProtectedRoute> },
-        ],
-      },
-
-      /* ==================== RUTAS PRIVADAS (FORMULARIOS / DETALLES) ==================== */
-      {
-        element: <MainLayout />,
-        children: [
           { path: "/userCreate", element: <ProtectedRoute permission="create_user"><CreateUserPage /></ProtectedRoute> },
           { path: "/UserView/:id", element: <ProtectedRoute permission="view_user"><UserView /></ProtectedRoute> },
           { path: "/EditUser/:id", element: <ProtectedRoute permission="update_user"><EditUser /></ProtectedRoute> },
           { path: "/permits", element: <ProtectedRoute permission="manage_permissions"><PermissionsManagementPage /></ProtectedRoute> },
-
           { path: "/providerCreate", element: <ProtectedRoute permission="create_provider"><CreateProviderPage /></ProtectedRoute> },
           { path: "/ProviderView/:id", element: <ProtectedRoute permission="view_provider"><ProviderView /></ProtectedRoute> },
           { path: "/EditProvider/:id", element: <ProtectedRoute permission="update_provider"><EditProvider /></ProtectedRoute> },
-
           { path: "/inventoryCreate", element: <ProtectedRoute permission="create_inventory"><CreateInventoryPage /></ProtectedRoute> },
           { path: "/InventoryView/:id", element: <ProtectedRoute permission="view_inventory"><ProvisionsView /></ProtectedRoute> },
           { path: "/editInventory/:id", element: <ProtectedRoute permission="update_inventory"><EditProvisions /></ProtectedRoute> },
-
           { path: "/menuCreate", element: <ProtectedRoute permission="create_product"><CreateMenuPage /></ProtectedRoute> },
           { path: "/ProductView/:id", element: <ProtectedRoute permission="view_product"><ProductView /></ProtectedRoute> },
           { path: "/EditProduct/:id", element: <ProtectedRoute permission="update_product"><EditProduct /></ProtectedRoute> },
-
           { path: "/ordensCreate", element: <ProtectedRoute permission="create_order"><CreateOrderPage /></ProtectedRoute> },
           { path: "/OrderView/:id", element: <ProtectedRoute permission="view_order"><OrderView /></ProtectedRoute> },
           { path: "/EditOrder/:id", element: <ProtectedRoute permission={["update_order", "prepare_order"]}><EditOrder /></ProtectedRoute> },
-
           { path: "/InvoiceView/:id", element: <ProtectedRoute permission="view_invoice"><InvoiceView /></ProtectedRoute> },
         ],
       },

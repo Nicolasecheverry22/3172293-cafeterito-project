@@ -1,6 +1,5 @@
 export {default as AuthLayout } from "./layouts/AuthLayout";
-export {default as DashboardLayout } from "./layouts/DashboardLayout";
-export {default as MainLayout } from "./layouts/MainLayout";
+export {default as AppShell } from "./layouts/AppShell";
 export {default as Footer } from "./layouts/Footer";
 
 // Components
@@ -15,7 +14,6 @@ export {default as ThemeSwitch } from "./components/ThemeSwitch";
 export {default as DataTable } from "./components/DataTable";
 export {default as FileInput } from "./components/FileInput";
 export {default as ImageThumb } from "./components/ImageThumb";
-export {default as FormNavbar } from "./components/FormNavbar";
 export {default as Card } from "./components/Card";
 export {default as QuantityStepper } from "./components/QuantityStepper";
 export {
@@ -24,8 +22,4 @@ export {
     DropdownContent,
     DropdownItem,
  } from "./components/Dropdown";
-
-// Layouts Components
-export { default as Navbar } from "./layouts/Navbar";
-export { default as NavbarAdmin } from "./layouts/NavbarAdmin";
 
