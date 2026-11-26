@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { DataTable, Button, Input, Select } from "@/shared";
 import { getInvoices, PAYMENT_METHODS, INVOICE_STATUSES } from "@/services/invoiceApi";
 import { getInvoiceColumns } from "../table/InvoiceColumns";
@@ -12,7 +13,9 @@ export default function InvoiceListPage() {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [invoices, setInvoices] = useState([]);
   const [loadError, setLoadError] = useState(null);
-  const [isReportOpen, setIsReportOpen] = useState(false);
+  // "Reporte de ventas" del tablero llega con state.openReport: abre el modal directamente
+  const location = useLocation();
+  const [isReportOpen, setIsReportOpen] = useState(() => Boolean(location.state?.openReport));
 
   // Los filtros se envían al backend; el buscador del DataTable filtra lo ya cargado
   const loadInvoices = useCallback(() => {
