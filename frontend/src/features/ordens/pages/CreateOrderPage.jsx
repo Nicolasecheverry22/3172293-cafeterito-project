@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Utensils } from "lucide-react";
 
 import OrderComposer from "../components/OrderComposer";
@@ -16,6 +16,20 @@ export default function CreateOrderPage() {
   const navigate = useNavigate();
   const [dishes, setDishes] = useState([]);
   const [isLoadingDishes, setIsLoadingDishes] = useState(true);
+  // Mesa preseleccionada desde el tablero (/ordensCreate?mesa=5). Si ya está ocupada,
+  // OrderComposer la descarta y pide elegir otra.
+  const [searchParams] = useSearchParams();
+  const presetTable = Number.parseInt(searchParams.get("mesa"), 10);
+  const initial = useMemo(
+    () => ({
+      tableNumber: Number.isInteger(presetTable) && presetTable > 0 ? presetTable : null,
+      observations: "",
+      items: [],
+      status: "activa",
+      waiterId: null,
+    }),
+    [presetTable]
+  );
 
   // Ya no se cargan usuarios: un mesero sin permiso list_user recibía error al abrir esta pantalla
   useEffect(() => {
@@ -72,6 +86,7 @@ export default function CreateOrderPage() {
 
         <OrderComposer
           mode="create"
+          initial={initial}
           dishes={dishes}
           isLoadingDishes={isLoadingDishes}
           onSubmit={handleCreateOrder}

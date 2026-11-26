@@ -3,6 +3,7 @@
 @import "tailwindcss";
 @import "./components/order-composer.css";
 @import "./components/settings.css";
+@import "./components/dashboard.css";
 
 /* Variante dark: basada en el atributo data-theme del <html> (lo gestiona ThemeProvider) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

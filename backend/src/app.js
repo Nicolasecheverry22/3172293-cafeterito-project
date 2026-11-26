@@ -14,6 +14,7 @@ import providerRoutes from "./features/providers/provider.routes.js";
 import orderRoutes from "./features/orders/order.routes.js";
 import settingsRoutes from "./features/settings/settings.routes.js";
 import invoiceRoutes from "./features/invoices/invoice.routes.js";
+import dashboardRoutes from "./features/dashboard/dashboard.routes.js";
 import { productController } from "./features/products/product.controller.js";
 
 import { authenticateToken } from "./middlewares/auth.middleware.js";
@@ -59,6 +60,8 @@ app.use("/api/providers", privateRoute, providerRoutes);
 app.use("/api/orders", privateRoute, orderRoutes);
 app.use("/api/settings", privateRoute, settingsRoutes);
 app.use("/api/invoices", privateRoute, invoiceRoutes);
+// Tablero de turno: sin requirePermission global, las secciones dependen de los permisos
+app.use("/api/dashboard", privateRoute, dashboardRoutes);
 
 // ── 404 y errores (siempre al final) ────────────────────────────
 app.use(notFoundHandler);
