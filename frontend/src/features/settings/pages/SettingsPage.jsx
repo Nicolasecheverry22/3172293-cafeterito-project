@@ -4,7 +4,7 @@ import { Minus, Plus, Settings, Armchair } from "lucide-react";
 import { Button } from "@/shared";
 import { getSettings, updateSettings } from "@/services/settingsApi";
 import { getOrders, OPEN_ORDER_STATUSES } from "@/services/orderApi";
-import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
+import { showConfirmAlert, showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
 import usePermission from "@/shared/hooks/usePermission";
 
 // Mismo rango que el backend (settings.schema.js) y el CHECK de la BD
@@ -63,6 +63,19 @@ export default function SettingsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canEdit || !isDirty || blocked.length) return;
+    if (value < saved.tableCount) {
+      const removed = saved.tableCount - value;
+      const { isConfirmed } = await showConfirmAlert({
+        title: `¿Reducir de ${saved.tableCount} a ${value} mesas?`,
+        text:
+          removed === 1
+            ? `Se retirará la mesa ${saved.tableCount} y ya no podrá asignarse a nuevas órdenes.`
+            : `Se retirarán ${removed} mesas (de la ${value + 1} a la ${saved.tableCount}) y ya no podrán asignarse a nuevas órdenes.`,
+        confirmButtonText: "Sí, reducir",
+        variant: "warning",
+      });
+      if (!isConfirmed) return;
+    }
     setIsSaving(true);
     try {
       const { settings } = await updateSettings({ tableCount: value });

@@ -11,11 +11,10 @@ import usePermission from "@/shared/hooks/usePermission";
 import { createEditUserSchema } from "../../users/schemas/editUserSchema";
 import {
   showSystemErrorAlert,
-  showDeleteCancelAlert,
-  showConfirmDeleteAlert,
   showSuccessAlert,
   showCreateErrorAlert
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges, isFormDirty } from "@/shared/services/confirmAction";
 
 // Convierte la respuesta del backend al estado del formulario
 const toFormData = (user) => ({
@@ -35,6 +34,9 @@ export default function EditUser() {
   const [documentTypes, setDocumentTypes] = useState([]);
   const [groups, setGroups] = useState([]);
   const [formData, setFormData] = useState(null);
+  // Estado inicial del formulario (primer valor cargado) para saber si hay cambios
+  const [initialForm, setInitialForm] = useState(null);
+  if (formData && !initialForm) setInitialForm(formData);
   const [currentImage, setCurrentImage] = useState(null);
   const [imageRemoved, setImageRemoved] = useState(false);
   const [errors, setErrors] = useState({});
@@ -143,20 +145,12 @@ export default function EditUser() {
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Descartar cambios?",
-      text: "Los cambios realizados no se guardarán.",
-      confirmButtonText: "Sí, descartar",
-      cancelButtonText: "Continuar editando",
+    const canLeave = await confirmDiscardChanges({
+      isDirty: isFormDirty(formData, initialForm) || imageRemoved,
+      title: "¿Descartar los cambios?",
+      text: "Los cambios que hiciste en el usuario no se guardarán.",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Edición cancelada",
-        text: "No se guardaron los cambios.",
-      });
-      navigate("/userList");
-    }
+    if (canLeave) navigate("/userList");
   };
 
   return (

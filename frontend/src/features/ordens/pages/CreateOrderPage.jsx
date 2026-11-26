@@ -9,9 +9,8 @@ import { getProducts } from "@/services/productApi";
 import {
   showSuccessAlert,
   showSystemErrorAlert,
-  showDeleteCancelAlert,
-  showConfirmDeleteAlert,
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges } from "@/shared/services/confirmAction";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
@@ -51,21 +50,16 @@ export default function CreateOrderPage() {
     }
   };
 
-  const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Cancelar registro?",
+  // Sin cambios sale directo; con datos ingresados pide confirmación "warning"
+  const handleCancel = async (isDirty) => {
+    const canLeave = await confirmDiscardChanges({
+      isDirty,
+      title: "¿Salir sin registrar la orden?",
       text: "Los datos ingresados no se guardarán.",
-      confirmButtonText: "Sí, cancelar",
-      cancelButtonText: "Continuar editando",
+      confirmButtonText: "Sí, salir",
+      cancelButtonText: "Seguir registrando",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Registro cancelado",
-        text: "No se guardó la nueva orden.",
-      });
-      navigate(-1);
-    }
+    if (canLeave) navigate(-1);
   };
 
   return (

@@ -8,11 +8,10 @@ import { createMenuSchema } from "../../menu/schemas/editMenuSchema";
 import menuCategoryTypes from "../../../data/selects/menuCategoryTypes.json";
 import {
   showSystemErrorAlert,
-  showDeleteCancelAlert,
   showSuccessAlert,
-  showConfirmDeleteAlert,
   showCreateErrorAlert
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges, isFormDirty } from "@/shared/services/confirmAction";
 
 export default function EditProduct() {
   const navigate = useNavigate();
@@ -22,6 +21,9 @@ export default function EditProduct() {
 
   const [item, setItem] = useState(null);
   const [formData, setFormData] = useState(null);
+  // Estado inicial del formulario (primer valor cargado) para saber si hay cambios
+  const [initialForm, setInitialForm] = useState(null);
+  if (formData && !initialForm) setInitialForm(formData);
   // true si el usuario quitó la imagen guardada (se envía removeImage)
   const [imageRemoved, setImageRemoved] = useState(false);
 
@@ -115,20 +117,12 @@ export default function EditProduct() {
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Descartar cambios?",
-      text: "Los cambios realizados no se guardarán.",
-      confirmButtonText: "Sí, descartar",
-      cancelButtonText: "Continuar editando",
+    const canLeave = await confirmDiscardChanges({
+      isDirty: isFormDirty(formData, initialForm) || imageRemoved,
+      title: "¿Descartar los cambios?",
+      text: "Los cambios que hiciste en el platillo no se guardarán.",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Edición cancelada",
-        text: "No se guardaron los cambios.",
-      });
-      navigate("/menuList");
-    }
+    if (canLeave) navigate("/menuList");
   };
 
   return (

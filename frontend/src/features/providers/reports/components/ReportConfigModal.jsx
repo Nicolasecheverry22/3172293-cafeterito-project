@@ -11,8 +11,6 @@ import {
   showSuccessAlert,
   showCreateErrorAlert,
   showSystemErrorAlert,
-  showDeleteCancelAlert,
-  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
 
 export default function ReportConfigModal({ isOpen, onClose }) {
@@ -91,23 +89,10 @@ export default function ReportConfigModal({ isOpen, onClose }) {
     }
   };
 
-  const handleCancel = async () => {
+  // Cancelar / X: cierra el modal directamente (no hay nada que perder)
+  const handleCancel = () => {
     if (isGenerating) return;
-
-    const result = await showConfirmDeleteAlert({
-      title: "¿Cancelar Reporte?",
-      text: "La configuración del reporte no se guardará.",
-      confirmButtonText: "Sí, cancelar",
-      cancelButtonText: "Continuar reportando",
-    });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Configuración cancelada",
-        text: "No se generó el reporte.",
-      });
-      onClose();
-    }
+    onClose();
   };
 
   // Portal a <body>: la tarjeta de la página usa backdrop-blur, y backdrop-filter

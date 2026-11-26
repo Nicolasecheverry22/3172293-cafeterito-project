@@ -7,9 +7,8 @@ import {
   showSuccessAlert,
   showCreateErrorAlert,
   showSystemErrorAlert,
-  showDeleteCancelAlert,
-  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges } from "@/shared/services/confirmAction";
 
 export default function CreateMenuPage() {
   const navigate = useNavigate();
@@ -50,21 +49,16 @@ export default function CreateMenuPage() {
     }
   };
 
-  const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Estás seguro de cancelar?",
+  // Sin cambios sale directo; con datos ingresados pide confirmación "warning"
+  const handleCancel = async (isDirty) => {
+    const canLeave = await confirmDiscardChanges({
+      isDirty,
+      title: "¿Salir sin registrar el platillo?",
       text: "Los datos ingresados no se guardarán.",
       confirmButtonText: "Sí, salir",
-      cancelButtonText: "Continuar registrando",
+      cancelButtonText: "Seguir registrando",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Registro cancelado",
-        text: "No se guardó el platillo.",
-      });
-      navigate(-1);
-    }
+    if (canLeave) navigate(-1);
   };
 
   return (

@@ -12,7 +12,7 @@ import { Button, Select } from "@/shared";
 import { getSessionUser } from "@/services/apiClient";
 import { ORDER_TRANSITIONS, ORDER_STATUS_LABELS } from "@/services/orderApi";
 import usePermission from "@/shared/hooks/usePermission";
-import { showConfirmDeleteAlert } from "@/shared/services/alertService";
+import { showConfirmAlert } from "@/shared/services/alertService";
 import { createOrderSchema } from "../schemas/orderSchema";
 import useTableAvailability from "../hooks/useTableAvailability";
 import useOrderCart from "../hooks/useOrderCart";
@@ -76,24 +76,38 @@ export default function OrderComposer({
     ? { ...errors, tableNumber: "La mesa que elegiste acaba de ocuparse. Elige otra." }
     : errors;
 
-  // Al editar, quitar el último de un platillo pide confirmación (mínimo 1 con el stepper)
+  // Quitar el último de un platillo (papelera del stepper) y "Vaciar orden" piden
+  // confirmación "danger", tanto al crear como al editar.
   const cart = useMemo(() => {
-    if (!isEdit) return baseCart;
+    const dishName = (productId) =>
+      (catalog ?? dishes).find((d) => d.id === productId)?.productName ?? "este platillo";
     return {
       ...baseCart,
       decrement: async (productId) => {
         if (baseCart.quantityOf(productId) > 1) return baseCart.decrement(productId);
-        const name = (catalog ?? dishes).find((d) => d.id === productId)?.productName ?? "este platillo";
-        const { isConfirmed } = await showConfirmDeleteAlert({
-          title: "¿Quitar platillo?",
-          text: `Se quitará "${name}" de la orden.`,
+        const name = dishName(productId);
+        const { isConfirmed } = await showConfirmAlert({
+          title: `¿Quitar "${name}" de la orden?`,
+          text: `Se quitará "${name}" del resumen de la orden.`,
           confirmButtonText: "Sí, quitar",
           cancelButtonText: "No, conservar",
+          variant: "danger",
         });
         if (isConfirmed) baseCart.remove(productId);
       },
+      clear: async () => {
+        const count = baseCart.totalItems;
+        const { isConfirmed } = await showConfirmAlert({
+          title: "¿Vaciar la orden?",
+          text: `Se quitarán ${count} ${count === 1 ? "platillo" : "platillos"} de la orden.`,
+          confirmButtonText: "Sí, vaciar",
+          cancelButtonText: "No, conservar",
+          variant: "danger",
+        });
+        if (isConfirmed) baseCart.clear();
+      },
     };
-  }, [baseCart, isEdit, catalog, dishes]);
+  }, [baseCart, catalog, dishes]);
 
   // ── Cambios sin guardar ──────────────────────────────────────
   const initialKey = useMemo(() => cartKey(initial.items), [initial.items]);
@@ -104,6 +118,9 @@ export default function OrderComposer({
       status !== initial.status ||
       (canChangeWaiter && waiterId !== String(initial.waiterId ?? "")) ||
       cartKey(baseCart.lines) !== initialKey);
+
+  // Al crear: hay algo que perder si ya se eligió mesa, platillos u observaciones
+  const hasDraft = !isEdit && (tableNumber != null || observations.trim() !== "" || baseCart.lines.length > 0);
 
   // Aviso al salir con cambios pendientes: navegación interna (useBlocker) y cierre/recarga
   const dirtyRef = useRef(false);
@@ -118,13 +135,14 @@ export default function OrderComposer({
   );
   useEffect(() => {
     if (blocker.state !== "blocked") return;
-    showConfirmDeleteAlert({
+    showConfirmAlert({
       title: "¿Salir sin guardar?",
-      text: "Tienes cambios sin guardar en esta orden. Si sales, se perderán.",
+      text: `Tienes cambios sin guardar en la orden #${order?.id}. Si sales, se perderán.`,
       confirmButtonText: "Sí, salir",
       cancelButtonText: "Seguir editando",
+      variant: "warning",
     }).then(({ isConfirmed }) => (isConfirmed ? blocker.proceed() : blocker.reset()));
-  }, [blocker]);
+  }, [blocker, order?.id]);
   useEffect(() => {
     if (!isDirty) return;
     const warn = (e) => {
@@ -135,7 +153,15 @@ export default function OrderComposer({
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty]);
 
-  const discardChanges = () => {
+  const discardChanges = async () => {
+    const { isConfirmed } = await showConfirmAlert({
+      title: "¿Descartar los cambios?",
+      text: `Se restaurará la orden #${order?.id} a como estaba la última vez que se guardó.`,
+      confirmButtonText: "Sí, descartar",
+      cancelButtonText: "Seguir editando",
+      variant: "warning",
+    });
+    if (!isConfirmed) return;
     setTableNumber(initial.tableNumber);
     setObservations(initial.observations ?? "");
     setStatus(initial.status);
@@ -163,11 +189,12 @@ export default function OrderComposer({
     }
 
     if (isEdit && status === "cancelada" && initial.status !== "cancelada") {
-      const { isConfirmed } = await showConfirmDeleteAlert({
-        title: "¿Anular la orden?",
-        text: `La orden #${order.id} quedará cancelada. Esta acción no se puede deshacer.`,
+      const { isConfirmed } = await showConfirmAlert({
+        title: `¿Anular la orden #${order.id}?`,
+        text: `La orden #${order.id} de la mesa ${initial.tableNumber} quedará cancelada. Esta acción no se puede deshacer.`,
         confirmButtonText: "Sí, anular",
-        cancelButtonText: "No",
+        cancelButtonText: "No, conservar",
+        variant: "danger",
       });
       if (!isConfirmed) return;
     }
@@ -314,7 +341,7 @@ export default function OrderComposer({
               <RotateCcw className="size-4" aria-hidden="true" /> Descartar cambios
             </Button>
           ) : (
-            <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => onCancel?.(hasDraft)}>Cancelar</Button>
           )}
           <Button variant="primary" type="submit" disabled={submitDisabled} className="order-composer__submit">
             {submitLabel}

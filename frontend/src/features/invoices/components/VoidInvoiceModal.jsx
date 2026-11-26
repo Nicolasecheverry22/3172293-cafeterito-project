@@ -6,7 +6,7 @@ import { Button } from "@/shared";
 import useDialogA11y from "@/shared/hooks/useDialogA11y";
 import usePermission from "@/shared/hooks/usePermission";
 import { voidInvoice } from "@/services/invoiceApi";
-import { showSuccessAlert } from "@/shared/services/alertService";
+import { showConfirmAlert, showSuccessAlert } from "@/shared/services/alertService";
 
 const MIN = 10;
 const MAX = 300;
@@ -29,6 +29,15 @@ export default function VoidInvoiceModal({ invoice, onClose, onVoided }) {
     e.preventDefault();
     setTouched(true);
     if (reasonError) return;
+    // Confirmación final (el Enter no confirma: variante danger enfoca Cancelar)
+    const { isConfirmed } = await showConfirmAlert({
+      title: `¿Anular el comprobante ${invoice.invoiceNumber}?`,
+      text: "La orden quedará cancelada y esta acción no se puede deshacer.",
+      confirmButtonText: "Sí, anular",
+      cancelButtonText: "No, conservar",
+      variant: "danger",
+    });
+    if (!isConfirmed) return;
     setSubmitting(true);
     setError(null);
     try {

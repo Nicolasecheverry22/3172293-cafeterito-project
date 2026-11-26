@@ -9,9 +9,8 @@ import {
   showSuccessAlert,
   showCreateErrorAlert,
   showSystemErrorAlert,
-  showDeleteCancelAlert,
-  showConfirmDeleteAlert
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges } from "@/shared/services/confirmAction";
 
 export default function CreateUserPage() {
   const navigate = useNavigate();
@@ -49,6 +48,8 @@ export default function CreateUserPage() {
         // (Administrador = superusuario; todo usuario nuevo queda activo).
         // Los checkboxes de "Tipo de Usuario" definen los grupos (y con ellos los permisos)
         groupNames: validatedData.groupNames ?? [],
+        // Autorización de tratamiento de datos: el formulario no deja enviar sin marcarla
+        dataConsent: true,
       };
 
       await createUser(payload);
@@ -69,21 +70,16 @@ export default function CreateUserPage() {
     }
   };
 
-  const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Estás seguro de cancelar?",
+  // Sin cambios sale directo; con datos ingresados pide confirmación "warning"
+  const handleCancel = async (isDirty) => {
+    const canLeave = await confirmDiscardChanges({
+      isDirty,
+      title: "¿Salir sin registrar el usuario?",
       text: "Los datos ingresados no se guardarán.",
       confirmButtonText: "Sí, salir",
-      cancelButtonText: "Continuar registrando",
+      cancelButtonText: "Seguir registrando",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Registro cancelado",
-        text: "No se guardó el usuario.",
-      });
-      navigate(-1);
-    }
+    if (canLeave) navigate(-1);
   };
 
   return (

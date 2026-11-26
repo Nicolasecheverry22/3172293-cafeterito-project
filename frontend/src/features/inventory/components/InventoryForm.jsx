@@ -9,6 +9,7 @@ import { createInventorySchema } from "../schemas/inventorySchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 import { INVENTORY_STATUSES } from "@/services/inventoryApi";
 import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
+import { isFormDirty } from "@/shared/services/confirmAction";
 
 const DEFAULT_FORM_DATA = {
   provisionName: "",
@@ -250,7 +251,7 @@ export default function InventoryForm({
         </div>
 
         <div className="flex gap-4 items-center justify-end pt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-          <Button variant="cancel" size="sm" type="button" onClick={onCancel}>
+          <Button variant="cancel" size="sm" type="button" onClick={() => onCancel?.(isFormDirty(formData, DEFAULT_FORM_DATA))}>
             Cancelar
           </Button>
           <Button

@@ -14,11 +14,12 @@ export default function MenuRowActions({ product, onChanged }) {
 
   const handleToggleStatus = () =>
     confirmAction({
-      title: isAvailable ? "¿Inhabilitar platillo?" : "¿Habilitar platillo?",
+      title: isAvailable ? `¿Inhabilitar el platillo ${name}?` : `¿Habilitar el platillo ${name}?`,
       text: isAvailable
         ? `"${name}" dejará de estar disponible para nuevas órdenes.`
         : `"${name}" volverá a estar disponible para nuevas órdenes.`,
       confirmText: isAvailable ? "Sí, inhabilitar" : "Sí, habilitar",
+      variant: isAvailable ? "danger" : "info",
       action: () => setProductStatus(product.id, !isAvailable),
       successTitle: isAvailable ? "Platillo inhabilitado" : "Platillo habilitado",
       successText: "El estado del platillo se actualizó correctamente.",

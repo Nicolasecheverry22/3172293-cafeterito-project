@@ -2,12 +2,14 @@ import { useRef, useState, useEffect, useMemo } from "react";
 import { Upload, X, RefreshCw } from "lucide-react";
 import { Infinity as InfinityLoader } from "ldrs/react";
 import "ldrs/react/Infinity.css";
+import { showConfirmAlert } from "@/shared/services/alertService";
 
 /**
  * Selector de archivos con vista previa.
  * - value / onChange: arreglo de File ([] si no hay).
  * - existingUrl: imagen ya guardada (modo edición); se muestra si no hay archivo nuevo.
- * - onRemoveExisting: si se pasa, permite quitar la imagen guardada.
+ * - onRemoveExisting: si se pasa, permite quitar la imagen guardada (pide confirmación
+ *   "danger"; un archivo recién elegido y aún no guardado se quita sin preguntar).
  * - validateFile(file) → mensaje de error | null: rechaza el archivo antes de aceptarlo.
  * - error: error externo (Zod) a mostrar debajo.
  * - hint: texto de ayuda bajo el área de carga.
@@ -25,6 +27,17 @@ export default function FileInput({
   label = "Subir imagen",
 }) {
   const inputRef = useRef();
+
+  const confirmRemoveExisting = async () => {
+    const { isConfirmed } = await showConfirmAlert({
+      title: "¿Quitar la imagen?",
+      text: "Se eliminará al guardar los cambios.",
+      confirmButtonText: "Sí, quitar",
+      cancelButtonText: "No, conservar",
+      variant: "danger",
+    });
+    if (isConfirmed) onRemoveExisting();
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [dragIndex, setDragIndex] = useState(null);
   const [localError, setLocalError] = useState(null);
@@ -123,7 +136,7 @@ export default function FileInput({
               {(value[0] || onRemoveExisting) && (
                 <button
                   type="button"
-                  onClick={() => (value[0] ? remove(0) : onRemoveExisting())}
+                  onClick={() => (value[0] ? remove(0) : confirmRemoveExisting())}
                   aria-label="Quitar imagen"
                   title="Quitar imagen"
                   className={`${iconBtn} bg-error text-on-error`}

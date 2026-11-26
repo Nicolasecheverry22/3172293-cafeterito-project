@@ -3,6 +3,7 @@ import { Input, Select, Checkbox, Button, FileInput, StatusSwitch } from "@/shar
 import { createProviderSchema } from "../schemas/providerSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
+import { isFormDirty } from "@/shared/services/confirmAction";
 
 const PRODUCT_CHECKBOXES = [
   { name: "productFood", label: "Alimentos y/o Bebidas" },
@@ -232,7 +233,7 @@ export default function ProviderForm({
         </div>
 
         <div className="flex gap-4 items-center justify-end mt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-          <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
+          <Button variant="secondary" size="sm" type="button" onClick={() => onCancel?.(isFormDirty(formData, initialData ?? DEFAULT_FORM_DATA))}>
             Cancelar
           </Button>
           <Button 

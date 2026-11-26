@@ -7,6 +7,10 @@ import bcrypt from "bcrypt";
 
 export const ADMIN_GROUP = "Administrador";
 
+// Política de tratamiento de datos que el titular acepta al crear el usuario (Ley 1581 de
+// 2012). Se guarda junto con la fecha (data_consent_at) como evidencia de la autorización.
+export const DATA_POLICY_URL = "https://normograma.sena.edu.co/compilacion/docs/acuerdo_sena_0013_2019.htm";
+
 const ONLY_SUPERUSER = "Solo un superusuario puede modificar a otro superusuario";
 
 // Reglas comunes al modificar a OTRO usuario: solo un superusuario toca a un superusuario.
@@ -48,6 +52,8 @@ export const userService = {
       isActive: true,
       // El rol Administrador = superusuario (mismo criterio que al editar)
       isSuperuser: data.groupNames.includes(ADMIN_GROUP),
+      // dataConsent === true lo exige el schema; la fecha la pone la BD (NOW())
+      dataPolicyUrl: DATA_POLICY_URL,
     };
 
     return await userRepository.createWithGroups(userData, data.groupNames);
