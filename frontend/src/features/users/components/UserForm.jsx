@@ -10,6 +10,7 @@ import { createUserSchema } from "../schemas/userSchema";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 import usePermission from "@/shared/hooks/usePermission";
 import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
+import { isFormDirty } from "@/shared/services/confirmAction";
 
 // Cada checkbox de "Tipo de Usuario" corresponde a un grupo de la BD (tabla groups).
 // `group` debe coincidir EXACTO con groups.group_name (ver migración 0028).
@@ -285,7 +286,7 @@ export default function UserForm({
         </div>
 
         <div className="flex gap-4 items-center justify-end mt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-          <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
+          <Button variant="secondary" size="sm" type="button" onClick={() => onCancel?.(isFormDirty(formData, initialData ?? DEFAULT_FORM_DATA))}>
             Cancelar
           </Button>
           <Button 

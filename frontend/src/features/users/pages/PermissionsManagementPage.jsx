@@ -13,10 +13,10 @@ import usePermission from "@/shared/hooks/usePermission";
 import {
   showSuccessAlert,
   showCreateErrorAlert,
-  showDeleteCancelAlert,
   showSystemErrorAlert,
-  showConfirmDeleteAlert,
+  showConfirmAlert,
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges } from "@/shared/services/confirmAction";
 
 const ADMIN_GROUP = "Administrador";
 
@@ -79,6 +79,11 @@ export default function PermissionsManagementPage() {
   const hasTarget = Boolean(selectedGroup || selectedUser);
   const group = groups.find((g) => String(g.group_id) === selectedGroup);
   const targetUser = users.find((u) => String(u.id) === selectedUser);
+  const targetLabel = group
+    ? `el grupo ${group.group_name}`
+    : targetUser
+      ? targetUser.userName
+      : "este destino";
 
   // Solo un superusuario edita el grupo Administrador o a otro superusuario (regla del backend)
   const lockedReason =
@@ -182,17 +187,13 @@ export default function PermissionsManagementPage() {
   };
 
   const handleCancel = async () => {
-    if (!isDirty) return navigate(-1);
-    const result = await showConfirmDeleteAlert({
-      title: "¿Descartar los cambios?",
-      text: "Los permisos modificados no se guardarán.",
+    // Sin cambios sale directo; con cambios pide confirmación "warning"
+    const canLeave = await confirmDiscardChanges({
+      isDirty,
+      text: `Los permisos modificados de ${targetLabel} no se guardarán.`,
       confirmButtonText: "Sí, salir",
-      cancelButtonText: "Continuar editando",
     });
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({ title: "Operación cancelada", text: "No se guardó ningún cambio." });
-      navigate(-1);
-    }
+    if (canLeave) navigate(-1);
   };
 
   const handleSubmit = async (e) => {
@@ -204,6 +205,28 @@ export default function PermissionsManagementPage() {
       });
       return;
     }
+
+    // Quitar permisos ya guardados → danger; solo agregar → info
+    const removedCount = [...savedIds].filter((id) => !selectedIds.has(id)).length;
+    const addedCount = [...selectedIds].filter((id) => !savedIds.has(id)).length;
+    const { isConfirmed } = await showConfirmAlert(
+      removedCount > 0
+        ? {
+            title: `¿Quitar ${removedCount} ${removedCount === 1 ? "permiso" : "permisos"} a ${targetLabel}?`,
+            text: `${targetLabel.charAt(0).toUpperCase()}${targetLabel.slice(1)} perderá ${removedCount === 1 ? "ese acceso" : "esos accesos"} al guardar${
+              addedCount ? ` y recibirá ${addedCount} ${addedCount === 1 ? "permiso nuevo" : "permisos nuevos"}` : ""
+            }.`,
+            confirmButtonText: "Sí, guardar y quitar",
+            variant: "danger",
+          }
+        : {
+            title: `¿Guardar los permisos de ${targetLabel}?`,
+            text: `Se asignarán ${addedCount} ${addedCount === 1 ? "permiso nuevo" : "permisos nuevos"} a ${targetLabel}.`,
+            confirmButtonText: "Sí, guardar",
+            variant: "info",
+          }
+    );
+    if (!isConfirmed) return;
 
     setIsSaving(true);
     try {

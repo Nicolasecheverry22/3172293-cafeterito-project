@@ -2,8 +2,17 @@ import { Pencil, Eye, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Button } from "@/shared";
-import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
-import { setInventoryStatus, INVENTORY_STATUSES } from "@/services/inventoryApi";
+import {
+  getConfirmAlertOptions,
+  showConfirmAlert,
+  showSuccessAlert,
+  showSystemErrorAlert,
+} from "@/shared/services/alertService";
+import {
+  setInventoryStatus,
+  INVENTORY_STATUSES,
+  inventoryStatusConfirmOptions,
+} from "@/services/inventoryApi";
 import usePermission from "@/shared/hooks/usePermission";
 
 // Acciones por fila. No existe "Eliminar": se cambia el estado del insumo
@@ -15,26 +24,26 @@ export default function InventoryRowActions({ provision, onChanged }) {
   const handleChangeStatus = async () => {
     if (!provision.id) return;
 
+    const name = provision.provisionName || "";
+    // Swal solo para el select del estado, con los estilos del componente de alertas
     const { value: status, isConfirmed } = await Swal.fire({
-      title: "Cambiar estado del suministro",
-      text: provision.provisionName || "",
+      ...getConfirmAlertOptions({
+        title: name ? `Cambiar estado de ${name}` : "Cambiar estado del suministro",
+        text: `Estado actual: ${provision.status}`,
+        confirmButtonText: "Continuar",
+        variant: "info",
+      }),
       input: "select",
       inputOptions: Object.fromEntries(INVENTORY_STATUSES.map((s) => [s, s])),
       inputValue: provision.status,
-      showCancelButton: true,
-      confirmButtonText: "Guardar",
-      cancelButtonText: "Cancelar",
-      customClass: {
-        popup: "rounded-shape-lg",
-        confirmButton:
-          "!bg-brand !text-text-on-brand border-2 border-border-strong px-4 py-2 rounded-shape-md font-bold cursor-pointer mr-2",
-        cancelButton:
-          "!bg-error/20 !text-text-primary border-2 border-error px-4 py-2 rounded-shape-md font-bold cursor-pointer",
-      },
-      buttonsStyling: false,
     });
 
     if (!isConfirmed || status === provision.status) return;
+
+    const { isConfirmed: confirmed } = await showConfirmAlert(
+      inventoryStatusConfirmOptions({ name, from: provision.status, to: status })
+    );
+    if (!confirmed) return;
 
     try {
       await setInventoryStatus(provision.id, status);

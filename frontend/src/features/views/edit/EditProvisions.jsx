@@ -2,16 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil } from "lucide-react";
 import { Input, Button, Select, FileInput } from "@/shared";
-import { getInventoryItem, updateInventoryItem, INVENTORY_STATUSES } from "@/services/inventoryApi";
+import {
+  getInventoryItem,
+  updateInventoryItem,
+  INVENTORY_STATUSES,
+  inventoryStatusConfirmOptions,
+} from "@/services/inventoryApi";
 import { createEditProvisionsSchema } from "../../inventory/schemas/editProvisionsSchema";
 import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 import {
   showSystemErrorAlert,
-  showDeleteCancelAlert,
   showSuccessAlert,
-  showConfirmDeleteAlert,
+  showConfirmAlert,
   showCreateErrorAlert
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges, isFormDirty } from "@/shared/services/confirmAction";
 
 const DEFAULT_CATEGORIES = [
   { value: "Carnes", label: "Carnes" },
@@ -49,6 +54,9 @@ export default function EditProvisions() {
   const [errors, setErrors] = useState({});
   const [item, setItem] = useState(null);
   const [formData, setFormData] = useState(null);
+  // Estado inicial del formulario (primer valor cargado) para saber si hay cambios
+  const [initialForm, setInitialForm] = useState(null);
+  if (formData && !initialForm) setInitialForm(formData);
 
   // Carga el suministro real desde la BD
   useEffect(() => {
@@ -164,12 +172,10 @@ export default function EditProvisions() {
 
     if (newStatus === oldStatus) return;
 
-    const result = await showConfirmDeleteAlert({
-      title: "¿Cambiar estado?",
-      text: `¿Estás seguro de cambiar el estado de "${oldStatus}" a "${newStatus}"?`,
-      confirmButtonText: "Sí, cambiar",
-      cancelButtonText: "Cancelar",
-    });
+    // Mismo criterio que InventoryRowActions (danger / info según el estado destino)
+    const result = await showConfirmAlert(
+      inventoryStatusConfirmOptions({ name: formData.provisionName, from: oldStatus, to: newStatus })
+    );
 
     if (result.isConfirmed) {
       setFormData((prev) => ({
@@ -180,20 +186,12 @@ export default function EditProvisions() {
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Descartar cambios?",
-      text: "Los cambios realizados no se guardarán.",
-      confirmButtonText: "Sí, descartar",
-      cancelButtonText: "Continuar editando",
+    const canLeave = await confirmDiscardChanges({
+      isDirty: isFormDirty(formData, initialForm),
+      title: "¿Descartar los cambios?",
+      text: "Los cambios que hiciste en el suministro no se guardarán.",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Edición cancelada",
-        text: "No se guardaron los cambios.",
-      });
-      navigate("/inventoryList");
-    }
+    if (canLeave) navigate("/inventoryList");
   };
 
   return (

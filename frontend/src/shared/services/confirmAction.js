@@ -49,3 +49,35 @@ export async function confirmAction({
     return false;
   }
 }
+
+// Compara el estado actual de un formulario con su estado inicial. Los archivos (File)
+// se comparan por nombre/tamaño; el resto por valor (JSON).
+const normalize = (value) =>
+  JSON.stringify(value, (_key, v) =>
+    typeof File !== "undefined" && v instanceof File ? `file:${v.name}:${v.size}` : v
+  );
+
+export const isFormDirty = (current, initial) =>
+  current != null && initial != null && normalize(current) !== normalize(initial);
+
+/**
+ * Salir de un formulario (Cancelar). Si no hay cambios sale sin preguntar; si los hay,
+ * pide confirmación "warning". Devuelve true si se puede salir.
+ */
+export async function confirmDiscardChanges({
+  isDirty,
+  title = "¿Descartar los cambios?",
+  text = "Los cambios que hiciste no se guardarán.",
+  confirmButtonText = "Sí, descartar",
+  cancelButtonText = "Seguir editando",
+} = {}) {
+  if (!isDirty) return true;
+  const { isConfirmed } = await showConfirmAlert({
+    title,
+    text,
+    confirmButtonText,
+    cancelButtonText,
+    variant: "warning",
+  });
+  return isConfirmed;
+}

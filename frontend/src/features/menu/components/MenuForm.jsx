@@ -6,6 +6,7 @@ import { createMenuSchema } from "../schemas/menuSchema";
 import { menuCategories } from "../data/categories";
 import { showCreateErrorAlert } from "@/shared/services/alertService";
 import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
+import { isFormDirty } from "@/shared/services/confirmAction";
 
 const DEFAULT_FORM_DATA = {
   nombre: "",
@@ -131,7 +132,7 @@ export default function MenuForm({
         </div>
 
         <div className="flex justify-end gap-4 mt-12 pt-6 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
-          <Button type="button" variant="secondary" onClick={onCancel} className="px-10">
+          <Button type="button" variant="secondary" onClick={() => onCancel?.(isFormDirty(formData, initialData ?? DEFAULT_FORM_DATA))} className="px-10">
             Cancelar
           </Button>
           <Button

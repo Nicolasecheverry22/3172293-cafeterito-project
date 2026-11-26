@@ -9,11 +9,10 @@ import { buildImagePayload, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "
 
 import {
   showSystemErrorAlert,
-  showDeleteCancelAlert,
   showSuccessAlert,
-  showConfirmDeleteAlert,
   showCreateErrorAlert
 } from "@/shared/services/alertService";
+import { confirmDiscardChanges, isFormDirty } from "@/shared/services/confirmAction";
 
 export default function EditProvider() {
   const navigate = useNavigate();
@@ -22,6 +21,9 @@ export default function EditProvider() {
 
   const [provider, setProvider] = useState(null);
   const [formData, setFormData] = useState(null);
+  // Estado inicial del formulario (primer valor cargado) para saber si hay cambios
+  const [initialForm, setInitialForm] = useState(null);
+  if (formData && !initialForm) setInitialForm(formData);
   const [imageRemoved, setImageRemoved] = useState(false);
 
   // Carga el proveedor real desde la BD
@@ -129,20 +131,12 @@ export default function EditProvider() {
   };
 
   const handleCancel = async () => {
-    const result = await showConfirmDeleteAlert({
-      title: "¿Descartar cambios?",
-      text: "Los cambios realizados no se guardarán.",
-      confirmButtonText: "Sí, descartar",
-      cancelButtonText: "Continuar editando",
+    const canLeave = await confirmDiscardChanges({
+      isDirty: isFormDirty(formData, initialForm) || imageRemoved,
+      title: "¿Descartar los cambios?",
+      text: "Los cambios que hiciste en el proveedor no se guardarán.",
     });
-
-    if (result.isConfirmed) {
-      showDeleteCancelAlert({
-        title: "Edición cancelada",
-        text: "No se guardaron los cambios.",
-      });
-      navigate("/providerList");
-    }
+    if (canLeave) navigate("/providerList");
   };
 
   return (
