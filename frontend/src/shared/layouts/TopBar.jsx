@@ -13,7 +13,7 @@ import useTheme from "@/shared/theme/useTheme";
 
 const isScrolled = () => window.scrollY > 0;
 
-export default function TopBar({ meta, onOpenMenu, menuOpen = false, menuButtonRef }) {
+export default function TopBar({ meta, onOpenMenu, menuOpen = false }) {
   const navigate = useNavigate();
   const user = useSessionUser();
   const { theme, toggleTheme } = useTheme();
@@ -39,7 +39,6 @@ export default function TopBar({ meta, onOpenMenu, menuOpen = false, menuButtonR
       <div className="top-bar__start">
         {onOpenMenu && (
           <button
-            ref={menuButtonRef}
             type="button"
             onClick={onOpenMenu}
             className="top-bar__icon-button top-bar__menu"

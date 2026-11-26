@@ -2,15 +2,20 @@
 // Un único layout para listados, detalles y formularios: al navegar entre ellos no se
 // desmonta, así la barra lateral conserva su estado. El tipo de pantalla (listado o
 // detalle/formulario) sale de shared/config/navigation.js (getRouteMeta).
+//  - < 768px: TopBar con botón de menú + BottomNav; la navegación completa va en un
+//    drawer modal (el mismo Sidebar) con scrim, focus trap y scroll del body bloqueado.
+//  - 768–1023px: rail fijo. ≥ 1024px: barra lateral expandible/contraíble (se recuerda).
 // IdleSessionGuard está por encima, en router.jsx: no se monta aquí.
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import usePermission from "@/shared/hooks/usePermission";
-import { getRouteMeta, getVisibleSections } from "@/shared/config/navigation";
+import useDialogA11y from "@/shared/hooks/useDialogA11y";
+import { getBottomNavItems, getRouteMeta, getVisibleSections } from "@/shared/config/navigation";
 import listBg from "@/assets/images/bg-2.jpg";
 import detailBg from "@/assets/images/bg-3.jpg";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
+import BottomNav from "./BottomNav";
 import Footer from "./Footer";
 
 const COLLAPSED_KEY = "cafeterito-sidebar-collapsed";
@@ -38,9 +43,28 @@ function useMediaQuery(query) {
 
 export default function AppShell() {
   const { pathname } = useLocation();
+  const { can } = usePermission();
   const isTablet = useMediaQuery("(min-width: 768px)");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [collapsed, setCollapsed] = useState(readCollapsed);
+
+  // El drawer guarda la ruta en la que se abrió: al navegar (enlace, atrás del
+  // navegador...) deja de coincidir y se cierra solo. En ≥ 768px no existe.
+  const [drawerPath, setDrawerPath] = useState(null);
+  const drawerOpen = drawerPath === pathname && !isTablet;
+  const openDrawer = () => setDrawerPath(pathname);
+  const closeDrawer = useCallback(() => setDrawerPath(null), []);
+  // Escape, foco inicial, Tab atrapado y foco de vuelta al botón que lo abrió
+  const drawerRef = useDialogA11y(drawerOpen, closeDrawer);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [drawerOpen]);
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -52,8 +76,8 @@ export default function AppShell() {
     }
   };
 
-  const { can } = usePermission();
   const meta = getRouteMeta(pathname);
+  const activeKey = meta.item?.key;
   const sections = getVisibleSections(can);
   const isDetail = meta.back;
 
@@ -65,7 +89,7 @@ export default function AppShell() {
         {isTablet && (
           <Sidebar
             sections={sections}
-            activeKey={meta.item?.key}
+            activeKey={activeKey}
             rail={!isDesktop || collapsed}
             collapsed={collapsed}
             onToggle={isDesktop ? toggleCollapsed : undefined}
@@ -74,7 +98,11 @@ export default function AppShell() {
       </div>
 
       <div className="app-shell__main">
-        <TopBar meta={meta} />
+        <TopBar
+          meta={meta}
+          onOpenMenu={isTablet ? undefined : openDrawer}
+          menuOpen={drawerOpen}
+        />
 
         <main
           id="main-content"
@@ -90,6 +118,33 @@ export default function AppShell() {
             detalles distrae de la tarea y empuja los botones de guardar hacia abajo */}
         {!isDetail && <Footer />}
       </div>
+
+      {!isTablet && (
+        <>
+          <BottomNav
+            items={getBottomNavItems(sections)}
+            activeKey={activeKey}
+            onMore={openDrawer}
+            moreOpen={drawerOpen}
+          />
+
+          {/* Siempre montado en móvil para animar la entrada/salida; cerrado queda
+              inerte (sin foco ni lector de pantalla) */}
+          <div className={`app-shell__drawer ${drawerOpen ? "app-shell__drawer--open" : ""}`} inert={!drawerOpen}>
+            <div className="app-shell__scrim" onClick={closeDrawer} aria-hidden="true" />
+            <div
+              ref={drawerRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menú de navegación"
+              tabIndex={-1}
+              className="app-shell__drawer-panel"
+            >
+              <Sidebar sections={sections} activeKey={activeKey} modal onClose={closeDrawer} />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

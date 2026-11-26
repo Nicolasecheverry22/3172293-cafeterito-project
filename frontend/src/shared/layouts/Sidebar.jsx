@@ -1,10 +1,11 @@
 // Barra lateral de navegación (BEM: sidebar). Patrón M3:
 //  - expandida (≥ 1024px): logo, secciones con título, icono + texto y botón Contraer.
 //  - rail (contraída en ≥ 1024px, o siempre en 768–1023px): solo iconos con tooltip.
+//  - modal (< 768px): dentro del drawer de AppShell, expandida y con botón de cerrar.
 // Las secciones llegan ya filtradas por permisos (getVisibleSections).
 // Teclado: Tab entra y sale; flechas arriba/abajo, Inicio y Fin se mueven entre ítems.
 import { Link } from "react-router-dom";
-import { Coffee, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Coffee, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 
 const focusSibling = (e) => {
   const keys = ["ArrowDown", "ArrowUp", "Home", "End"];
@@ -28,18 +29,35 @@ export default function Sidebar({
   rail = false,        // solo iconos
   collapsed = false,   // estado guardado (solo se muestra el botón si onToggle existe)
   onToggle,            // contraer / expandir (solo en ≥ 1024px)
+  modal = false,       // dentro del drawer móvil
+  onClose,             // cierra el drawer (botón X y al elegir un destino)
 }) {
+  const classes = ["sidebar", rail && "sidebar--collapsed", modal && "sidebar--modal"].filter(Boolean).join(" ");
+
   return (
     <nav
-      id="sidebar-navigation"
+      id={modal ? undefined : "sidebar-navigation"}
       aria-label="Navegación principal"
-      className={`sidebar ${rail ? "sidebar--collapsed" : ""}`}
+      className={classes}
       onKeyDown={focusSibling}
     >
-      <Link to="/home" className="sidebar__brand" aria-label="Cafeterito, ir a Inicio" title={rail ? "Cafeterito" : undefined}>
-        <Coffee className="sidebar__brand-icon" aria-hidden="true" />
-        <span className="sidebar__label">Cafeterito</span>
-      </Link>
+      <div className="sidebar__header">
+        <Link
+          to="/home"
+          onClick={onClose}
+          className="sidebar__brand"
+          aria-label="Cafeterito, ir a Inicio"
+          title={rail ? "Cafeterito" : undefined}
+        >
+          <Coffee className="sidebar__brand-icon" aria-hidden="true" />
+          <span className="sidebar__label">Cafeterito</span>
+        </Link>
+        {modal && (
+          <button type="button" onClick={onClose} className="sidebar__close" aria-label="Cerrar menú de navegación">
+            <X aria-hidden="true" />
+          </button>
+        )}
+      </div>
 
       <div className="sidebar__sections">
         {sections.map((section) => (
@@ -55,6 +73,7 @@ export default function Sidebar({
                         el ítem debe quedar activo también en sus rutas hijas (matchPaths) */}
                     <Link
                       to={item.to}
+                      onClick={onClose}
                       data-nav-item
                       aria-current={isActive ? "page" : undefined}
                       aria-label={item.label}
