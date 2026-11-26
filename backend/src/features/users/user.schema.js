@@ -54,6 +54,17 @@ export const createUserSchema = Joi.object({
   ...userFields,
   ...imageFields("userImage", "La foto de perfil"),
   userPassword: passwordSchema().required(),
+  // Autorización de tratamiento de datos personales (Ley 1581 de 2012): obligatoria y true.
+  // Solo al crear; el PUT no la acepta (stripUnknown) y /me la prohíbe.
+  dataConsent: Joi.boolean()
+    .valid(true)
+    .required()
+    .label("La autorización de datos")
+    .messages({
+      "any.required": "Debe aceptarse la política de tratamiento de datos personales",
+      "any.only": "Debe aceptarse la política de tratamiento de datos personales",
+      "boolean.base": "Debe aceptarse la política de tratamiento de datos personales",
+    }),
 });
 
 // PUT /api/users/:id — la contraseña no se cambia aquí; removeImage quita la foto
@@ -88,6 +99,7 @@ const FORBIDDEN_PROFILE_FIELDS = [
   "groupNames", "groups", "isActive", "is_active", "isSuperuser", "is_superuser",
   "isStaff", "is_staff", "userEmail", "userDocumentTypes", "userDocumentNumber",
   "userDocument", "userPassword", "hireDate", "startDate", "endDate", "createdAt",
+  "dataConsent", "dataConsentAt", "dataPolicyUrl",
 ];
 
 export const updateMeSchema = Joi.object({

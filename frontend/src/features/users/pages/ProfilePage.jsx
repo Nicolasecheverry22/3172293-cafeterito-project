@@ -12,6 +12,7 @@ import {
   buildImagePayload, imageFilesField, IMAGE_ACCEPT, IMAGE_HINT, validateImageFile,
 } from "@/shared/utils/image";
 import { showSuccessAlert, showSystemErrorAlert } from "@/shared/services/alertService";
+import { DataConsentStatus } from "@/shared/components/DataPolicyLink";
 
 // Mismas reglas que el backend (user.schema.js: updateMeSchema y RNF10)
 const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/;
@@ -176,6 +177,7 @@ export default function ProfilePage() {
             </div>
           </dl>
           <p className="profile__note">El correo de acceso y el documento los actualiza un administrador.</p>
+          <DataConsentStatus consentAt={me.dataConsentAt} policyUrl={me.dataPolicyUrl} />
         </aside>
 
         <div className="profile__main">

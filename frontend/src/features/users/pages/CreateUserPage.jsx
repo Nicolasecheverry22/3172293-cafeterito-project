@@ -48,6 +48,8 @@ export default function CreateUserPage() {
         // (Administrador = superusuario; todo usuario nuevo queda activo).
         // Los checkboxes de "Tipo de Usuario" definen los grupos (y con ellos los permisos)
         groupNames: validatedData.groupNames ?? [],
+        // Autorización de tratamiento de datos: el formulario no deja enviar sin marcarla
+        dataConsent: true,
       };
 
       await createUser(payload);

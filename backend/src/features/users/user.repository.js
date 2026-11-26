@@ -58,6 +58,7 @@ async create(userData, db = pool) {
         isStaff,
         isActive,
         isSuperuser,
+        dataPolicyUrl,
     } = userData;
 
     const query= `
@@ -74,9 +75,11 @@ async create(userData, db = pool) {
     is_staff,
     is_active,
     is_superuser,
-    user_image_thumb
+    user_image_thumb,
+    data_consent_at,
+    data_policy_url
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),$14)
     RETURNING id;
     `
     // Array de valores que pasan al query
@@ -95,6 +98,7 @@ async create(userData, db = pool) {
         isActive,
         isSuperuser,
         userImageThumb ?? null,
+        dataPolicyUrl,
     ]
 
     // Ejecutuamoa la consulta usando el pool
@@ -329,6 +333,8 @@ async getById(id) {
         is_staff,
         is_active,
         TO_CHAR(created_at, 'YYYY-MM-DD') AS "createdAt",
+        data_consent_at      AS "dataConsentAt",
+        data_policy_url      AS "dataPolicyUrl",
         ${USER_GROUPS_SUBQUERY} AS groups
     FROM users
     WHERE id = $1;

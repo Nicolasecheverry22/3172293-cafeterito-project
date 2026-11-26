@@ -9,6 +9,7 @@ import {
   X,
   Headset,
 } from "lucide-react";
+import DataPolicyLink from "@/shared/components/DataPolicyLink";
 
 const APP_VERSION = "1.0.0";
 
@@ -107,6 +108,14 @@ export default function Footer() {
               />
               <span className="relative">Soporte Técnico</span>
             </button>
+
+            <span className="text-border-strong font-bold" aria-hidden="true">
+              |
+            </span>
+
+            <DataPolicyLink className="inline-flex items-center min-h-touch">
+              Política de tratamiento de datos
+            </DataPolicyLink>
 
             <span className="text-border-strong font-bold" aria-hidden="true">
               |

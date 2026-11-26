@@ -56,6 +56,11 @@ export function createUserSchema({ currentUserId = null } = {}) {
 
       startDate: z.string().optional(),
       endDate: z.string().optional(),
+
+      // Autorización de tratamiento de datos (Ley 1581 de 2012): obligatoria
+      dataConsent: z.literal(true, {
+        message: "Debes aceptar la política de tratamiento de datos para continuar",
+      }),
     })
 
     // 1. Validar unificación de Correo (Existente)

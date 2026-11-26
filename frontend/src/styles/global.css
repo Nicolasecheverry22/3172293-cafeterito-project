@@ -529,3 +529,52 @@ body {
   }
   .payment-modal__receipt-number { font-size: 1.5rem; font-weight: 700; }
 }
+/* ============== BEM: autorización de tratamiento de datos (Ley 1581) ============== */
+/* Solo tokens semánticos: claro y oscuro sin reglas extra. */
+@layer components {
+  .data-consent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+    padding: var(--md-space-3) var(--md-space-4);
+    border: 1px solid var(--semantic-border);
+    border-radius: var(--md-shape-md);
+    background: var(--semantic-surface-muted);
+    color: var(--semantic-text-primary);
+    font-size: var(--semantic-font-size-small);
+    line-height: 1.5;
+  }
+  .data-consent--invalid { border-color: var(--semantic-error); }
+  .data-consent--readonly { background: transparent; }
+
+  /* El checkbox alinea arriba: el texto ocupa varias líneas en 360 px */
+  .data-consent__checkbox input { margin-top: 3px; flex-shrink: 0; }
+
+  .data-consent__link {
+    display: inline;
+    color: var(--semantic-text-primary);
+    font-weight: var(--semantic-font-weight-label);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+  }
+  .data-consent__link:hover { text-decoration-thickness: 2px; }
+  .data-consent__link:focus-visible {
+    outline: 2px solid var(--semantic-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--md-shape-xs);
+  }
+  .data-consent__link-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+    vertical-align: -2px;
+  }
+
+  .data-consent__label { font-weight: var(--semantic-font-weight-label); }
+  .data-consent__value { color: var(--semantic-text-primary); }
+  .data-consent__value--empty { color: var(--semantic-text-secondary); font-style: italic; }
+  .data-consent__error { color: var(--semantic-error); font-size: var(--semantic-font-size-small); }
+}

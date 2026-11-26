@@ -8,6 +8,9 @@ export default function Checkbox({
     onChange,              //Fución que maneja el cambio de estado
     disabled = false,
     indeterminate = false, // "seleccionar todo" con solo una parte marcada
+    required = false,
+    invalid = false,       // aria-invalid (p. ej. autorización obligatoria sin marcar)
+    describedBy,           // id del mensaje de error/ayuda (aria-describedby)
     className = "",
 }) {
     const inputRef = useRef(null);
@@ -38,6 +41,10 @@ export default function Checkbox({
             checked={checked}
             disabled={disabled}
             onChange={onChange}
+            required={required}
+            aria-required={required || undefined}
+            aria-invalid={invalid || undefined}
+            aria-describedby={describedBy}
             aria-checked={indeterminate ? "mixed" : undefined}
             className="size-[18px] accent-text-primary cursor-pointer"
         />

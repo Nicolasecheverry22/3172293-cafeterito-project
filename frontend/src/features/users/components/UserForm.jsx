@@ -11,6 +11,7 @@ import { showCreateErrorAlert } from "@/shared/services/alertService";
 import usePermission from "@/shared/hooks/usePermission";
 import { IMAGE_ACCEPT, IMAGE_HINT, validateImageFile } from "@/shared/utils/image";
 import { isFormDirty } from "@/shared/services/confirmAction";
+import DataPolicyLink from "@/shared/components/DataPolicyLink";
 
 // Cada checkbox de "Tipo de Usuario" corresponde a un grupo de la BD (tabla groups).
 // `group` debe coincidir EXACTO con groups.group_name (ver migración 0028).
@@ -25,6 +26,8 @@ const ROLE_CHECKBOXES = [
 // Grupos marcados en el formulario -> ["Mesero", "Caja", ...]
 const getSelectedGroups = (data) =>
   ROLE_CHECKBOXES.filter(({ name }) => data[name]).map(({ group }) => group);
+
+const DATA_CONSENT_ERROR = "Debes aceptar la política de tratamiento de datos para continuar";
 
 const DEFAULT_FORM_DATA = {
   userName: "",
@@ -44,6 +47,7 @@ const DEFAULT_FORM_DATA = {
   isGuest: false,
   startDate: "",
   endDate: "",
+  dataConsent: false,
 };
 
 const getSelectedRole = (data) => {
@@ -285,6 +289,38 @@ export default function UserForm({
           )}
         </div>
 
+        {/* Autorización de tratamiento de datos (Ley 1581 de 2012). El enlace está dentro del
+            <label>, pero un <a href> es contenido interactivo: su clic no cambia el checkbox. */}
+        <div className={`data-consent mt-4 ${errors.dataConsent ? "data-consent--invalid" : ""}`}>
+          <Checkbox
+            id="dataConsent"
+            name="dataConsent"
+            checked={formData.dataConsent}
+            onChange={(e) => {
+              handleChange(e);
+              // El botón Guardar se deshabilita sin la autorización; al desmarcarla se
+              // explica el motivo bajo el checkbox (mismo mensaje que el schema Zod).
+              const { checked } = e.target;
+              setErrors((prev) => ({ ...prev, dataConsent: checked ? undefined : DATA_CONSENT_ERROR }));
+            }}
+            required
+            invalid={Boolean(errors.dataConsent)}
+            describedBy={errors.dataConsent ? "dataConsent-error" : undefined}
+            className="data-consent__checkbox !items-start !text-small"
+            label={
+              <>
+                El titular de los datos autoriza su tratamiento conforme a la{" "}
+                <DataPolicyLink /> (Acuerdo 0013 de 2019).
+              </>
+            }
+          />
+          {errors.dataConsent && (
+            <p id="dataConsent-error" className="data-consent__error" role="alert">
+              {errors.dataConsent}
+            </p>
+          )}
+        </div>
+
         <div className="flex gap-4 items-center justify-end mt-4 max-sm:flex-col-reverse max-sm:items-stretch max-sm:*:w-full">
           <Button variant="secondary" size="sm" type="button" onClick={() => onCancel?.(isFormDirty(formData, initialData ?? DEFAULT_FORM_DATA))}>
             Cancelar
@@ -292,7 +328,8 @@ export default function UserForm({
           <Button 
             type="submit" 
             variant="primary"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !formData.dataConsent}
+            title={formData.dataConsent ? undefined : "Acepta la política de tratamiento de datos para continuar"}
             className="w-full md:w-auto px-14 font-bold shadow-elevation-1"
           >
             {isSubmitting ? "Guardando..." : mode === "edit" ? "Guardar Cambios" : "Crear Usuario"}

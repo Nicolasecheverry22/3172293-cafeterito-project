@@ -5,6 +5,7 @@ import { SquarePen, UserRoundSearch, ArrowLeft } from "lucide-react";
 import { getUserById } from "@/services/userApi";
 import { getDocumentTypeLabel } from "@/services/selectService";
 import usePermission from "@/shared/hooks/usePermission";
+import { DataConsentStatus } from "@/shared/components/DataPolicyLink";
 
 export default function UserView() {
   const { guard } = usePermission();
@@ -120,6 +121,9 @@ export default function UserView() {
                 value={user.userEmail ?? ""}
                 disabled
               />
+            </div>
+            <div className="md:col-span-2">
+              <DataConsentStatus consentAt={user.dataConsentAt} policyUrl={user.dataPolicyUrl} />
             </div>
           </div>
         </div>
