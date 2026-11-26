@@ -21,7 +21,7 @@ export default function ProviderView() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen w-full flex flex-col">
+      <div className="min-h-[50vh] w-full flex flex-col">
         <div className="flex items-center gap-3 mt-10 ml-12">
           <Ambulance className="w-10 h-10 text-text-primary" />
           <h1 className="text-main font-heading font-bold text-text-primary">
@@ -35,7 +35,7 @@ export default function ProviderView() {
 
   if (!provider) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center">
+      <div className="min-h-[50vh] w-full flex items-center justify-center">
         <p className="text-text-secondary">Cargando proveedor...</p>
       </div>
     );

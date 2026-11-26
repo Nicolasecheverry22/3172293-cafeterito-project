@@ -90,7 +90,7 @@ export default function ProfilePage() {
       const imageFields = await buildImagePayload("userImage", userImage, { removed: imageRemoved });
       const saved = await updateMe({ ...fields, ...imageFields });
 
-      // Navbar: nombre y avatar nuevos (SESSION_EVENT)
+      // Barra superior: nombre y avatar nuevos (SESSION_EVENT)
       updateSessionUser({ name: saved.name, imageThumb: saved.imageThumb });
       const fresh = await getMe();
       setMe(fresh);

@@ -165,7 +165,7 @@ export default function Footer() {
                   type="button"
                   onClick={() => setOpenSupport(false)}
                   aria-label="Cerrar ventana de soporte técnico"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-shape-full bg-surface-muted border border-border text-text-primary hover:bg-red-500/15 hover:text-red-500 hover:border-red-500/60 hover:shadow-elevation-1 active:scale-95 transition-all"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-shape-full bg-surface-muted border border-border text-text-primary hover:bg-error-container hover:text-on-error-container hover:border-error hover:shadow-elevation-1 active:scale-95 transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
